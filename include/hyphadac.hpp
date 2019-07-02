@@ -43,7 +43,7 @@ CONTRACT hyphadac : public contract {
                            const asset       preseeds_value, 
                            const time_point  contribution_date);
 
-   private:
+
       struct [[ eosio::table, eosio::contract("hyphadac") ]] Config
       {
          // TODO: should this be a time type instead of uint32_t
@@ -126,6 +126,10 @@ CONTRACT hyphadac : public contract {
       typedef multi_index<"contribs"_n, Contribution> contribution_table;
       typedef multi_index<"proposals"_n, Proposal> proposal_table;
       typedef singleton<"config"_n, Config> config_table;
+      typedef multi_index<"config"_n, Config> config_table_placeholder;
+      typedef multi_index<"periods"_n, Period> period_table;
+
+   private:
 };
 
 #endif
