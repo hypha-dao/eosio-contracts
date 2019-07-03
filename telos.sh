@@ -59,13 +59,8 @@ cleos -u https://testnet.telos.caleos.io push action eosio.trail castvote '["hyp
 cleos -u https://testnet.telos.caleos.io push action hyphaboardtk endelection '["hyphamember1"]' -p hyphamember1
 
 
-##### Issue voting
+##### Propose a role
 cleos -u https://testnet.telos.caleos.io push action hyphaboardtk proposerole '["hyphamember3", "blockdev", "https://joinseeds.com", "blockchain developer", "10 HYPHA", "10 PRESEED", "10 HVOICE"]' -p hyphamember3
-
-cleos -u https://testnet.telos.caleos.io push action eosio.trail castvote '["hyphamember1", 15, 0]' -p hyphamember1
-cleos -u https://testnet.telos.caleos.io push action eosio.trail castvote '["hyphamember2", 13, 0]' -p hyphamember2
-cleos -u https://testnet.telos.caleos.io push action eosio.trail castvote '["hyphamember3", 13, 0]' -p hyphamember3
-
 
 cleos -u https://testnet.telos.caleos.io push action eosio.trail castvote '["hyphamember1", 17, 1]' -p hyphamember1
 cleos -u https://testnet.telos.caleos.io push action eosio.trail castvote '["hyphamember2", 17, 1]' -p hyphamember2
@@ -73,8 +68,7 @@ cleos -u https://testnet.telos.caleos.io push action eosio.trail castvote '["hyp
 
 cleos -u https://testnet.telos.caleos.io push action hyphaboardtk closeissue '["hyphamember3", "hyphamember3"]' -p hyphamember3
 
-
-cleos -u https://testnet.telos.caleos.io push action hyphaboardtk setconfig '["hyphamember1"]' -p hyphaboardtk
+#####  Propose an assignment
 
 
 

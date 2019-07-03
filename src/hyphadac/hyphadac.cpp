@@ -113,7 +113,7 @@ void hyphadac::initsteward(string initial_info_link) {
    )).send();
 
    action(permission_level{get_self(), name("active")}, name("eosio.trail"), name("initsettings"), make_tuple(
-      get_self(),                         //publisher
+      get_self(),                                  //publisher
       common::INITIAL_STEWARD_MAX_SUPPLY.symbol,  //token_symbol
       common::INITIAL_STEWARD_SETTINGS            //new_settings
    )).send();
@@ -126,7 +126,7 @@ void hyphadac::initsteward(string initial_info_link) {
          false
    )).send();
 
-   print("\STEWARD Registration and Initialization Actions Sent...");
+   print("\nSTEWARD Registration and Initialization Actions Sent...");
 }
 
 void hyphadac::proposerole (const name proposer,
@@ -143,7 +143,7 @@ void hyphadac::proposerole (const name proposer,
 		std::make_tuple(role_name, description, hypha_salary, preseeds_salary, voice_salary));
 	trx.delay_sec = 0;
 	
-   makeissue (proposer, info_url, role_name, trx);
+   makeissue (proposer, info_url, role_name, description, trx);
 }
 
 void hyphadac::newrole (const name role_name, 
@@ -191,10 +191,29 @@ void hyphadac::updaterole (const name role_name,
    });
 }
 
-void hyphadac::assign (const name     assigned_account,
-                        const name     role_name,
-                        const time_point start_date,
-                        const float    time_share) {
+void hyphadac::propassign (const name        proposer,
+                           const name        assigned_account,
+                           const name        role_name,
+                           const string      info_url,
+                           const string      notes,
+                           const time_point  start_date,
+                           const float       time_share) {
+   transaction trx (time_point_sec(current_time_point())+ (60 * 60 * 24 * 35));
+	trx.actions.emplace_back(permission_level{get_self(), "owner"_n}, 
+		get_self(), "assign"_n, 
+		std::make_tuple(assigned_account, role_name, info_url, start_date, time_share));
+	trx.delay_sec = 0;
+	
+   makeissue (proposer, info_url, role_name, notes, trx);
+}
+
+void hyphadac::assign (const name         assigned_account,
+                        const name        role_name,
+                        const string      info_url,
+                        const string      notes,
+                        const time_point  start_date,
+                        const float       time_share) {
+
    require_auth (get_self());
    assignment_table assignment_t (get_self(), get_self().value);
    auto sorted_by_assigned = assignment_t.get_index<"byassigned"_n>();
@@ -210,16 +229,17 @@ void hyphadac::assign (const name     assigned_account,
       a.assignment_id      = assignment_t.available_primary_key();
       a.assigned_account   = assigned_account;
       a.role_name          = role_name;
+      a.notes              = notes;
       a.start_date         = start_date;
       a.time_share         = time_share;
    });
 }
 
-void hyphadac::contribute (const name     contributor,
-                           const string   description,
-                           const asset    hypha_value,
-                           const asset    preseeds_value, 
-                           const time_point contribution_date) {
+void hyphadac::contribute (const name        contributor,
+                           const string      description,
+                           const asset       hypha_value,
+                           const asset       preseeds_value, 
+                           const time_point  contribution_date) {
 
    require_auth (get_self());
    contribution_table contribution_t (get_self(), get_self().value);
@@ -239,6 +259,7 @@ void hyphadac::contribute (const name     contributor,
 void hyphadac::makeissue(const name proposer, 
                         const string info_url,
                         const name proposal_name,
+                        const string notes,
                         const transaction trx) {
 
 	// name 	_holder;
@@ -268,10 +289,11 @@ void hyphadac::makeissue(const name proposer,
 	
 	proposal_table proposals(get_self(), get_self().value);
 	proposals.emplace(get_self(), [&](auto& p) {
-		p.proposer = proposer;
-		p.proposal_name = proposal_name;
-		p.ballot_id = next_ballot_id;
-		p.transaction = trx;
+		p.proposer        = proposer;
+		p.proposal_name   = proposal_name;
+      p.notes           = notes;
+		p.ballot_id       = next_ballot_id;
+		p.transaction     = trx;
 	});
 }
 

@@ -99,6 +99,7 @@ CONTRACT hyphadac : public contract {
          uint64_t       assignment_id           = 0;
          name           assigned_account        ;
          name           role_name               ;
+         string         notes                   ;
          time_point     start_date              = current_block_time().to_time_point();
          time_point     end_date                = current_block_time().to_time_point();
          float          time_share              = 0.000000000000000;
@@ -116,7 +117,7 @@ CONTRACT hyphadac : public contract {
          // uint64_t       proposal_id             = 0;
          name           proposer                ; 
          name           proposal_name           ;
-         string         description             ;
+         string         notes                   ;
          uint64_t       ballot_id               ;
          transaction    transaction             ;
 
@@ -200,13 +201,23 @@ CONTRACT hyphadac : public contract {
                            const asset preseeds_salary,
                            const asset voice_salary); 
 
+      ACTION propassign (const name       proposer,
+                        const name        assigned_account,
+                        const name        role_name,
+                        const string      info_url,
+                        const string      notes,
+                        const time_point  start_date,
+                        const float       time_share);
+
       ACTION assign (const name        assigned_account,
                      const name        role_name,
+                     const string      info_url,
+                     const string      notes,
                      const time_point  start_date,
                      const float       time_share);
 
       ACTION contribute (  const name        contributor,
-                           const string      description,
+                           const string      notes,
                            const asset       hypha_value,
                            const asset       preseeds_value, 
                            const time_point  contribution_date);
@@ -219,10 +230,11 @@ CONTRACT hyphadac : public contract {
 
       ACTION nominate(const name nominee, const name nominator);
 
-      ACTION makeissue(const name holder, 
-                     const string info_url,
-                     const name issue_name,
-                     const transaction trx);
+      ACTION makeissue(const name proposer, 
+                        const string info_url,
+                        const name proposal_name,
+                        const string notes,
+                        const transaction trx);
 
       ACTION closeissue(const name holder, const name proposer);
 
