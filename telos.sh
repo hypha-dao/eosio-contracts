@@ -31,7 +31,7 @@ cleos -u https://testnet.telos.caleos.io get table hyphaboardtk hyphaboardtk nom
 cleos -u https://testnet.telos.caleos.io get table hyphaboardtk hyphaboardtk boardmembers
 cleos -u https://testnet.telos.caleos.io get table hyphaboardtk hyphaboardtk issues
 cleos -u https://testnet.telos.caleos.io get table eosio.trail eosio.trail registries
-cleos -u https://testnet.telos.caleos.io get table eosio.trail eosio.trail ballots --lower 15
+cleos -u https://testnet.telos.caleos.io get table -l 100 eosio.trail eosio.trail ballots
 cleos -u https://testnet.telos.caleos.io get table eosio.trail eosio.trail elections
 cleos -u https://testnet.telos.caleos.io get table eosio.trail eosio.trail leaderboards --lower 4
 cleos -u https://testnet.telos.caleos.io get table eosio.trail eosio.trail proposals
@@ -52,7 +52,7 @@ cleos -u https://testnet.telos.caleos.io push action hyphaboardtk makeelection '
 cleos -u https://testnet.telos.caleos.io push action hyphaboardtk addcand '["hyphamember1", "https://joinseeds.com"]' -p hyphamember1
 
 
-cleos -u https://testnet.telos.caleos.io push action eosio.trail castvote '["hyphamember1", 14, 0]' -p hyphamember1
+cleos -u https://testnet.telos.caleos.io push action eosio.trail castvote '["hyphamember1", 16, 0]' -p hyphamember1
 cleos -u https://testnet.telos.caleos.io push action eosio.trail castvote '["hyphamember2", 14, 0]' -p hyphamember2
 cleos -u https://testnet.telos.caleos.io push action eosio.trail castvote '["hyphamember3", 14, 0]' -p hyphamember3
 
@@ -60,17 +60,18 @@ cleos -u https://testnet.telos.caleos.io push action hyphaboardtk endelection '[
 
 
 ##### Issue voting
-cleos -u https://testnet.telos.caleos.io push action hyphaboardtk proposerole '["hyphamember1", "blockdev", "https://joinseeds.com", "blockchain developer", "10 HYPHA", "10 PRESEED", "10 HVOICE"]' -p hyphamember1
+cleos -u https://testnet.telos.caleos.io push action hyphaboardtk proposerole '["hyphamember3", "blockdev", "https://joinseeds.com", "blockchain developer", "10 HYPHA", "10 PRESEED", "10 HVOICE"]' -p hyphamember3
 
-cleos -u https://testnet.telos.caleos.io push action eosio.trail castvote '["hyphamember1", 1, 0]' -p hyphamember1
+cleos -u https://testnet.telos.caleos.io push action eosio.trail castvote '["hyphamember1", 15, 0]' -p hyphamember1
 cleos -u https://testnet.telos.caleos.io push action eosio.trail castvote '["hyphamember2", 13, 0]' -p hyphamember2
 cleos -u https://testnet.telos.caleos.io push action eosio.trail castvote '["hyphamember3", 13, 0]' -p hyphamember3
 
 
-cleos -u https://testnet.telos.caleos.io push action eosio.trail castvote '["hyphamember1", 10, 1]' -p hyphamember1
-cleos -u https://testnet.telos.caleos.io push action eosio.trail castvote '["hyphamember2", 15, 1]' -p hyphamember2
-cleos -u https://testnet.telos.caleos.io push action eosio.trail castvote '["hyphamember3", 15, 1]' -p hyphamember3
+cleos -u https://testnet.telos.caleos.io push action eosio.trail castvote '["hyphamember1", 17, 1]' -p hyphamember1
+cleos -u https://testnet.telos.caleos.io push action eosio.trail castvote '["hyphamember2", 17, 1]' -p hyphamember2
+cleos -u https://testnet.telos.caleos.io push action eosio.trail castvote '["hyphamember3", 17, 1]' -p hyphamember3
 
+cleos -u https://testnet.telos.caleos.io push action hyphaboardtk closeissue '["hyphamember3", "hyphamember3"]' -p hyphamember3
 
 
 cleos -u https://testnet.telos.caleos.io push action hyphaboardtk setconfig '["hyphamember1"]' -p hyphaboardtk
