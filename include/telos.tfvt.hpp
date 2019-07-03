@@ -8,12 +8,14 @@
 #include <trail.voting.hpp>
 #include <trail.tokens.hpp>
 
-#include <eosiolib/eosio.hpp>
-#include <eosiolib/permission.hpp>
-#include <eosiolib/asset.hpp>
-#include <eosiolib/action.hpp>
-#include <eosiolib/singleton.hpp>
-#include <eosiolib/transaction.hpp>
+#include <eosio/eosio.hpp>
+#include <eosio/permission.hpp>
+#include <eosio/asset.hpp>
+#include <eosio/action.hpp>
+#include <eosio/singleton.hpp>
+#include <eosio/transaction.hpp>
+
+#include "common.hpp"
 
 using namespace std;
 using namespace eosio;
@@ -147,6 +149,19 @@ public:
 		EOSLIB_SERIALIZE(issue, (proposer)(issue_name)(ballot_id)(transaction))
 	};
 
+    struct [[eosio::table, eosio::contract("telos.tfvt") ]] Role
+    {
+        name           role_name               ;
+        string         description             ;
+        asset          hypha_salary            = asset { 0, common::S_HYPHA };
+        asset          preseeds_salary         = asset { 0, common::S_PRESEEDS };
+        asset          voice_salary            = asset { 0, common::S_VOICE };
+        time_point     created_date            = current_block_time().to_time_point();
+        time_point     updated_date            = current_block_time().to_time_point();
+
+        uint64_t       primary_key()           const { return role_name.value; }
+    };
+
 	//TODO: create multisig compatible packed_trx table for proposals.
     
     typedef multi_index<name("nominees"), board_nominee> nominees_table;
@@ -154,6 +169,8 @@ public:
     typedef multi_index<name("boardmembers"), board_member> members_table;
 
 	typedef multi_index<name("issues"), issue> issues_table;
+
+    typedef multi_index<"roles"_n, Role> role_table;
 
     typedef singleton<name("config"), config> config_table;
 	config_table configs;
@@ -170,13 +187,32 @@ public:
     void setconfig(name publisher);
 
     [[eosio::action]]
+    void reset();
+
+    [[eosio::action]] 
+    void proposerole (  const name proposer,
+						const name role_name,
+						const string info_url,
+						const string description,
+						const asset hypha_salary,
+						const asset preseeds_salary,
+						const asset voice_salary);
+
+    [[eosio::action]] 
+    void newrole (  const name role_name, 
+                    const string description,
+                    const asset hypha_salary,
+                    const asset preseeds_salary,
+                    const asset voice_salary);
+
+    [[eosio::action]]
     void nominate(name nominee, name nominator);
 
     [[eosio::action]]
-    void makeissue(ignore<name> holder,
-		ignore<string> info_url,
-		ignore<name> issue_name,
-		ignore<transaction> transaction);
+    void makeissue(const name holder, 
+                    const string info_url,
+                    const name issue_name,
+                    const transaction trx);
 
     [[eosio::action]]
     void closeissue(name holder, name proposer);
