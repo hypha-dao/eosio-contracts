@@ -1,20 +1,20 @@
-#include <hyphadac.hpp>
+#include <hyphadao.hpp>
 
-hyphadac::hyphadac(name self, name code, datastream<const char*> ds)
+hyphadao::hyphadao(name self, name code, datastream<const char*> ds)
 : contract(self, code, ds), voting_configs(get_self(), get_self().value) {
 	print("\n exists?: ", voting_configs.exists());
 	_config = voting_configs.exists() ? voting_configs.get() : get_default_config();
 }
 
-hyphadac::~hyphadac() {
+hyphadao::~hyphadao() {
 	if(voting_configs.exists()) voting_configs.set(_config, get_self());
 }
 
-ACTION hyphadac::reset () {
+ACTION hyphadao::reset () {
    voting_configs.remove();
 }
 
-hyphadac::VotingConfig hyphadac::get_default_config() {
+hyphadao::VotingConfig hyphadao::get_default_config() {
 	auto c = VotingConfig {
 		get_self(),			//publisher
 		uint8_t(9),		   //max seats
@@ -33,7 +33,7 @@ hyphadac::VotingConfig hyphadac::get_default_config() {
 	return c;
 }
 
-void hyphadac::setconfig (const uint32_t period_length, 
+void hyphadao::setconfig (const uint32_t period_length, 
                            const name     hypha_token_contract) {
 
    require_auth (get_self());
@@ -85,7 +85,7 @@ void hyphadac::setconfig (const uint32_t period_length,
 	voting_configs.set(_config, get_self());
 }
 
-void hyphadac::inithvoice(string initial_info_link) {
+void hyphadao::inithvoice(string initial_info_link) {
     require_auth(get_self());
     
     action(permission_level{get_self(), name("active")}, name("eosio.trail"), name("regtoken"), make_tuple(
@@ -103,7 +103,7 @@ void hyphadac::inithvoice(string initial_info_link) {
     print("\nHVOICE Registration and Initialization Actions Sent...");
 }
 
-void hyphadac::initsteward(string initial_info_link) {
+void hyphadao::initsteward(string initial_info_link) {
    require_auth(get_self());
       
    action(permission_level{get_self(), name("active")}, name("eosio.trail"), name("regtoken"), make_tuple(
@@ -130,7 +130,7 @@ void hyphadac::initsteward(string initial_info_link) {
    print("\nSTEWARD Registration and Initialization Actions Sent...");
 }
 
-void hyphadac::proposerole (const name proposer,
+void hyphadao::proposerole (const name proposer,
                            const name role_name,
                            const string info_url,
                            const string description,
@@ -147,7 +147,7 @@ void hyphadac::proposerole (const name proposer,
    makeissue (proposer, info_url, role_name, description, trx);
 }
 
-void hyphadac::newrole (const name role_name, 
+void hyphadao::newrole (const name role_name, 
                         const string description,
                         const asset hypha_salary,
                         const asset preseeds_salary,
@@ -170,7 +170,7 @@ void hyphadac::newrole (const name role_name,
    });
 }
 
-void hyphadac::updaterole (const name role_name, 
+void hyphadao::updaterole (const name role_name, 
                            const string description,
                            const asset hypha_salary,
                            const asset preseeds_salary,
@@ -192,7 +192,7 @@ void hyphadac::updaterole (const name role_name,
    });
 }
 
-void hyphadac::propassign (const name        proposer,
+void hyphadao::propassign (const name        proposer,
                            const name        assigned_account,
                            const name        role_name,
                            const string      info_url,
@@ -208,7 +208,7 @@ void hyphadac::propassign (const name        proposer,
    makeissue (proposer, info_url, role_name, notes, trx);
 }
 
-void hyphadac::assign (const name         assigned_account,
+void hyphadao::assign (const name         assigned_account,
                         const name        role_name,
                         const string      info_url,
                         const string      notes,
@@ -236,7 +236,7 @@ void hyphadac::assign (const name         assigned_account,
    });
 }
 
-void hyphadac::propcontrib (const name       proposer,
+void hyphadao::propcontrib (const name       proposer,
                            const name        contributor,
                            const string      notes,
                            const asset       hypha_value,
@@ -252,7 +252,7 @@ void hyphadac::propcontrib (const name       proposer,
    	makeissue (proposer, info_url, contributor, notes, trx);
 }
 
-void hyphadac::paycontrib (const name        contributor,
+void hyphadao::paycontrib (const name        contributor,
                            const string      notes,
                            const asset       hypha_value,
                            const asset       preseeds_value, 
@@ -273,7 +273,7 @@ void hyphadac::paycontrib (const name        contributor,
    });
 }
 
-void hyphadac::makeissue(const name proposer, 
+void hyphadao::makeissue(const name proposer, 
                         const string info_url,
                         const name proposal_name,
                         const string notes,
@@ -314,7 +314,7 @@ void hyphadac::makeissue(const name proposer,
 	});
 }
 
-void hyphadac::closeissue(name holder, name proposer) {
+void hyphadao::closeissue(name holder, name proposer) {
    require_auth(holder);
 	check(is_hvoice_holder(holder) || is_steward_holder(holder), "caller must be a HVOICE or STEWARD holder");
 
@@ -399,7 +399,7 @@ void hyphadac::closeissue(name holder, name proposer) {
 	)).send();
 }
 
-void hyphadac::nominate(name nominee, name nominator) {
+void hyphadao::nominate(name nominee, name nominator) {
    require_auth(nominator);
    check(is_account(nominee), "nominee account must exist");
    check(is_hvoice_holder(nominator), "caller must be a HVOICE holder");
@@ -414,7 +414,7 @@ void hyphadac::nominate(name nominee, name nominator) {
    });
 }
 
-void hyphadac::makeelection(name holder, string info_url) {
+void hyphadao::makeelection(name holder, string info_url) {
    require_auth(holder);
 	check(!_config.is_active_election, "there is already an election is progress");
    check(is_hvoice_holder(holder) || is_steward(holder), "caller must be a HVOICE or STEWARD holder");
@@ -452,7 +452,7 @@ void hyphadac::makeelection(name holder, string info_url) {
 	_config.is_active_election = true;
 }
 
-void hyphadac::addcand(name nominee, string info_link) {
+void hyphadao::addcand(name nominee, string info_link) {
 	require_auth(nominee);
 	check(is_nominee(nominee), "only nominees can be added to the election");
 	check(_config.is_active_election, "no active election for board members at this time");
@@ -466,7 +466,7 @@ void hyphadac::addcand(name nominee, string info_link) {
 	)).send();
 }
 
-void hyphadac::removecand(name candidate) {
+void hyphadao::removecand(name candidate) {
 	require_auth(candidate);
 	check(is_nominee(candidate), "candidate is not a nominee");
 
@@ -477,7 +477,7 @@ void hyphadac::removecand(name candidate) {
 	)).send();
 }
 
-void hyphadac::endelection(name holder) {
+void hyphadao::endelection(name holder) {
    require_auth(holder);
    check(is_hvoice_holder(holder) || is_steward(holder), "caller must be a HVOICE or STEWARD holder");
 	check(_config.is_active_election, "there is no active election to end");
@@ -534,7 +534,7 @@ void hyphadac::endelection(name holder) {
 	_config.is_active_election = false;
 }
 
-void hyphadac::removemember(name member_to_remove) {
+void hyphadao::removemember(name member_to_remove) {
 	require_auth(permission_level{get_self(), "major"_n});
 	remove_and_seize(member_to_remove);
 	
@@ -545,7 +545,7 @@ void hyphadac::removemember(name member_to_remove) {
 
 #pragma region Helper_Functions
 
-void hyphadac::add_steward(name nominee) {
+void hyphadao::add_steward(name nominee) {
    nominee_table noms(get_self(), get_self().value);
    auto n = noms.find(nominee.value);
    check(n != noms.end(), "nominee doesn't exist in table");
@@ -571,7 +571,7 @@ void hyphadac::add_steward(name nominee) {
 	).send();
 }
 
-void hyphadac::rmv_steward(name member) {
+void hyphadao::rmv_steward(name member) {
     steward_table mems(get_self(), get_self().value);
     auto m = mems.find(member.value);
     check(m != mems.end(), "member is not on the board");
@@ -579,7 +579,7 @@ void hyphadac::rmv_steward(name member) {
     mems.erase(m);
 }
 
-void hyphadac::addseats(name member, uint8_t num_seats) {
+void hyphadao::addseats(name member, uint8_t num_seats) {
    require_auth(get_self());
 
    voting_config_table configs(get_self(), get_self().value);
@@ -591,7 +591,7 @@ void hyphadac::addseats(name member, uint8_t num_seats) {
    configs.set(c, get_self());
 }
 
-bool hyphadac::is_steward(name user) {
+bool hyphadao::is_steward(name user) {
    steward_table mems(get_self(), get_self().value);
    auto m = mems.find(user.value);
    
@@ -602,7 +602,7 @@ bool hyphadac::is_steward(name user) {
    return false;
 }
 
-bool hyphadac::is_nominee(name user) {
+bool hyphadao::is_nominee(name user) {
    nominee_table noms(get_self(), get_self().value);
    auto n = noms.find(user.value);
 
@@ -613,7 +613,7 @@ bool hyphadac::is_nominee(name user) {
    return false;
 }
 
-bool hyphadac::is_hvoice_holder(name user) {
+bool hyphadao::is_hvoice_holder(name user) {
    balances_table balances(name("eosio.trail"), common::S_HVOICE.code().raw());
    auto b = balances.find(user.value);
 
@@ -624,7 +624,7 @@ bool hyphadac::is_hvoice_holder(name user) {
    return false;
 }
 
-bool hyphadac:: is_steward_holder(name user) {
+bool hyphadao:: is_steward_holder(name user) {
     balances_table balances(name("eosio.trail"), common::S_STEWARD.code().raw());
     auto b = balances.find(user.value);
 
@@ -635,11 +635,11 @@ bool hyphadac:: is_steward_holder(name user) {
     return false;
 }
 
-bool hyphadac::is_term_expired() {
+bool hyphadao::is_term_expired() {
 	return current_block_time().to_time_point().sec_since_epoch() - _config.last_board_election_time > _config.election_frequency;
 }
 
-void hyphadac::remove_and_seize_all() {
+void hyphadao::remove_and_seize_all() {
 	steward_table stewards (get_self(), get_self().value);
 	asset amount_to_seize = asset(1, common::S_STEWARD);
 
@@ -669,7 +669,7 @@ void hyphadac::remove_and_seize_all() {
 	}
 }
 
-void hyphadac::remove_and_seize(name member) {
+void hyphadao::remove_and_seize(name member) {
 	steward_table stewards (get_self(), get_self().value);
 	asset amount_to_seize = asset(1, common::S_STEWARD);
 	auto m = stewards.get(member.value, "board member not found");
@@ -685,7 +685,7 @@ void hyphadac::remove_and_seize(name member) {
 	).send();
 }
 
-void hyphadac::set_permissions(vector<permission_level_weight> perms) {
+void hyphadao::set_permissions(vector<permission_level_weight> perms) {
 	auto self = get_self();
 	uint16_t active_weight = perms.size() < 3 ? 1 : ((perms.size() / 3) * 2);
 
@@ -731,7 +731,7 @@ void hyphadac::set_permissions(vector<permission_level_weight> perms) {
 	).send();
 }
 
-vector<hyphadac::permission_level_weight> hyphadac::perms_from_members() {
+vector<hyphadao::permission_level_weight> hyphadao::perms_from_members() {
 	steward_table members(get_self(), get_self().value);
 	auto itr = members.begin();
 	
