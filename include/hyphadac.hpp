@@ -173,6 +173,8 @@ CONTRACT hyphadac : public contract {
       typedef multi_index<"config"_n, Config> config_table_placeholder;
       
       typedef singleton<"vconfig"_n, VotingConfig> voting_config_table;
+      typedef multi_index<"vconfig"_n, VotingConfig> voting_config_table_placeholder;
+      
       voting_config_table voting_configs;
       VotingConfig _config;
 

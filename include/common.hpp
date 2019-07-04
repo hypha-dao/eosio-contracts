@@ -30,9 +30,9 @@ namespace common {
 		PASS = 1
 	};
 
-    asset const INITIAL_HVOICE_MAX_SUPPLY = asset(500, symbol("HVOICE", 0)); 
+    asset const INITIAL_HVOICE_MAX_SUPPLY = asset(500, common::S_HVOICE); 
     
-    asset const INITIAL_STEWARD_MAX_SUPPLY = asset(13, symbol("STEWARD", 0)); 
+    asset const INITIAL_STEWARD_MAX_SUPPLY = asset(9, common::S_STEWARD); 
     
     token_settings const INITIAL_HVOICE_SETTINGS = token_settings { 
         false, //is_destructible

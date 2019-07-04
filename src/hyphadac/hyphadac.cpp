@@ -118,11 +118,12 @@ void hyphadac::initsteward(string initial_info_link) {
       common::INITIAL_STEWARD_SETTINGS            //new_settings
    )).send();
 
+	asset board_token = asset { 1, common::S_STEWARD };
    action(permission_level{get_self(), "active"_n }, "eosio.trail"_n, "issuetoken"_n,
       std::make_tuple(
          get_self(),		//account to update
          get_self(),
-         common::S_STEWARD,
+         board_token,
          false
    )).send();
 
@@ -201,7 +202,7 @@ void hyphadac::propassign (const name        proposer,
    transaction trx (time_point_sec(current_time_point())+ (60 * 60 * 24 * 35));
 	trx.actions.emplace_back(permission_level{get_self(), "owner"_n}, 
 		get_self(), "assign"_n, 
-		std::make_tuple(assigned_account, role_name, info_url, start_date, time_share));
+		std::make_tuple(assigned_account, role_name, info_url, notes, start_date, time_share));
 	trx.delay_sec = 0;
 	
    makeissue (proposer, info_url, role_name, notes, trx);
