@@ -142,6 +142,17 @@ CONTRACT hyphadac : public contract {
          uint64_t         primary_key()           const { return contribution_id; }
       };
 
+      struct [[eosio::table, eosio::contract("hyphadac") ]] Payment
+      {
+         uint64_t       payment_id              ;
+         name           recipient               ;
+         asset          amount                  ;
+         string         notes                   ;
+         time_point     payment_date            = current_block_time().to_time_point();
+
+         uint64_t         primary_key()           const { return contribution_id; }
+      };
+
       struct [[eosio::table]] Nominee {
         name      nominee;
         uint64_t  primary_key() const { return nominee.value; }
@@ -174,7 +185,7 @@ CONTRACT hyphadac : public contract {
       
       typedef singleton<"vconfig"_n, VotingConfig> voting_config_table;
       typedef multi_index<"vconfig"_n, VotingConfig> voting_config_table_placeholder;
-      
+
       voting_config_table voting_configs;
       VotingConfig _config;
 
@@ -218,7 +229,14 @@ CONTRACT hyphadac : public contract {
                      const time_point  start_date,
                      const float       time_share);
 
-      ACTION contribute (  const name        contributor,
+      ACTION propcontrib ( const name        proposer,
+                           const name        contributor,
+                           const string      notes,
+                           const asset       hypha_value,
+                           const asset       preseeds_value, 
+                           const time_point  contribution_date);
+
+      ACTION paycontrib (  const name        contributor,
                            const string      notes,
                            const asset       hypha_value,
                            const asset       preseeds_value, 

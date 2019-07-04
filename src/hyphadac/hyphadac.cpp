@@ -236,8 +236,24 @@ void hyphadac::assign (const name         assigned_account,
    });
 }
 
-void hyphadac::contribute (const name        contributor,
-                           const string      description,
+void hyphadac::propcontrib (const name       proposer,
+                           const name        contributor,
+                           const string      notes,
+                           const asset       hypha_value,
+                           const asset       preseeds_value, 
+                           const time_point  contribution_date) {
+
+   	transaction trx (time_point_sec(current_time_point())+ (60 * 60 * 24 * 35));
+	trx.actions.emplace_back(permission_level{get_self(), "owner"_n}, 
+		get_self(), "contribute"_n, 
+		std::make_tuple(contributor, notes, hypha_value, preseeds_value, contribution_date));
+	trx.delay_sec = 0;
+	
+   	makeissue (proposer, info_url, contributor, notes, trx);
+}
+
+void hyphadac::paycontrib (const name        contributor,
+                           const string      notes,
                            const asset       hypha_value,
                            const asset       preseeds_value, 
                            const time_point  contribution_date) {
@@ -270,7 +286,7 @@ void hyphadac::makeissue(const name proposer,
 
 	// _ds >> _holder >> _info_url >> _issue_name >> _trx;
 
-   require_auth(proposer);
+   	require_auth(proposer);
 
 	check(is_hvoice_holder(proposer) || is_steward_holder(proposer), "caller must be a STEWARD or HVOICE holder");
 
@@ -279,9 +295,9 @@ void hyphadac::makeissue(const name proposer,
 	uint32_t begin_time = current_block_time().to_time_point().sec_since_epoch() + _config.start_delay;
 	uint32_t end_time = begin_time + _config.issue_duration;
 
-   action(permission_level{get_self(), "active"_n}, "eosio.trail"_n, "regballot"_n, make_tuple(
+   	action(permission_level{get_self(), "active"_n}, "eosio.trail"_n, "regballot"_n, make_tuple(
 		get_self(),
-		uint8_t(0), 			//NOTE: makes a proposal on Trail
+		uint8_t(0), 			// NOTE: makes a proposal on Trail
 		common::S_HVOICE,
 		begin_time,
       end_time,
