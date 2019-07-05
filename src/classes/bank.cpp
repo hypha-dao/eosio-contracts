@@ -1,6 +1,6 @@
 #include "../../include/bank.hpp"
 
-void bank::reset () {
+void Bank::reset () {
     require_auth (contract);
     bankconfig_s.remove ();
     auto per_itr = period_t.begin();
@@ -14,9 +14,12 @@ void bank::reset () {
     }
 }
 
-void bank::set_config  (const name& hypha_token_contract, 
+void Bank::set_config  (const name& hypha_token_contract, 
                         const name& preseeds_token_contract) {
-    require_auth (contract.get_self());
+    require_auth (contract);
+
+    check (is_account(hypha_token_contract), "HYPHA token contract is not an account: " + hypha_token_contract.to_string());
+    check (is_account(preseeds_token_contract), "HYPHA token contract is not an account: " + preseeds_token_contract.to_string());
 
     BankConfig bc = bankconfig_s.get_or_create (contract, BankConfig());
     bc.hypha_token_contract = hypha_token_contract;
@@ -24,7 +27,7 @@ void bank::set_config  (const name& hypha_token_contract,
     bankconfig_s.set (bc, contract);
 }
                         
-void bank::makepayment (const uint64_t& period_id, const name& recipient, 
+void Bank::makepayment (const uint64_t& period_id, const name& recipient, 
                             const asset& quantity, const string& memo) {
     
     BankConfig bc = bankconfig_s.get_or_create (contract, BankConfig());
@@ -39,7 +42,7 @@ void bank::makepayment (const uint64_t& period_id, const name& recipient,
     });
 }
 
-void bank::addperiod (const time_point& start_date, const time_point& end_date) {
+void Bank::addperiod (const time_point& start_date, const time_point& end_date) {
 
     period_t.emplace (contract, [&](auto &p) {
         p.period_id     = period_t.available_primary_key();
@@ -48,15 +51,15 @@ void bank::addperiod (const time_point& start_date, const time_point& end_date) 
     });
 }
 
-void bank::issuetoken(const name token_contract,
-                    const name to,
-                    const asset token_amount,
-                    const string memo)
+void Bank::issuetoken(const name& token_contract,
+                    const name& to,
+                    const asset& token_amount,
+                    const string& memo)
 {
-    EMIT_PAYTOKEN_EVENT (token_contract, from, to, token_amount, memo);
+    //EMIT_PAYTOKEN_EVENT (token_contract, from, to, token_amount, memo);
 
     action(
-        permission_level{get_self(), "owner"_n},
+        permission_level{contract, "owner"_n},
         token_contract, "issue"_n,
         std::make_tuple(to, token_amount, memo))
     .send();

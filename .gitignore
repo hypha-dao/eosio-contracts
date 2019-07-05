@@ -5,6 +5,7 @@ build
 ricardian
 **/Makefile
 **/CMakeCache.txt
+hyphadao_project-prefix
 hyphadac_project-prefix
 **/*.abi
 **/*.wasm

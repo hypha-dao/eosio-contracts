@@ -4,5 +4,5 @@ project(hyphadao)
 set(EOSIO_WASM_OLD_BEHAVIOR "Off")
 find_package(eosio.cdt)
 
-add_contract( hyphadao hyphadao hyphadao.cpp )
-target_include_directories( hyphadac PUBLIC ${CMAKE_SOURCE_DIR}/../include )
+add_contract( hyphadao hyphadao hyphadao.cpp)
+target_include_directories( hyphadao PUBLIC ${CMAKE_SOURCE_DIR}/../include )

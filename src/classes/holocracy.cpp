@@ -1,10 +1,12 @@
 #include "../../include/holocracy.hpp"
 
-Holocracy::Holocracy (const name& contract) 
-    : role_t (contract, contract.value), contract (contract),
-        assignment_t (contract, contract.value) {}
+Holocracy::Holocracy (const name& contract) :
+    role_t (contract, contract.value), 
+    contract (contract),
+    assignment_t (contract, contract.value),
+    bank (contract) {}
 
-void holocracy::reset () {
+void Holocracy::reset () {
 
     require_auth (contract);
     
@@ -19,7 +21,7 @@ void holocracy::reset () {
     }
 }
 
-void holocracy::newrole (  const name& role_name, 
+void Holocracy::newrole (  const name& role_name, 
                             const string& description,
                             const asset& hypha_salary,
                             const asset& preseeds_salary,
@@ -38,11 +40,11 @@ void holocracy::newrole (  const name& role_name,
     });
 }
 
-void holocracy::delrole (const name& role_name) {
+void Holocracy::delrole (const name& role_name) {
 
     require_auth (contract);
 
-    auto ass_by_role = assignment_table.get_index<"byrole">();
+    auto ass_by_role = assignment_t.get_index<"byrole"_n>();
     check (ass_by_role.find(role_name.value) == ass_by_role.end(), "Delete role failed. Role has existing assignments: " + role_name.to_string());
 
     auto r_itr = role_t.find (role_name.value);
@@ -50,26 +52,37 @@ void holocracy::delrole (const name& role_name) {
     role_t.erase (r_itr);
 }
 
-void holocracy::newassign (const name&        assigned_account,
+void Holocracy::newassign (const name&        assigned_account,
                             const name&        role_name,
                             const string&      info_url,
                             const string&      notes,
+                            const uint64_t&     start_period,
                             const float&       time_share) {
                         
     require_auth (contract);
 
+    auto sorted_by_assigned = assignment_t.get_index<"byassigned"_n>();
+
+    auto a_itr = sorted_by_assigned.begin();
+    while (a_itr != sorted_by_assigned.end()) {
+        check (a_itr->role_name != role_name, "Assigned account already has this role. Assigned account: " 
+            + assigned_account.to_string() + "; Role name: " + role_name.to_string());    
+        a_itr++;
+    }
+
     assignment_t.emplace (contract, [&](auto &a) {
-       a.assignment_id      = assignment_t.available_primary_keyu();
+       a.assignment_id      = assignment_t.available_primary_key();
        a.assigned_account   = assigned_account;
        a.role_name          = role_name;
        a.info_url           = info_url;
        a.notes              = notes;
        a.time_share         = time_share;
+       a.start_period       = start_period;
        a.created_date       = current_block_time().to_time_point();
    });
 }
 
-void holocracy::delassign (const uint64_t&     assignment_id) {
+void Holocracy::delassign (const uint64_t&     assignment_id) {
 
     require_auth (contract);
 
@@ -78,11 +91,11 @@ void holocracy::delassign (const uint64_t&     assignment_id) {
     assignment_t.erase (a_itr);
 }
 
-asset holocracy::adjust_asset (const asset& original_asset, const float& adjustment) {
+asset Holocracy::adjust_asset (const asset& original_asset, const float& adjustment) {
     return asset { static_cast<int64_t> (original_asset.amount * adjustment), original_asset.symbol };
 }
 
-void holocracy::payassign (const uint64_t& assignment_id, const uint64_t& period_id) {
+void Holocracy::payassign (const uint64_t& assignment_id, const uint64_t& period_id) {
 
     require_auth (contract);
 
@@ -90,11 +103,11 @@ void holocracy::payassign (const uint64_t& assignment_id, const uint64_t& period
     check (a_itr != assignment_t.end(), "Cannot pay assignment. Assignment ID does not exist: " + std::to_string(assignment_id));
 
     auto r_itr = role_t.find (a_itr->role_name.value);
-    check (r_itr != role_t.end(), "Cannot pay assignment. Role does not exist: " + role_name.to_string());
+    check (r_itr != role_t.end(), "Cannot pay assignment. Role does not exist: " + a_itr->role_name.to_string());
 
     bank.makepayment (period_id, a_itr->assigned_account, adjust_asset(r_itr->hypha_salary, a_itr->time_share), 
-        "Payment for role " + role_name.to_string() + "; Period ID: " + std::to_string(period_id));
+        "Payment for role " + a_itr->role_name.to_string() + "; Period ID: " + std::to_string(period_id));
 
     bank.makepayment (period_id, a_itr->assigned_account, adjust_asset(r_itr->preseeds_salary, a_itr->time_share), 
-        "Payment for role " + role_name.to_string() + "; Period ID: " + std::to_string(period_id));
+        "Payment for role " + a_itr->role_name.to_string() + "; Period ID: " + std::to_string(period_id));
 }

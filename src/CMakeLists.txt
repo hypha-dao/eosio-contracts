@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.13)
-project(hyphadac)
+project(hyphadao)
 
 set(EOSIO_WASM_OLD_BEHAVIOR "Off")
 find_package(eosio.cdt)
 
-add_subdirectory(hyphadac)
+add_subdirectory(hyphadao)
 add_subdirectory(eosiotoken)

@@ -1,7 +1,7 @@
 Private key: 5J1gYLAc4GUo7EXNAXyaZTgo3m3SxtxDygdVUsNL4Par5Swfy1q
 Public key: EOS6vvAofsMC5RJyY6fRHcyiQLNjDGukX6tRUoF1WEc63idQ3BqJn
 
-hyphadactest
+hyphadaotest
 hyphatoken11
 hyphaboard11
 hyphaboard11
@@ -11,10 +11,10 @@ hyphamember3
 hyphamember4
 hyphamember5
 
-cleos -u http://testnet.telosusa.io set contract hyphaboard11 hyphadac/hyphadac
-cleos -u http://testnet.telosusa.io set contract hyphatoken11 hyphadac/eosiotoken
+cleos -u http://testnet.telosusa.io set contract hyphaboard11 hyphadao/hyphadao
+cleos -u http://testnet.telosusa.io set contract hyphatoken11 hyphadao/eosiotoken
 
-cleos -u http://testnet.telosusa.io push action hyphdactest setconfig '[10, "hyphatoken11"]' -p hyphadactest
+cleos -u http://testnet.telosusa.io push action hyphdactest setconfig '[10, "hyphatoken11"]' -p hyphadaotest
 cleos -u http://testnet.telosusa.io push action hyphdactest newrole '["blockdev", "blockchain developer", "10 HYPHA", "10 PRESEED", "10 HVOICE"]' -p hyphdactest
 
 cleos -u http://testnet.telosusa.io push action hypha
@@ -24,7 +24,7 @@ cleos -u http://testnet.telosusa.io push action hypha
 
 # Trail experimentation
 
-cleos -u https://testnet.telos.caleos.io set contract hyphaboard11 hyphadac/hyphadac
+cleos -u https://testnet.telos.caleos.io set contract hyphaboard11 hyphadao/hyphadao
 
 cleos -u https://testnet.telos.caleos.io get table hyphaboardtk hyphaboard11 config
 cleos -u https://testnet.telos.caleos.io get table hyphaboard11 hyphaboard11 nominees

@@ -1,0 +1,121 @@
+cleos push action eosio updateauth '{
+    "account": "hyphadao",
+    "permission": "active",
+    "parent": "owner",
+    "auth": {
+        "keys": [
+            {
+                "key": "EOS6vvAofsMC5RJyY6fRHcyiQLNjDGukX6tRUoF1WEc63idQ3BqJn",
+                "weight": 1
+            }
+        ],
+        "threshold": 1,
+        "accounts": [
+            {
+                "permission": {
+                    "actor": "hyphadao",
+                    "permission": "eosio.code"
+                },
+                "weight": 1
+            }
+        ],
+        "waits": []
+    }
+}' -p hyphadao@owner
+
+cleos push action eosio updateauth '{
+    "account": "hyphadao",
+    "permission": "owner",
+    "parent": "",
+    "auth": {
+        "keys": [
+            {
+                "key": "EOS6vvAofsMC5RJyY6fRHcyiQLNjDGukX6tRUoF1WEc63idQ3BqJn",
+                "weight": 1
+            }
+        ],
+        "threshold": 1,
+        "accounts": [
+            {
+                "permission": {
+                    "actor": "hyphadao",
+                    "permission": "eosio.code"
+                },
+                "weight": 1
+            }
+        ],
+        "waits": []
+    }
+}' -p hyphadao@owner
+
+// cleos push action eosio updateauth '{
+//     "account": "bitcashtoken",
+//     "permission": "active",
+//     "parent": "owner",
+//     "auth": {
+//         "keys": [
+//             {
+//                 "key": "EOS7wQY2up64ntKabRYUHfLkcHBNTSZCzGdQmB5LsgNqY1X3bFUjJ",
+//                 "weight": 1
+//             }
+//         ],
+//         "threshold": 1,
+//         "accounts": [
+//             {
+//                 "permission": {
+//                     "actor": "bitcashtoken",
+//                     "permission": "active"
+//                 },
+//                 "weight": 1
+//             },
+//             {
+//                 "permission": {
+//                     "actor": "bitcashtoken",
+//                     "permission": "eosio.code"
+//                 },
+//                 "weight": 1
+//             },
+//             {
+//                 "permission": {
+//                     "actor": "bitcashtreas",
+//                     "permission": "active"
+//                 },
+//                 "weight": 1
+//             },
+//             {
+//                 "permission": {
+//                     "actor": "bitcashtreas",
+//                     "permission": "eosio.code"
+//                 },
+//                 "weight": 1
+//             },
+//         ],
+//         "waits": []
+//     }
+// }' -p bitcashtoken@owner
+
+
+// cleos -u https://eos.greymass.com push action eosio updateauth '{
+//     "account": "bitcashtreas",
+//     "permission": "active",
+//     "parent": "owner",
+//     "auth": {
+//         "keys": [
+//             {
+//                 "key": "EOS7wQY2up64ntKabRYUHfLkcHBNTSZCzGdQmB5LsgNqY1X3bFUjJ",
+//                 "weight": 1
+//             }
+//         ],
+//         "threshold": 1,
+//         "accounts": [
+//             {
+//                 "permission": {
+//                     "actor": "bitcashtreas",
+//                     "permission": "eosio.code"
+//                 },
+//                 "weight": 1
+//             }
+//         ],
+//         "waits": []
+//     }
+// }' -p bitcashtreas@owner

@@ -19,10 +19,15 @@ namespace common {
     static const uint8_t        PAUSED                          = 1;
     static const uint8_t        UNPAUSED                        = 0;
 
-    static const string         OPEN                            = "OPEN";
-    static const string         APPROVED                        = "APPROVED";
-    static const string         PAID                            = "PAID";
+    static const uint8_t         OPEN                            = 1;
+    static const uint8_t         EXECUTED                        = 2;
+   // static const uint8_t         PAID                            = "PAID";
 
+    static const uint8_t        ROLE_PROPOSAL                   = 1;
+    static const uint8_t        ASS_PROPOSAL                    = 2;
+    static const uint8_t        PAYOUT_PROPOSAL                 = 3;
+    static const uint8_t        OTHER_PROPOSAL                  = 4;
+    
     enum ISSUE_STATE {
 		FAIL = 2,
 		COUNT = 0,
