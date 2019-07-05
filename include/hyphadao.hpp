@@ -23,8 +23,9 @@ CONTRACT hyphadao : public contract {
          name           proposer                ; 
          name           proposal_name           ;
          string         notes                   ;
+         string         info_url                ;
          uint64_t       ballot_id               ;
-         transaction    transaction             ;
+         transaction    trx                     ;
          uint8_t        proposal_type           = 0;
          uint64_t       proposal_fk             ;
 
@@ -35,14 +36,16 @@ CONTRACT hyphadao : public contract {
       struct [[eosio::table, eosio::contract("hyphadao") ]] RoleProposal
       {
          uint64_t       proposal_id             = 0;
+         uint64_t       ballot_id               ;
          name           proposer                ; 
-         name           role_name               ;
+         string         role_name               ;
          string         info_url                ;
          string         description             ;
          asset          hypha_salary            = asset { 0, common::S_HYPHA };
          asset          preseeds_salary         = asset { 0, common::S_PRESEEDS };
          asset          voice_salary            = asset { 0, common::S_HVOICE };
          uint8_t        status                  ;
+         transaction    trx                     ;
 
          time_point     created_date            = current_block_time().to_time_point();
          time_point     executed_date           ;
@@ -53,33 +56,37 @@ CONTRACT hyphadao : public contract {
       struct [[eosio::table, eosio::contract("hyphadao") ]] AssignmentProposal
       {
          uint64_t       proposal_id             ;
+         uint64_t       ballot_id               ;
          name           proposer                ;
          name           assigned_account        ;
-         name           role_name               ;
+         uint64_t       role_id                 ;
          string         info_url                ;
          string         notes                   ;
          uint64_t       start_period            ;
          float          time_share              = 0.000000000000000;
          uint8_t        status                  ;
+         transaction    trx                     ;
 
          time_point     created_date            = current_block_time().to_time_point();
          time_point     executed_date           ;
 
          uint64_t       primary_key()           const { return proposal_id; }
          uint64_t       by_assigned()           const { return assigned_account.value; }
-         uint64_t       by_role()               const { return role_name.value; }
+         uint64_t       by_role()               const { return role_id; }
       };
 
       struct [[eosio::table, eosio::contract("hyphadao") ]] PayoutProposal
       {
          uint64_t       proposal_id             ;
+         uint64_t       ballot_id               ;
          name           recipient               ;
-         string         notes             ;
+         string         notes                   ;
          string         info_url                ;
          asset          hypha_value             = asset { 0, common::S_HYPHA };
          asset          preseeds_value          = asset { 0, common::S_PRESEEDS };
          asset          voice_value             = asset { 0, common::S_HVOICE };
          uint8_t        status                  = common::OPEN;
+         transaction    trx                     ;
          
          time_point     created_date            = current_block_time().to_time_point();
          time_point     executed_date           ;
@@ -102,7 +109,7 @@ CONTRACT hyphadao : public contract {
       ACTION setconfig (const name&     hypha_token_contract);
 
       ACTION proposerole (const name& proposer,
-                           const name& role_name,
+                           const string& role_name,
                            const string& info_url,
                            const string& description,
                            const asset& hypha_salary,
@@ -119,10 +126,10 @@ CONTRACT hyphadao : public contract {
 
       ACTION propassign (const name&       proposer,
                         const name&        assigned_account,
-                        const name&        role_name,
+                        const uint64_t&    role_id,
                         const string&      info_url,
                         const string&      notes,
-                        const uint64_t&      start_period,
+                        const uint64_t&    start_period,
                         const float&       time_share);
 
       ACTION assign (const uint64_t& 		proposal_id);
@@ -138,16 +145,16 @@ CONTRACT hyphadao : public contract {
 
       ACTION makepayout (  const uint64_t&   proposal_id);
       
-      ACTION makeprop(const name& proposer, 
-                        const string& info_url,
-                        const name& proposal_name,
-                        const string& notes,
-                        const uint8_t& proposal_type,
-                        const uint64_t& proposal_fk,
-                        const transaction& trx);
+      // ACTION makeprop(const name& proposer, 
+      //                   const string& info_url,
+      //                   const name& proposal_name,
+      //                   const string& notes,
+      //                   const uint8_t& proposal_type,
+      //                   const uint64_t& proposal_fk,
+      //                   const transaction& trx);
 
       ACTION closeprop(const name& holder, const uint64_t& proposal_id);
-
+      ACTION payassign(const uint64_t& assignment_id, const uint64_t& period_id);
 
       //NOTE: sends inline actions to register and initialize HVOICE token registry
       ACTION inithvoice(const string initial_info_link);
@@ -168,6 +175,8 @@ CONTRACT hyphadao : public contract {
       Bank bank = Bank (get_self());
 
       void qualify_proposer (const name& proposer);
+      uint64_t register_ballot (const name& proposer,
+									      const string& info_url);
 };
 
 #endif

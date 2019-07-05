@@ -9,9 +9,9 @@ using std::string;
 
 namespace common {
 
-    static const symbol         S_HYPHA                         ("HYPHA", 0);
-    static const symbol         S_HVOICE                        ("HVOICE", 0);
-    static const symbol         S_PRESEEDS                      ("PRESEED", 8);
+    static const symbol         S_HYPHA                         ("HYPH", 0);
+    static const symbol         S_HVOICE                        ("HYVO", 0);
+    static const symbol         S_PRESEEDS                      ("PRESEE", 8);
     static const symbol         S_STEWARD                       ("STEWARD", 0);
     
     static const uint64_t       SCALER                          = 100000000;
@@ -28,7 +28,7 @@ namespace common {
     static const uint8_t        PAYOUT_PROPOSAL                 = 3;
     static const uint8_t        OTHER_PROPOSAL                  = 4;
     
-    enum ISSUE_STATE {
+    enum PROP_STATE {
 		FAIL = 2,
 		COUNT = 0,
 		TIE = 3,

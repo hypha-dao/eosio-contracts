@@ -16,6 +16,9 @@ cleos push action hyphadao closeprop '["member1", 0]' -p member1
 cleos push action hyphadao propassign '["member1", "member1", "blockdev", "https://joinseeds.com", "I cant wait to start this assignment", 0, 1.00000000]' -p member1
 cleos push action hyphadao closeprop '["member1", 1]' -p member1 
 
+cleos get table hyphadao hyphadao proposals
+cleos push action hyphadao eraseprop '[0]' -p member1 
+
 # proposals
 cleos get table hyphadao hyphadao proposals
 cleos get table hyphadao hyphadao payoutprops

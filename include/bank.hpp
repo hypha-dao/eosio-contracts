@@ -130,11 +130,17 @@ class Bank {
         {
             //EMIT_PAYTOKEN_EVENT (token_contract, from, to, token_amount, memo);
 
-            action(
-                permission_level{contract, "owner"_n},
-                token_contract, "issue"_n,
-                std::make_tuple(to, token_amount, memo))
-            .send();
+            print ("\nIssue Token Event\n");
+            print ("    Token Contract  : ", token_contract.to_string(), "\n");
+            print ("    Issue To        : ", to.to_string(), "\n");
+            print ("    Issue Amount    : ", token_amount.to_string(), "\n");
+            print ("    Memo            : ", memo, "\n\n");
+
+            // action(
+            //     permission_level{contract, "owner"_n},
+            //     token_contract, "issue"_n,
+            //     std::make_tuple(to, token_amount, memo))
+            // .send();
         }
 
 };

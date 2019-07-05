@@ -71,12 +71,12 @@ class Board {
             // uint64_t primary_key() const { return publisher.value; }
         };
 
-        struct [[eosio::table]] Nominee {
+        struct [[eosio::table, eosio::contract("hyphadao") ]] Nominee {
             name      nominee;
             uint64_t  primary_key() const { return nominee.value; }
         };
 
-        struct [[eosio::table]] Steward {
+        struct [[eosio::table, eosio::contract("hyphadao") ]] Steward {
             name     member;
             uint64_t primary_key() const { return member.value; }
         };
@@ -130,8 +130,13 @@ class Board {
     //     vector<permission_level_weight> perms_from_members();
     //     #pragma endregion Helper_Functions
 
+BoardConfig get_config() {
+    return boardconfig_s.get_or_create (contract, BoardConfig());
+}
 
-void reset() {}
+void reset() {
+    boardconfig_s.remove();
+}
 
 void init_token () {
     require_auth(contract);

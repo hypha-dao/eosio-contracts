@@ -97,14 +97,14 @@ asset Holocracy::adjust_asset (const asset& original_asset, const float& adjustm
 
 void Holocracy::payassign (const uint64_t& assignment_id, const uint64_t& period_id) {
 
-    require_auth (contract);
-
     auto a_itr = assignment_t.find (assignment_id);
     check (a_itr != assignment_t.end(), "Cannot pay assignment. Assignment ID does not exist: " + std::to_string(assignment_id));
 
     auto r_itr = role_t.find (a_itr->role_name.value);
     check (r_itr != role_t.end(), "Cannot pay assignment. Role does not exist: " + a_itr->role_name.to_string());
 
+    require_auth (a_itr->assigned_account);
+    
     bank.makepayment (period_id, a_itr->assigned_account, adjust_asset(r_itr->hypha_salary, a_itr->time_share), 
         "Payment for role " + a_itr->role_name.to_string() + "; Period ID: " + std::to_string(period_id));
 
