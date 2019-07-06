@@ -108,8 +108,6 @@ CONTRACT hyphadao : public contract {
       ACTION eraseprop (const uint64_t& proposal_id);
       ACTION setconfig (const name&     hypha_token_contract);
 
-      ACTION issuehypha ();
-
       ACTION proposerole (const name& proposer,
                            const string& role_name,
                            const string& info_url,
@@ -170,6 +168,8 @@ CONTRACT hyphadao : public contract {
       ACTION removecand(const name& candidate);
       ACTION endelection(const name& holder);
       ACTION removemember(const name& member_to_remove);
+      ACTION addperiod (const time_point& start_time, const time_point& end_time, const string& phase);
+      
 
    private:
       Board board = Board (get_self());

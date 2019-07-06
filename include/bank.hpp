@@ -25,6 +25,7 @@ class Bank {
             uint64_t         period_id               ;
             time_point       start_date              ;
             time_point       end_date                ;
+            string           phase                   ;
 
             uint64_t        primary_key()  const { return period_id; }
         };
@@ -114,12 +115,13 @@ class Bank {
             });
         }
 
-        void addperiod (const time_point& start_date, const time_point& end_date) {
+        void addperiod (const time_point& start_date, const time_point& end_date, const string& phase) {
 
             period_t.emplace (contract, [&](auto &p) {
                 p.period_id     = period_t.available_primary_key();
                 p.start_date    = start_date;
                 p.end_date      = end_date;
+                p.phase         = phase;
             });
         }
 
@@ -141,15 +143,6 @@ class Bank {
                 token_contract, "issue"_n,
                 std::make_tuple(to, token_amount, memo))
             .send();
-
-            // asset a = asset { 100000000, common::S_PRESEEDS };
-
-            // string memo1 { "memo" };
-            // action(
-            //     permission_level{"hyphadaobal1"_n, "active"_n},
-            //     "hyphatoken12"_n, "issue"_n,
-            //     std::make_tuple("hyphamember1"_n, a, memo1))
-            // .send();
         }
 
 };

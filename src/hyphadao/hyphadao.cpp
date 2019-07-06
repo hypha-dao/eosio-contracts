@@ -17,6 +17,18 @@ void hyphadao::reset () {
 	while (rp_itr != rp_t.end()) {
 		rp_itr = rp_t.erase (rp_itr);
 	}
+
+	payoutprop_table pp_t (get_self(), get_self().value);
+	auto pp_itr = pp_t.begin();
+	while (pp_itr != pp_t.end()) {
+		pp_itr = pp_t.erase (pp_itr);
+	}
+
+	assprop_table ap_t (get_self(), get_self().value);
+	auto ap_itr = ap_t.begin();
+	while (ap_itr != ap_t.end()) {
+		ap_itr = ap_t.erase (ap_itr);
+	}
 }
 
 void hyphadao::init () {
@@ -95,11 +107,6 @@ void hyphadao::proposerole (const name& proposer,
 	});
 }
 
-void hyphadao::issuehypha () {
-	string memo { "memo "};
-	bank.issuetoken ("hyphatoken12"_n, "hyphamember1"_n, asset (1, common::S_PRESEEDS), memo);
-}
-
 void hyphadao::newrole (const uint64_t& proposal_id) {
 
    	require_auth (get_self());
@@ -118,6 +125,10 @@ void hyphadao::newrole (const uint64_t& proposal_id) {
 						rp_itr->hypha_salary, 
 						rp_itr->preseeds_salary, 
 						rp_itr->voice_salary);
+}
+
+void hyphadao::addperiod (const time_point& start_date, const time_point& end_date, const string& phase) {
+	bank.addperiod (start_date, end_date, phase);
 }
 
 void hyphadao::propassign (const name&      proposer,

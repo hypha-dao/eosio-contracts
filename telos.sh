@@ -14,7 +14,7 @@ hyphadaobali
 hyphatoken12
 
 
-cleos -u http://testnet.telosusa.io set contract hyphaboard11 hyphadao/hyphadao
+cleos -u http://testnet.telosusa.io set contract hyphadaobal1 hyphadao/hyphadao
 cleos -u http://testnet.telosusa.io set contract hyphatoken12 hyphadao/eosiotoken
 
 cleos -u https://testnet.telos.caleos.io push action hyphadaobal1 setconfig '["hyphatoken12"]' -p hyphadaobal1
@@ -88,15 +88,15 @@ cleos -u https://testnet.telos.caleos.io push action hyphadaobal1 closeprop '["h
 ##### Propose a contribution
 cleos -u https://testnet.telos.caleos.io set contract hyphadaobal1 hyphadao/hyphadao
 cleos -u https://testnet.telos.caleos.io push action hyphadaobal1 proppayout '["hyphamember2", "hyphamember2", "Investment", "https://joinseeds.com", "2000 HHH", "10000.00000000 PPP", "5 HYVO", "2019-07-05T05:49:01.500"]' -p hyphamember2
-cleos -u https://testnet.telos.caleos.io push action eosio.trail castvote '["hyphamember1", 43, 1]' -p hyphamember1
-cleos -u https://testnet.telos.caleos.io push action eosio.trail castvote '["hyphamember2", 43, 1]' -p hyphamember2
-cleos -u https://testnet.telos.caleos.io push action eosio.trail castvote '["hyphamember3", 43, 1]' -p hyphamember3
-cleos -u https://testnet.telos.caleos.io push action hyphadaobal1 closeprop '["hyphamember2", 2]' -p hyphamember2
+cleos -u https://testnet.telos.caleos.io push action eosio.trail castvote '["hyphamember1", 50, 1]' -p hyphamember1
+cleos -u https://testnet.telos.caleos.io push action eosio.trail castvote '["hyphamember2", 50, 1]' -p hyphamember2
+cleos -u https://testnet.telos.caleos.io push action eosio.trail castvote '["hyphamember3", 50, 1]' -p hyphamember3
+cleos -u https://testnet.telos.caleos.io push action hyphadaobal1 closeprop '["hyphamember2", 9]' -p hyphamember2
 
 cleos -u https://testnet.telos.caleos.io get table hyphatoken12 hyphamember2 accounts
 
 cleos -u https://testnet.telos.caleos.io push action hyphadaobal1 makepayout '[2]' -p hyphadaobal1
-cleos -u https://testnet.telos.caleos.io push action hyphadaobali reset '[]' -p hyphadaobali
+cleos -u https://testnet.telos.caleos.io push action hyphadaobal1 reset '[]' -p hyphadaobal1
 
 
 cleos -u https://testnet.telos.caleos.io push action hyphatoken12 create '["hyphadaobal1", "1000000000000 HHH"]' -p hyphatoken12

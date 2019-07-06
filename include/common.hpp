@@ -21,7 +21,7 @@ namespace common {
 
     static const uint8_t         OPEN                            = 1;
     static const uint8_t         EXECUTED                        = 2;
-   // static const uint8_t         PAID                            = "PAID";
+    static const uint8_t         REJECTED                        = 3;
 
     static const uint8_t        ROLE_PROPOSAL                   = 1;
     static const uint8_t        ASS_PROPOSAL                    = 2;

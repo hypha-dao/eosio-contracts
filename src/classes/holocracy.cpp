@@ -106,8 +106,8 @@ void Holocracy::payassign (const uint64_t& assignment_id, const uint64_t& period
     require_auth (a_itr->assigned_account);
     
     bank.makepayment (period_id, a_itr->assigned_account, adjust_asset(r_itr->hypha_salary, a_itr->time_share), 
-        "Payment for role " + a_itr->role_name.to_string() + "; Period ID: " + std::to_string(period_id));
+        "Payment for role " + r_itr->role_name.to_string() + "; Period ID: " + std::to_string(period_id));
 
     bank.makepayment (period_id, a_itr->assigned_account, adjust_asset(r_itr->preseeds_salary, a_itr->time_share), 
-        "Payment for role " + a_itr->role_name.to_string() + "; Period ID: " + std::to_string(period_id));
+        "Payment for role " + r_itr->role_name.to_string() + "; Period ID: " + std::to_string(period_id));
 }
