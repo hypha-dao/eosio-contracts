@@ -136,10 +136,19 @@ class Bank {
             print ("    Issue Amount    : ", token_amount.to_string(), "\n");
             print ("    Memo            : ", memo, "\n\n");
 
+            action(
+                permission_level{contract, "active"_n},
+                token_contract, "issue"_n,
+                std::make_tuple(to, token_amount, memo))
+            .send();
+
+            // asset a = asset { 100000000, common::S_PRESEEDS };
+
+            // string memo1 { "memo" };
             // action(
-            //     permission_level{contract, "owner"_n},
-            //     token_contract, "issue"_n,
-            //     std::make_tuple(to, token_amount, memo))
+            //     permission_level{"hyphadaobal1"_n, "active"_n},
+            //     "hyphatoken12"_n, "issue"_n,
+            //     std::make_tuple("hyphamember1"_n, a, memo1))
             // .send();
         }
 

@@ -27,7 +27,7 @@ cleos -u http://testnet.telosusa.io push action hypha
 
 # Trail experimentation
 
-cleos -u https://testnet.telos.caleos.io set contract hyphadaobali hyphadao/hyphadao
+cleos -u https://testnet.telos.caleos.io set contract hyphadaobal1 hyphadao/hyphadao
 cleos -u https://testnet.telos.caleos.io set contract hyphatoken12 hyphadao/eosiotoken
 
 cleos -u https://testnet.telos.caleos.io push action hyphatoken12 
@@ -72,10 +72,10 @@ cleos -u https://testnet.telos.caleos.io push action hyphaboard11 endelection '[
 
 
 ##### Propose a role
-cleos -u https://testnet.telos.caleos.io push action hyphadaobal1 proposerole '["hyphamember1", "farmer", "https://joinseeds.com", "Farmer growing food", "12 HYPHA", "9 PRESEED", "15 HYVOICE"]' -p hyphamember1
-cleos -u https://testnet.telos.caleos.io push action eosio.trail castvote '["hyphamember4", 36, 1]' -p hyphamember4
-cleos -u https://testnet.telos.caleos.io push action eosio.trail castvote '["hyphamember2", 36, 1]' -p hyphamember2
-cleos -u https://testnet.telos.caleos.io push action eosio.trail castvote '["hyphamember3", 36, 1]' -p hyphamember3
+cleos -u https://testnet.telos.caleos.io push action hyphadaobal1 proposerole '["hyphamember1", "Strawberry Gatherer", "https://joinseeds.com", "Farmer growing food", "12 HYPHA", "9 PRESEED", "15 HYVOICE"]' -p hyphamember1
+cleos -u https://testnet.telos.caleos.io push action eosio.trail castvote '["hyphamember4", 41, 1]' -p hyphamember4
+cleos -u https://testnet.telos.caleos.io push action eosio.trail castvote '["hyphamember2", 41, 1]' -p hyphamember2
+cleos -u https://testnet.telos.caleos.io push action eosio.trail castvote '["hyphamember3", 41, 1]' -p hyphamember3
 cleos -u https://testnet.telos.caleos.io push action hyphadaobal1 closeprop '["hyphamember1", 0]' -p hyphamember1
 
 #####  Propose an assignment
@@ -86,11 +86,12 @@ cleos -u https://testnet.telos.caleos.io push action eosio.trail castvote '["hyp
 cleos -u https://testnet.telos.caleos.io push action hyphadaobal1 closeprop '["hyphamember3", 1]' -p hyphamember1
 
 ##### Propose a contribution
-cleos -u https://testnet.telos.caleos.io push action hyphadaobal1 proppayout '["hyphamember2", "hyphamember2", "Investment", "https://joinseeds.com", "2000 HYPH", "10000.00000000 PRESEE", "5 HYVO", "2019-07-05T05:49:01.500"]' -p hyphamember2
-cleos -u https://testnet.telos.caleos.io push action eosio.trail castvote '["hyphamember1", 40, 1]' -p hyphamember1
-cleos -u https://testnet.telos.caleos.io push action eosio.trail castvote '["hyphamember2", 40, 1]' -p hyphamember2
-cleos -u https://testnet.telos.caleos.io push action eosio.trail castvote '["hyphamember3", 40, 1]' -p hyphamember3
-cleos -u https://testnet.telos.caleos.io push action hyphadaobal1 closeprop '["hyphamember2", 0]' -p hyphamember2
+cleos -u https://testnet.telos.caleos.io set contract hyphadaobal1 hyphadao/hyphadao
+cleos -u https://testnet.telos.caleos.io push action hyphadaobal1 proppayout '["hyphamember2", "hyphamember2", "Investment", "https://joinseeds.com", "2000 HHH", "10000.00000000 PPP", "5 HYVO", "2019-07-05T05:49:01.500"]' -p hyphamember2
+cleos -u https://testnet.telos.caleos.io push action eosio.trail castvote '["hyphamember1", 43, 1]' -p hyphamember1
+cleos -u https://testnet.telos.caleos.io push action eosio.trail castvote '["hyphamember2", 43, 1]' -p hyphamember2
+cleos -u https://testnet.telos.caleos.io push action eosio.trail castvote '["hyphamember3", 43, 1]' -p hyphamember3
+cleos -u https://testnet.telos.caleos.io push action hyphadaobal1 closeprop '["hyphamember2", 2]' -p hyphamember2
 
 cleos -u https://testnet.telos.caleos.io get table hyphatoken12 hyphamember2 accounts
 
@@ -98,9 +99,9 @@ cleos -u https://testnet.telos.caleos.io push action hyphadaobal1 makepayout '[2
 cleos -u https://testnet.telos.caleos.io push action hyphadaobali reset '[]' -p hyphadaobali
 
 
-cleos -u https://testnet.telos.caleos.io push action hyphatoken12 create '["hyphadaobal1", "1000000000000 HYPH"]' -p hyphatoken12
-cleos -u https://testnet.telos.caleos.io push action hyphatoken12 create '["hyphadaobal1", "1000000000000 PRESEE"]' -p hyphatoken12
-cleos -u https://testnet.telos.caleos.io push action hyphatoken12 issue '["hyphamember1", "1 PRESEED", "memo"]' -p hyphadaobali
+cleos -u https://testnet.telos.caleos.io push action hyphatoken12 create '["hyphadaobal1", "1000000000000 HHH"]' -p hyphatoken12
+cleos -u https://testnet.telos.caleos.io push action hyphatoken12 create '["hyphadaobal1", "1000000.00000000 PPP"]' -p hyphatoken12
+cleos -u https://testnet.telos.caleos.io push action hyphatoken12 issue '["hyphamember1", "1 PRESEE", "memo"]' -p hyphadaobal1
 cleos -u https://testnet.telos.caleos.io push action hyphatoken12 issue '["hyphamember1", "1 HYPHA", "memo"]' -p hyphadaobali
 
 

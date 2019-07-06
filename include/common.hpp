@@ -9,9 +9,9 @@ using std::string;
 
 namespace common {
 
-    static const symbol         S_HYPHA                         ("HYPH", 0);
+    static const symbol         S_HYPHA                         ("HHH", 0);
     static const symbol         S_HVOICE                        ("HYVO", 0);
-    static const symbol         S_PRESEEDS                      ("PRESEE", 8);
+    static const symbol         S_PRESEEDS                      ("PPP", 8);
     static const symbol         S_STEWARD                       ("STEWARD", 0);
     
     static const uint64_t       SCALER                          = 100000000;

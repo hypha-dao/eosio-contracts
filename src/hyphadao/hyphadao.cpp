@@ -95,6 +95,11 @@ void hyphadao::proposerole (const name& proposer,
 	});
 }
 
+void hyphadao::issuehypha () {
+	string memo { "memo "};
+	bank.issuetoken ("hyphatoken12"_n, "hyphamember1"_n, asset (1, common::S_PRESEEDS), memo);
+}
+
 void hyphadao::newrole (const uint64_t& proposal_id) {
 
    	require_auth (get_self());

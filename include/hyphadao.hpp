@@ -108,6 +108,8 @@ CONTRACT hyphadao : public contract {
       ACTION eraseprop (const uint64_t& proposal_id);
       ACTION setconfig (const name&     hypha_token_contract);
 
+      ACTION issuehypha ();
+
       ACTION proposerole (const name& proposer,
                            const string& role_name,
                            const string& info_url,
