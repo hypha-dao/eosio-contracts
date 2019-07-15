@@ -18,43 +18,95 @@ const api = new Api({
   textEncoder: new TextEncoder()
 });
 
-fs.createReadStream("../moon_phases.csv").pipe(
-  csv.parse({ headers: true }).on("data", row => {
-    const actions = [
+const resetPeriods = () => {
+  const actions = [{
+    account: "hyphadaobal1",
+    name: "reset",
+    authorization: [
       {
-        account: "hyphadaobal1",
-        name: "addperiod",
-        authorization: [
-          {
-            actor: "hyphadaobal1",
-            permission: "active"
-          }
-        ],
-        data: {
-          start_time: row.startdate,
-          end_time: row.enddate,
-          phase: row.phaseatstart
-        }
+        actor: "hyphadaobal1",
+        permission: "active"
       }
-    ];
-    console.log ('Actions: ', actions)
+    ],
+    data: {}
+  }]
 
-    api
-      .transact(
+  return api
+    .transact(
+      {
+        actions: actions
+      },
+      {
+        blocksBehind: 3,
+        expireSeconds: 30
+      }
+    )
+    .then(function(result) {
+      console.log('Flush database: ' + result.transaction_id);
+    })
+    .catch(function(e) {
+      console.log(e);
+    })
+}
+
+const addPeriodsSync = async (periods) => {
+  for (let i = 0; i < periods.length; i++) {
+    try {
+      const { startdate, enddate, phaseatstart } = periods[i]
+
+      const actions = [
         {
-          actions: actions
-        },
-        {
-          blocksBehind: 3,
-          expireSeconds: 30
+          account: "hyphadaobal1",
+          name: "addperiod",
+          authorization: [
+            {
+              actor: "hyphadaobal1",
+              permission: "active"
+            }
+          ],
+          data: {
+            start_time: startdate,
+            end_time: enddate,
+            phase: phaseatstart
+          }
         }
-      )
-      .then(function(result) {
-        console.log("Successfully created phase: ", row.startdate);
-      })
-      .catch(function(e) {
-        console.log(e);
-      });
-    // console.log(row);
-  })
-);
+      ]
+
+      await api
+        .transact(
+          {
+            actions: actions
+          },
+          {
+            blocksBehind: 3,
+            expireSeconds: 30
+          }
+        )
+
+      console.log("Successfully created phase: ", startdate)
+    } catch (e) {
+      console.error(e)
+      console.log('Please, fix an error and run script again')
+    }
+  }
+}
+
+const loadPeriods = () => {
+  let periods = []
+
+  const handler = csv.parse({ headers: true })
+
+  handler.on('data', row => periods.push(row))
+
+  handler.on('end', () => addPeriodsSync(periods))
+
+  fs.createReadStream("../moon_phases.csv").pipe(handler)
+}
+
+const main = async () => {
+  await resetPeriods()
+
+  await loadPeriods()
+}
+
+main()
