@@ -1,6 +1,5 @@
 /* eslint-disable prettier/prettier */
-const assert = require("assert");
-const eoslime = require("../../eoslime").init("local");
+../const eoslime = require("../../eoslime").init("local");
 
 const HYPHADAC_WASM = "../hyphadac/hyphadac/hyphadac/hyphadac.wasm";
 const HYPHADAC_ABI = "../hyphadac/hyphadac/hyphadac/hyphadac.abi";
