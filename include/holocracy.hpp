@@ -48,6 +48,30 @@ class Holocracy {
             uint64_t        by_role()               const { return role_id; }
         };
 
+        struct [[eosio::table, eosio::contract("hyphadao") ]] AssignmentPayout
+        {
+            uint64_t        ass_payment_id          ;
+            uint64_t        assignment_id           ;
+            name            recipient               ;
+            uint64_t        period_id               ;
+            vector<asset>   payments                ;
+            time_point      payment_date            ;
+
+            uint64_t        primary_key()           const { return ass_payment_id; }
+            uint64_t        by_assignment()         const { return assignment_id; }
+            uint64_t        by_period ()            const { return period_id; }
+            uint64_t        by_recipient()          const { return recipient.value; }
+        };
+
+        typedef multi_index<"asspayouts"_n, AssignmentPayout,
+            indexed_by<"byassignment"_n,
+                const_mem_fun<AssignmentPayout, uint64_t, &AssignmentPayout::by_assignment>>,
+            indexed_by<"byperiod"_n,
+                const_mem_fun<AssignmentPayout, uint64_t, &AssignmentPayout::by_period>>,
+            indexed_by<"byrecipient"_n,
+                const_mem_fun<AssignmentPayout, uint64_t, &AssignmentPayout::by_recipient>>
+        > assprop_table;
+
         typedef multi_index<"roles"_n, Role> role_table;
 
         typedef multi_index<"assignments"_n, Assignment,
@@ -61,10 +85,12 @@ class Holocracy {
             role_t (contract, contract.value), 
             contract (contract),
             assignment_t (contract, contract.value),
+            assprop_t (contract, contract.value),
             bank (contract) {}
 
         role_table          role_t;
         assignment_table    assignment_t;
+        assprop_table       assprop_t;
         Bank                bank;
         name                contract;
 
@@ -190,19 +216,53 @@ class Holocracy {
 
     void payassign (const uint64_t& assignment_id, const uint64_t& period_id) {
 
-        require_auth (contract);
-
         auto a_itr = assignment_t.find (assignment_id);
         check (a_itr != assignment_t.end(), "Cannot pay assignment. Assignment ID does not exist: " + std::to_string(assignment_id));
 
+        require_auth (a_itr->assigned_account);
+        
         auto r_itr = role_t.find (a_itr->role_id);
         check (r_itr != role_t.end(), "Cannot pay assignment. Role ID does not exist: " + std::to_string(a_itr->role_id));
 
-        bank.makepayment (period_id, a_itr->assigned_account, adjust_asset(r_itr->hypha_salary, a_itr->time_share), 
-            "Payment for role " + std::to_string(a_itr->role_id) + "; Period ID: " + std::to_string(period_id));
+        // Check that the assignment has not been paid for this period yet
+        auto period_index = assprop_t.get_index<"byperiod"_n>();
+        auto per_itr = period_index.find (period_id);
+        while (per_itr->period_id == period_id && per_itr != period_index.end()) {
+            check (per_itr->assignment_id != assignment_id, "Assignment ID has already been paid for this period. Period ID: " +
+                std::to_string(period_id) + "; Assignment ID: " + std::to_string(assignment_id));
+        }
 
-        bank.makepayment (period_id, a_itr->assigned_account, adjust_asset(r_itr->preseeds_salary, a_itr->time_share), 
-            "Payment for role " + std::to_string(a_itr->role_id) + "; Period ID: " + std::to_string(period_id));
+        // Check that the period has elapsed
+        auto p_itr = bank.period_t.find (period_id);
+        check (p_itr != bank.period_t.end(), "Cannot make payment. Period ID not found: " + std::to_string(period_id));
+        check (p_itr->end_date.time_since_epoch() < current_block_time().to_time_point().time_since_epoch(), 
+            "Cannot make payment. Period ID " + std::to_string(period_id) + " has not closed yet.");
+    
+        asset hypha_payment = adjust_asset(r_itr->hypha_salary, a_itr->time_share);
+        asset preseeds_payment = adjust_asset(r_itr->preseeds_salary, a_itr->time_share);
+        asset voice_payment = adjust_asset(r_itr->voice_salary, a_itr->time_share);
+
+        assprop_t.emplace (contract, [&](auto &a) {
+            a.ass_payment_id        = assprop_t.available_primary_key();
+            a.recipient             = a_itr->assigned_account,
+            a.period_id             = period_id;
+            a.payment_date          = current_block_time().to_time_point();
+            a.payments.push_back (hypha_payment);
+            a.payments.push_back (preseeds_payment);
+            a.payments.push_back (voice_payment);
+        });
+
+        bank.makepayment (period_id, a_itr->assigned_account, hypha_payment, 
+            "Payment for role " + std::to_string(a_itr->role_id) + "; Period ID: " + std::to_string(period_id),
+            assignment_id);
+
+        bank.makepayment (period_id, a_itr->assigned_account, preseeds_payment, 
+            "Payment for role " + std::to_string(a_itr->role_id) + "; Period ID: " + std::to_string(period_id),
+            assignment_id);
+
+        bank.makepayment (period_id, a_itr->assigned_account, voice_payment, 
+            "Payment for role " + std::to_string(a_itr->role_id) + "; Period ID: " + std::to_string(period_id),
+            assignment_id);
     }
 };
 

@@ -9,10 +9,10 @@ using std::string;
 
 namespace common {
 
-    static const symbol         S_HYPHA                         ("HHH", 0);
-    static const symbol         S_HVOICE                        ("HYVO", 0);
-    static const symbol         S_PRESEEDS                      ("PPP", 8);
-    static const symbol         S_STEWARD                       ("STEWARD", 0);
+    static const symbol         S_HYPHA                         ("HYA", 0);
+    static const symbol         S_HVOICE                        ("HVQ", 0);
+    static const symbol         S_PRESEEDS                      ("PRX", 8);
+    static const symbol         S_STEWARD                       ("HYST", 0);
     
     static const uint64_t       SCALER                          = 100000000;
 
@@ -27,6 +27,10 @@ namespace common {
     static const uint8_t        ASS_PROPOSAL                    = 2;
     static const uint8_t        PAYOUT_PROPOSAL                 = 3;
     static const uint8_t        OTHER_PROPOSAL                  = 4;
+
+    static const uint8_t        NO_ASSIGNMENT                   = -1;
+
+    static const string         SEEDS_URL                       = "https://joinseeds.com";
     
     enum PROP_STATE {
 		FAIL = 2,

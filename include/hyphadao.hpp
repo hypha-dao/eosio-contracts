@@ -17,6 +17,14 @@ CONTRACT hyphadao : public contract {
    public:
       using contract::contract;
 
+      struct [[eosio::table, eosio::contract("hyphadao") ]] DAOConfig 
+      {
+         name           trail_contract          ;
+      };
+
+      typedef singleton<"config"_n, DAOConfig> config_table;
+      typedef multi_index<"config"_n, DAOConfig> config_table_placehoder;
+
       struct [[eosio::table, eosio::contract("hyphadao") ]] Proposal
       {
          uint64_t       proposal_id             = 0;
@@ -94,19 +102,18 @@ CONTRACT hyphadao : public contract {
 
          uint64_t       primary_key()           const { return proposal_id; }
       };
-      
+
       typedef multi_index<"proposals"_n, Proposal> proposal_table;
       typedef multi_index<"payoutprops"_n, PayoutProposal> payoutprop_table;
       typedef multi_index<"roleprops"_n, RoleProposal> roleprop_table;
       typedef multi_index<"assprops"_n, AssignmentProposal> assprop_table;
 
-      // typedef singleton<"config"_n, DAOConfig> config_table;
-      // typedef multi_index<"config"_n, DAOConfig> config_table_placeholder;
-      
       ACTION reset ();
+      ACTION resetperiods();
       ACTION init ();
       ACTION eraseprop (const uint64_t& proposal_id);
-      ACTION setconfig (const name&     hypha_token_contract);
+      ACTION setconfig (const name&    hypha_token_contract,
+                        const name&    trail_contract);
 
       ACTION proposerole (const name& proposer,
                            const string& role_name,
@@ -125,12 +132,12 @@ CONTRACT hyphadao : public contract {
       //                      const asset& voice_salary); 
 
       ACTION propassign (const name&       proposer,
-                        const name&        assigned_account,
-                        const uint64_t&    role_id,
-                        const string&      info_url,
-                        const string&      notes,
-                        const uint64_t&    start_period,
-                        const float&       time_share);
+                           const name&        assigned_account,
+                           const uint64_t&    role_id,
+                           const string&      info_url,
+                           const string&      notes,
+                           const uint64_t&    start_period,
+                           const float&       time_share);
 
       ACTION assign (const uint64_t& 		proposal_id);
 
@@ -145,14 +152,6 @@ CONTRACT hyphadao : public contract {
 
       ACTION makepayout (  const uint64_t&   proposal_id);
       
-      // ACTION makeprop(const name& proposer, 
-      //                   const string& info_url,
-      //                   const name& proposal_name,
-      //                   const string& notes,
-      //                   const uint8_t& proposal_type,
-      //                   const uint64_t& proposal_fk,
-      //                   const transaction& trx);
-
       ACTION closeprop(const name& holder, const uint64_t& proposal_id);
       ACTION payassign(const uint64_t& assignment_id, const uint64_t& period_id);
 

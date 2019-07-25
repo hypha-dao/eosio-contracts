@@ -14,35 +14,88 @@ hyphadaobali
 hyphatoken12
 
 
-cleos -u http://testnet.telosusa.io set contract hyphadaobal1 hyphadao/hyphadao
-cleos -u http://testnet.telosusa.io set contract hyphatoken12 hyphadao/eosiotoken
+cleos -u https://testnet.telos.caleos.io set contract hyphadaobal1 hyphadao/hyphadao
+cleos -u https://testnet.telos.caleos.io set contract hyphatoken12 hyphadao/eosiotoken
 
-cleos -u https://testnet.telos.caleos.io push action hyphadaobal1 setconfig '["hyphatoken12"]' -p hyphadaobal1
-cleos -u http://testnet.telosusa.io push action hyphdactest newrole '["blockdev", "blockchain developer", "10 HYPHA", "10 PRESEED", "10 HVOICE"]' -p hyphdactest
+cleos -u https://testnet.telos.caleos.io push action hyphadaotst1 newrole '["blockdev", "blockchain developer", "10 HYPHA", "10 PRESEED", "10 HVOICE"]' -p hyphdactest
 
-cleos -u http://testnet.telosusa.io push action hypha
+cleos -u https://testnet.telos.caleos.io push action hypha
+
+
+
+Payout Testing
+hyphadaotst1
+
+cleos -u https://testnet.telos.caleos.io set contract hyphadaotst1 hyphadao/hyphadao
+cleos -u https://testnet.telos.caleos.io push action hyphadaotst1 setconfig '["hyphatoken12", "eosio.trail"]' -p hyphadaotst1
+
+cleos -u https://testnet.telos.caleos.io push action hyphadaotst1 init '[]' -p hyphadaotst1
+
+cleos -u https://testnet.telos.caleos.io push action hyphatoken12 create '["hyphadaotst1", "1000000000000 HYA"]' -p hyphatoken12
+cleos -u https://testnet.telos.caleos.io push action hyphatoken12 create '["hyphadaotst1", "1000000.00000000 PRX"]' -p hyphatoken12
+cleos -u https://testnet.telos.caleos.io push action hyphatoken12 issue '["hyphamember1", "1.00000000 PRX", "memo"]' -p hyphadaotst1
+
+cleos -u https://testnet.telos.caleos.io push action hyphatoken12 issue '["hyphamember1", "1 HYA", "memo"]' -p hyphadaotst1
+cleos -u https://testnet.telos.caleos.io push action hyphatoken12 issue '["hyphamember2", "1 HYA", "memo"]' -p hyphadaotst1
+cleos -u https://testnet.telos.caleos.io push action hyphatoken12 issue '["hyphamember3", "1 HYA", "memo"]' -p hyphadaotst1
+cleos -u https://testnet.telos.caleos.io push action hyphatoken12 issue '["hyphamember4", "1 HYA", "memo"]' -p hyphadaotst1
+cleos -u https://testnet.telos.caleos.io push action hyphatoken12 issue '["hyphamember5", "1 HYA", "memo"]' -p hyphadaotst1
+
+
+cleos -u https://testnet.telos.caleos.io push action eosio.trail issuetoken '["hyphadaotst1", "hyphamember1", "1 HVQ", false]' -p hyphadaotst1
+cleos -u https://testnet.telos.caleos.io push action eosio.trail issuetoken '["hyphadaotst1", "hyphamember2", "1 HVQ", false]' -p hyphadaotst1
+cleos -u https://testnet.telos.caleos.io push action eosio.trail issuetoken '["hyphadaotst1", "hyphamember3", "1 HVQ", false]' -p hyphadaotst1
+cleos -u https://testnet.telos.caleos.io push action eosio.trail issuetoken '["hyphadaotst1", "hyphamember4", "1 HVQ", false]' -p hyphadaotst1
+cleos -u https://testnet.telos.caleos.io push action eosio.trail issuetoken '["hyphadaotst1", "hyphamember5", "1 HVQ", false]' -p hyphadaotst1
+
+cleos -u https://testnet.telos.caleos.io push action hyphadaotst1 proposerole '["hyphamember1", "blockdev", "https://joinseeds.com", "blockchain developer", "10 HYA", "10.00000000 PRX", "10 HVQ"]' -p hyphamember1
+
+cleos -u https://testnet.telos.caleos.io push action eosio.trail castvote '["hyphamember1", 53, 1]' -p hyphamember1
+cleos -u https://testnet.telos.caleos.io push action eosio.trail castvote '["hyphamember2", 53, 1]' -p hyphamember2
+cleos -u https://testnet.telos.caleos.io push action eosio.trail castvote '["hyphamember3", 53, 1]' -p hyphamember3
+cleos -u https://testnet.telos.caleos.io push action eosio.trail castvote '["hyphamember4", 53, 0]' -p hyphamember4
+
+cleos -u https://testnet.telos.caleos.io push action hyphadaotst1 closeprop '["hyphamember1", 1]' -p hyphamember1
+
+cleos -u https://testnet.telos.caleos.io push action hyphadaotst1 propassign '["hyphamember1", "hyphamember1", 0, "https://joinseeds.com", "I would like this job", 0, 1.000000000]' -p hyphamember1
+
+cleos -u https://testnet.telos.caleos.io push action hyphadaotst1 payassign '[0, 0]' -p hyphamember1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 
 # Trail experimentation
 
-cleos -u https://testnet.telos.caleos.io set contract hyphadaobal1 hyphadao/hyphadao
-cleos -u https://testnet.telos.caleos.io set contract hyphatoken12 hyphadao/eosiotoken
+cleos -u https://testnet.telos.caleos.io get table hyphadaotst1 hyphadaotst1 config
+cleos -u https://testnet.telos.caleos.io get table hyphadaotst1 hyphadaotst1 nominees
+cleos -u https://testnet.telos.caleos.io get table hyphadaotst1 hyphadaotst1 boardmembers
 
-cleos -u https://testnet.telos.caleos.io push action hyphatoken12 
-
-cleos -u https://testnet.telos.caleos.io get table hyphaboardtk hyphaboard11 config
-cleos -u https://testnet.telos.caleos.io get table hyphaboard11 hyphaboard11 nominees
-cleos -u https://testnet.telos.caleos.io get table hyphaboard11 hyphaboard11 boardmembers
-
-cleos -u https://testnet.telos.caleos.io get table hyphadaobali hyphadaobali proposals
-cleos -u https://testnet.telos.caleos.io get table hyphadaobali hyphadaobali roles
-cleos -u https://testnet.telos.caleos.io get table hyphadaobali hyphadaobali assignments
-cleos -u https://testnet.telos.caleos.io get table hyphadaobali hyphadaobali 
+cleos -u https://testnet.telos.caleos.io get table hyphadaotst1 hyphadaotst1 proposals
+cleos -u https://testnet.telos.caleos.io get table hyphadaotst1 hyphadaotst1 roles
+cleos -u https://testnet.telos.caleos.io get table hyphadaotst1 hyphadaotst1 assignments
+cleos -u https://testnet.telos.caleos.io get table hyphadaotst1 hyphadaotst1 roleprops
 
 cleos -u https://testnet.telos.caleos.io get table eosio.trail eosio.trail registries
-cleos -u https://testnet.telos.caleos.io get table -l 100 eosio.trail eosio.trail ballots
+cleos -u https://testnet.telos.caleos.io get table -lower 50  eosio.trail eosio.trail ballots
 cleos -u https://testnet.telos.caleos.io get table eosio.trail eosio.trail elections
 cleos -u https://testnet.telos.caleos.io get table eosio.trail eosio.trail leaderboards --lower 4
 cleos -u https://testnet.telos.caleos.io get table eosio.trail eosio.trail proposals
@@ -99,17 +152,14 @@ cleos -u https://testnet.telos.caleos.io push action hyphadaobal1 makepayout '[2
 cleos -u https://testnet.telos.caleos.io push action hyphadaobal1 reset '[]' -p hyphadaobal1
 
 
-cleos -u https://testnet.telos.caleos.io push action hyphatoken12 create '["hyphadaobal1", "1000000000000 HHH"]' -p hyphatoken12
-cleos -u https://testnet.telos.caleos.io push action hyphatoken12 create '["hyphadaobal1", "1000000.00000000 PPP"]' -p hyphatoken12
-cleos -u https://testnet.telos.caleos.io push action hyphatoken12 issue '["hyphamember1", "1 PRESEE", "memo"]' -p hyphadaobal1
-cleos -u https://testnet.telos.caleos.io push action hyphatoken12 issue '["hyphamember1", "1 HYPHA", "memo"]' -p hyphadaobali
+
 
 
 cleos -u https://testnet.telos.caleos.io push action hyphadaobali setconfig '["hyphatoken12", "hyphatoken12"]' -p hyphadaobali
 
 
 cleos -u https://testnet.telos.caleos.io push action eosio updateauth '{
-    "account": "hyphadaobal1",
+    "account": "hyphadaotst1",
     "permission": "owner",
     "parent": "",
     "auth": {
@@ -123,7 +173,7 @@ cleos -u https://testnet.telos.caleos.io push action eosio updateauth '{
         "accounts": [
             {
                 "permission": {
-                    "actor": "hyphadaobal1",
+                    "actor": "hyphadaotst1",
                     "permission": "eosio.code"
                 },
                 "weight": 1
@@ -131,10 +181,10 @@ cleos -u https://testnet.telos.caleos.io push action eosio updateauth '{
         ],
         "waits": []
     }
-}' -p hyphadaobal1@owner
+}' -p hyphadaotst1@owner
 
 cleos -u https://testnet.telos.caleos.io push action eosio updateauth '{
-    "account": "hyphadaobal1",
+    "account": "hyphadaotst1",
     "permission": "active",
     "parent": "owner",
     "auth": {
@@ -148,7 +198,7 @@ cleos -u https://testnet.telos.caleos.io push action eosio updateauth '{
         "accounts": [
             {
                 "permission": {
-                    "actor": "hyphadaobal1",
+                    "actor": "hyphadaotst1",
                     "permission": "eosio.code"
                 },
                 "weight": 1
@@ -156,4 +206,4 @@ cleos -u https://testnet.telos.caleos.io push action eosio updateauth '{
         ],
         "waits": []
     }
-}' -p hyphadaobal1@owner
+}' -p hyphadaotst1@owner

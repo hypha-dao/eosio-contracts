@@ -31,14 +31,23 @@ void hyphadao::reset () {
 	}
 }
 
+void hyphadao::resetperiods () {
+	bank.reset_periods();
+}
+
 void hyphadao::init () {
 	board.init ();
 	inithvoice ( string { "https://joinseeds.com" });
 }
 
-void hyphadao::setconfig ( const name&     hypha_token_contract) {
+void hyphadao::setconfig ( const name&     	hypha_token_contract,
+							const name& 	trail_contract) {
 
    	require_auth (get_self());
+	config_table      config_s (get_self(), get_self().value);
+   	DAOConfig c = config_s.get_or_create (get_self(), DAOConfig());   
+	c.trail_contract 	= trail_contract;
+	config_s.set (c, get_self());
    	bank.set_config (hypha_token_contract, hypha_token_contract);
 }
 
@@ -47,12 +56,15 @@ uint64_t hyphadao::register_ballot (const name& proposer,
 	require_auth(proposer);
 	qualify_proposer(proposer);
 
-	ballots_table ballots("eosio.trail"_n, "eosio.trail"_n.value);
+	config_table      config_s (get_self(), get_self().value);
+   	DAOConfig c = config_s.get_or_create (get_self(), DAOConfig());  
+
+	ballots_table ballots(c.trail_contract, c.trail_contract.value);
 	uint64_t next_ballot_id = ballots.available_primary_key();
 	uint32_t begin_time = current_block_time().to_time_point().sec_since_epoch() + board.get_config().start_delay;
 	uint32_t end_time = begin_time + board.get_config().issue_duration;
 
-   	action(permission_level{get_self(), "active"_n}, "eosio.trail"_n, "regballot"_n, make_tuple(
+   	action(permission_level{get_self(), "active"_n}, c.trail_contract, "regballot"_n, make_tuple(
 		get_self(),
 		uint8_t(0), 			// NOTE: makes a proposal on Trail
 		common::S_HVOICE,
@@ -255,15 +267,18 @@ void hyphadao::makepayout (const uint64_t&        proposal_id) {
 
 	string memo { "One time payout for Hypha DAO Contribution: " + std::to_string(proposal_id) };
 	if (p_itr->hypha_value.amount > 0) {
-		bank.makepayment (-1, p_itr->recipient, p_itr->hypha_value, memo);
+		bank.makepayment (-1, p_itr->recipient, p_itr->hypha_value, memo, common::NO_ASSIGNMENT);
 	}
 
 	if (p_itr->preseeds_value.amount > 0) {
-		bank.makepayment (-1, p_itr->recipient, p_itr->preseeds_value, memo);
+		bank.makepayment (-1, p_itr->recipient, p_itr->preseeds_value, memo, common::NO_ASSIGNMENT);
 	}
 	
 	if (p_itr->voice_value.amount > 0) {
-		action(permission_level{get_self(), "active"_n}, "eosio.trail"_n, "issuetoken"_n, make_tuple(
+		config_table      config_s (get_self(), get_self().value);
+   		DAOConfig c = config_s.get_or_create (get_self(), DAOConfig());  
+
+		action(permission_level{get_self(), "active"_n}, c.trail_contract, "issuetoken"_n, make_tuple(
 			get_self(),
 			p_itr->recipient, 			
 			p_itr->voice_value,
@@ -291,13 +306,16 @@ void hyphadao::closeprop(const name& holder,
 	check(i_iter != props.end(), "prop not found");
 	auto prop = *i_iter;
 
-	ballots_table ballots("eosio.trail"_n, "eosio.trail"_n.value);
+	config_table      config_s (get_self(), get_self().value);
+   	DAOConfig c = config_s.get_or_create (get_self(), DAOConfig());  
+
+	ballots_table ballots(c.trail_contract, c.trail_contract.value);
 	auto ballot = ballots.get(prop.ballot_id, "ballot does not exist");
 
-	proposals_table proposals("eosio.trail"_n, "eosio.trail"_n.value);
+	proposals_table proposals(c.trail_contract, c.trail_contract.value);
 	auto trail_prop = proposals.get(ballot.reference_id, "proposal not found");
 
-	registries_table registries("eosio.trail"_n, "eosio.trail"_n.value);
+	registries_table registries(c.trail_contract, c.trail_contract.value);
 	auto registry = registries.get(trail_prop.no_count.symbol.code().raw(), "registry not found, this shouldn't happen");
 	uint32_t total_voters = registry.total_voters;
 	
@@ -329,7 +347,7 @@ void hyphadao::closeprop(const name& holder,
 		uint64_t next_ballot_id = ballots.available_primary_key();
 		uint32_t begin_time = current_block_time().to_time_point().sec_since_epoch() + board.get_config().start_delay;
 		uint32_t end_time = begin_time + board.get_config().issue_duration;
-		action(permission_level{get_self(), "active"_n}, "eosio.trail"_n, "regballot"_n, make_tuple(
+		action(permission_level{get_self(), "active"_n}, c.trail_contract, "regballot"_n, make_tuple(
 			get_self(),		      //proposer name
 			uint8_t(0), 			//ballot_type uint8_t
 			common::S_HVOICE,	   //voting_symbol symbol
@@ -343,7 +361,7 @@ void hyphadao::closeprop(const name& holder,
 		});
 	}
 
-   action(permission_level{get_self(), "active"_n}, "eosio.trail"_n, "closeballot"_n, make_tuple(
+   action(permission_level{get_self(), "active"_n}, c.trail_contract, "closeballot"_n, make_tuple(
 		get_self(),
 		prop.ballot_id,
 		uint8_t(state)
@@ -352,14 +370,17 @@ void hyphadao::closeprop(const name& holder,
 
 void hyphadao::inithvoice(string initial_info_link) {
     require_auth(get_self());
+
+	config_table      config_s (get_self(), get_self().value);
+   	DAOConfig c = config_s.get_or_create (get_self(), DAOConfig());
     
-    action(permission_level{get_self(), name("active")}, name("eosio.trail"), name("regtoken"), make_tuple(
+    action(permission_level{get_self(), name("active")}, c.trail_contract, name("regtoken"), make_tuple(
 		common::INITIAL_HVOICE_MAX_SUPPLY, //max_supply
 		get_self(), //publisher
 		initial_info_link //info_url
 	)).send();
 
-    action(permission_level{get_self(), name("active")}, name("eosio.trail"), name("initsettings"), make_tuple(
+    action(permission_level{get_self(), name("active")}, c.trail_contract, name("initsettings"), make_tuple(
 		get_self(), //publisher
 		common::INITIAL_HVOICE_MAX_SUPPLY.symbol, //token_symbol
 		common::INITIAL_HVOICE_SETTINGS //new_settings
@@ -371,8 +392,7 @@ void hyphadao::inithvoice(string initial_info_link) {
 void hyphadao::initsteward(const string initial_info_link) {}
 
 void hyphadao::qualify_proposer (const name& proposer) {
-	check(board.is_hvoice_holder(proposer) || 
-		board.is_steward_holder(proposer), "caller must be a STEWARD or HVOICE holder");
+	check(board.is_hvoice_holder(proposer) || board.is_steward_holder(proposer), "caller must be a STEWARD or HVOICE holder");
 }
 
 void hyphadao::nominate (const name& nominee, const name& nominator) {

@@ -144,7 +144,7 @@ void init_token () {
     action(permission_level{contract, name("active")}, name("eosio.trail"), name("regtoken"), make_tuple(
         common::INITIAL_STEWARD_MAX_SUPPLY,   //max_supply
         contract, 						//publisher
-        "https://joinseeds.com" 			   //info_url
+       common::SEEDS_URL 			   //info_url
     )).send();
 
     action(permission_level{contract, name("active")}, name("eosio.trail"), name("initsettings"), make_tuple(

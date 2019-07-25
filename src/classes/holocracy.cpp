@@ -104,7 +104,7 @@ void Holocracy::payassign (const uint64_t& assignment_id, const uint64_t& period
     check (r_itr != role_t.end(), "Cannot pay assignment. Role does not exist: " + a_itr->role_id);
 
     require_auth (a_itr->assigned_account);
-    
+
     bank.makepayment (period_id, a_itr->assigned_account, adjust_asset(r_itr->hypha_salary, a_itr->time_share), 
         "Payment for role " + r_itr->role_name.to_string() + "; Period ID: " + std::to_string(period_id));
 
