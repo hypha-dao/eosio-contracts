@@ -14,9 +14,6 @@ hyphadaobali
 hyphatoken12
 
 
-cleos -u https://testnet.telos.caleos.io set contract hyphadaobal1 hyphadao/hyphadao
-cleos -u https://testnet.telos.caleos.io set contract hyphatoken12 hyphadao/eosiotoken
-
 
 Payout Testing
 hyphadaotst1
@@ -43,27 +40,25 @@ cleos -u https://testnet.telos.caleos.io push action eosio.trail issuetoken '["h
 cleos -u https://testnet.telos.caleos.io push action eosio.trail issuetoken '["hyphadaotst1", "hyphamember4", "1 HVQ", false]' -p hyphadaotst1
 cleos -u https://testnet.telos.caleos.io push action eosio.trail issuetoken '["hyphadaotst1", "hyphamember5", "1 HVQ", false]' -p hyphadaotst1
 
-cleos -u https://testnet.telos.caleos.io push action hyphadaotst1 proposerole '["hyphamember1", "blockdev", "https://joinseeds.com", "blockchain developer", "10 HYA", "10.00000000 PRX", "10 HVQ"]' -p hyphamember1
 
-cleos -u https://testnet.telos.caleos.io push action eosio.trail castvote '["hyphamember1", 53, 1]' -p hyphamember1
-cleos -u https://testnet.telos.caleos.io push action eosio.trail castvote '["hyphamember2", 53, 1]' -p hyphamember2
-cleos -u https://testnet.telos.caleos.io push action eosio.trail castvote '["hyphamember3", 53, 1]' -p hyphamember3
-cleos -u https://testnet.telos.caleos.io push action eosio.trail castvote '["hyphamember4", 53, 0]' -p hyphamember4
+cleos -u https://testnet.telos.caleos.io push action hyphadaotst1 propassign '["hyphamember2", "hyphamember2", 0, "https://joinseeds.com", "pro-rated", 0, 1.000000000]' -p hyphamember2
 
-cleos -u https://testnet.telos.caleos.io push action hyphadaotst1 closeprop '["hyphamember1", 1]' -p hyphamember1
+cleos -u https://testnet.telos.caleos.io push action hyphadaotst1 proposerole '["hyphamember1", "yetanother", "https://joinseeds.com", "blockchain developer", "11 HYA", "11.00000000 PRX", "11 HVQ"]' -p hyphamember1
 
-cleos -u https://testnet.telos.caleos.io push action hyphadaotst1 propassign '["hyphamember1", "hyphamember1", 0, "https://joinseeds.com", "I would like this job", 0, 1.000000000]' -p hyphamember1
-
-cleos -u https://testnet.telos.caleos.io push action hyphadaotst1 payassign '[0, 0]' -p hyphamember1
+cleos -u https://testnet.telos.caleos.io push action eosio.trail castvote '["hyphamember1", 66, 1]' -p hyphamember1
+cleos -u https://testnet.telos.caleos.io push action eosio.trail castvote '["hyphamember2", 66, 1]' -p hyphamember2
+cleos -u https://testnet.telos.caleos.io push action eosio.trail castvote '["hyphamember3", 66, 1]' -p hyphamember3
 
 
+cleos -u https://testnet.telos.caleos.io push action eosio.trail castvote '["hyphamember4", 60, 0]' -p hyphamember4
 
+cleos -u https://testnet.telos.caleos.io push action hyphadaotst1 closeprop '[0]' -p hyphamember1
 
+cleos -u https://testnet.telos.caleos.io push action hyphadaotst1 propassign '["hyphamember2", "hyphamember2", 0, "https://joinseeds.com", "pro-rated", 0, 1.000000000]' -p hyphamember2
 
-
-
-
-
+cleos -u https://testnet.telos.caleos.io push action hyphadaotst1 payassign '[0, 0]' -p hyphamember3
+cleos -u https://testnet.telos.caleos.io push action hyphadaotst1 resetperiods '[]' -p hyphadaotst1
+cleos -u https://testnet.telos.caleos.io push action hyphadaotst1 assign '[2]' -p hyphadaotst1
 
 
 
@@ -71,6 +66,15 @@ cleos -u https://testnet.telos.caleos.io push action hyphadaotst1 payassign '[0,
 
 
 
+
+
+
+
+doesnt work: 3fbdca985be8751bcfd3917bdbae80ea9e33770a
+does work: 
+
+
+62b2e3dd38533cd6f3ced50c3f53c76f40e98651
 
 
 
@@ -131,7 +135,7 @@ cleos -u https://testnet.telos.caleos.io push action hyphadaobal1 propassign '["
 cleos -u https://testnet.telos.caleos.io push action eosio.trail castvote '["hyphamember1", 34, 1]' -p hyphamember1
 cleos -u https://testnet.telos.caleos.io push action eosio.trail castvote '["hyphamember2", 34, 1]' -p hyphamember2
 cleos -u https://testnet.telos.caleos.io push action eosio.trail castvote '["hyphamember3", 34, 1]' -p hyphamember3
-cleos -u https://testnet.telos.caleos.io push action hyphadaobal1 closeprop '["hyphamember3", 1]' -p hyphamember1
+cleos -u https://testnet.telos.caleos.io push action hyphadaobal1 closeprop '[1]' -p hyphamember1
 
 ##### Propose a contribution
 cleos -u https://testnet.telos.caleos.io set contract hyphadaobal1 hyphadao/hyphadao

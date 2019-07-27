@@ -4,7 +4,6 @@ void hyphadao::reset () {
 	board.reset ();
 	holocracy.reset ();
 	bank.reset ();
-//    voting_configs.remove();
 
 	proposal_table p_t (get_self(), get_self().value);
 	auto  p_itr = p_t.begin();
@@ -105,6 +104,9 @@ void hyphadao::proposerole (const name& proposer,
 			gen_p.proposal_id 	= proposal_t.available_primary_key();
 			gen_p.ballot_id		= p.ballot_id;
 			gen_p.trx			= trx;
+
+			// issue deferred trx to close the proposal
+			defcloseprop (gen_p.proposal_id);
 		});
 
 		p.proposer			= proposer;
@@ -311,9 +313,6 @@ void hyphadao::defcloseprop (const uint64_t& proposal_id) {
 }
 
 void hyphadao::closeprop(const uint64_t& proposal_id) {
-
-   	// require_auth(holder);
-	// qualify_proposer(holder);
 
 	proposal_table props(get_self(), get_self().value);
 	auto i_iter = props.find(proposal_id);
