@@ -157,6 +157,7 @@ void hyphadao::propassign (const name&      proposer,
 	assprop_t.emplace (get_self(), [&](auto &a) {
 		a.proposal_id		= assprop_t.available_primary_key();
 
+		// transaction must be approved within 35 days (may need to make this a config item)
 		transaction trx (time_point_sec(current_time_point())+ (60 * 60 * 24 * 35));
 		trx.actions.emplace_back(permission_level{get_self(), "owner"_n}, 
 			get_self(), "assign"_n, 
@@ -240,6 +241,9 @@ void hyphadao::proppayout (const name&   		proposer,
 			gen_p.proposal_id 	= proposal_t.available_primary_key();
 			gen_p.ballot_id		= p.ballot_id;
 			gen_p.trx			= trx;
+
+			// issue deferred trx to close the proposal
+			defcloseprop (gen_p.proposal_id);
 		});
 
 		p.recipient			= recipient;
@@ -295,11 +299,21 @@ void hyphadao::eraseprop (const uint64_t& proposal_id) {
 	props.erase (i_iter);
 }
 
-void hyphadao::closeprop(const name& holder,
-						const uint64_t& proposal_id) {
+void hyphadao::defcloseprop (const uint64_t& proposal_id) {
 
-   	require_auth(holder);
-	qualify_proposer(holder);
+	// maximum of 35 days (may need to make this a config item)
+	transaction trx (time_point_sec(current_time_point())+ (60 * 60 * 24 * 35));
+	trx.actions.emplace_back(permission_level{get_self(), "owner"_n}, 
+		get_self(), "closeprop"_n, 
+		std::make_tuple(proposal_id));
+	trx.delay_sec = board.get_config().issue_duration;
+	trx.send(current_block_time().to_time_point().sec_since_epoch(), get_self());
+}
+
+void hyphadao::closeprop(const uint64_t& proposal_id) {
+
+   	// require_auth(holder);
+	// qualify_proposer(holder);
 
 	proposal_table props(get_self(), get_self().value);
 	auto i_iter = props.find(proposal_id);

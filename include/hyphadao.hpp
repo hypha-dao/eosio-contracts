@@ -152,7 +152,7 @@ CONTRACT hyphadao : public contract {
 
       ACTION makepayout (  const uint64_t&   proposal_id);
       
-      ACTION closeprop(const name& holder, const uint64_t& proposal_id);
+      ACTION closeprop(const uint64_t& proposal_id);
       ACTION payassign(const uint64_t& assignment_id, const uint64_t& period_id);
 
       //NOTE: sends inline actions to register and initialize HVOICE token registry
@@ -169,12 +169,12 @@ CONTRACT hyphadao : public contract {
       ACTION removemember(const name& member_to_remove);
       ACTION addperiod (const time_point& start_time, const time_point& end_time, const string& phase);
       
-
    private:
       Board board = Board (get_self());
       Holocracy holocracy = Holocracy (get_self());
       Bank bank = Bank (get_self());
 
+      void defcloseprop (const uint64_t& proposal_id);
       void qualify_proposer (const name& proposer);
       uint64_t register_ballot (const name& proposer,
 									      const string& info_url);

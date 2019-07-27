@@ -237,10 +237,23 @@ class Holocracy {
         check (p_itr != bank.period_t.end(), "Cannot make payment. Period ID not found: " + std::to_string(period_id));
         check (p_itr->end_date.time_since_epoch() < current_block_time().to_time_point().time_since_epoch(), 
             "Cannot make payment. Period ID " + std::to_string(period_id) + " has not closed yet.");
-    
-        asset hypha_payment = adjust_asset(r_itr->hypha_salary, a_itr->time_share);
-        asset preseeds_payment = adjust_asset(r_itr->preseeds_salary, a_itr->time_share);
-        asset voice_payment = adjust_asset(r_itr->voice_salary, a_itr->time_share);
+
+        // check that the creation date of the assignment is before the end of the period
+        check (a_itr->created_date.time_since_epoch() < p_itr->end_date.time_since_epoch(), 
+            "Cannot make payment to assignment. Assignment was not approved before this period.");
+
+        float time_share_calc = a_itr->time_share;
+
+        // pro-rate the payout if the assignment was created 
+        if (a_itr->created_date.sec_since_epoch() < p_itr->end_date.sec_since_epoch()) {
+            time_share_calc = time_share_calc * (float) ( (float) a_itr->created_date.sec_since_epoch() - p_itr->start_date.sec_since_epoch()) / 
+                                ( (float) p_itr->end_date.sec_since_epoch() - p_itr->start_date.sec_since_epoch());
+        }
+
+        print ("Time share used in payout calculation: ", std::to_string(time_share_calc), "\n");
+        asset hypha_payment = adjust_asset(r_itr->hypha_salary, time_share_calc);
+        asset preseeds_payment = adjust_asset(r_itr->preseeds_salary, time_share_calc);
+        asset voice_payment = adjust_asset(r_itr->voice_salary, time_share_calc);
 
         asspay_t.emplace (contract, [&](auto &a) {
             a.ass_payment_id        = asspay_t.available_primary_key();

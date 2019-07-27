@@ -17,11 +17,6 @@ hyphatoken12
 cleos -u https://testnet.telos.caleos.io set contract hyphadaobal1 hyphadao/hyphadao
 cleos -u https://testnet.telos.caleos.io set contract hyphatoken12 hyphadao/eosiotoken
 
-cleos -u https://testnet.telos.caleos.io push action hyphadaotst1 newrole '["blockdev", "blockchain developer", "10 HYPHA", "10 PRESEED", "10 HVOICE"]' -p hyphdactest
-
-cleos -u https://testnet.telos.caleos.io push action hypha
-
-
 
 Payout Testing
 hyphadaotst1
