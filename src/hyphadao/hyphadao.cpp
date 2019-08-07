@@ -61,7 +61,7 @@ uint64_t hyphadao::register_ballot (const name& proposer,
 	ballots_table ballots(c.trail_contract, c.trail_contract.value);
 	uint64_t next_ballot_id = ballots.available_primary_key();
 	uint32_t begin_time = current_block_time().to_time_point().sec_since_epoch() + board.get_config().start_delay;
-	uint32_t end_time = begin_time + board.get_config().issue_duration;
+	uint32_t end_time = begin_time + 1209600; //board.get_config().issue_duration;
 
    	action(permission_level{get_self(), "active"_n}, c.trail_contract, "regballot"_n, make_tuple(
 		get_self(),

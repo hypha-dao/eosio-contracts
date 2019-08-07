@@ -6,10 +6,10 @@ const { JsSignatureProvider } = require("eosjs/dist/eosjs-jssig"); // developmen
 const fetch = require("node-fetch"); // node only; not needed in browsers
 const { TextEncoder, TextDecoder } = require("util");
 
-const defaultPrivateKey = "5J1gYLAc4GUo7EXNAXyaZTgo3m3SxtxDygdVUsNL4Par5Swfy1q"; // bob
+const defaultPrivateKey = "5JaqE5sipd4xwZJ2SVB8iSqRwmpyTxSien7zG4himc1peGEXQUo"; // bob
 const signatureProvider = new JsSignatureProvider([defaultPrivateKey]);
 
-const rpc = new JsonRpc("https://testnet.telos.caleos.io", { fetch });
+const rpc = new JsonRpc("https://telos.caleos.io", { fetch });
 
 const api = new Api({
   rpc,
@@ -56,11 +56,11 @@ const addPeriodsSync = async (periods) => {
 
       const actions = [
         {
-          account: "hyphadaotst1",
+          account: "hyphadaomain",
           name: "addperiod",
           authorization: [
             {
-              actor: "hyphadaotst1",
+              actor: "hyphadaomain",
               permission: "active"
             }
           ],
@@ -100,7 +100,7 @@ const loadPeriods = () => {
 
   handler.on('end', () => addPeriodsSync(periods))
 
-  fs.createReadStream("../moon_phases_test.csv").pipe(handler)
+  fs.createReadStream("../moon_phases.csv").pipe(handler)
 }
 
 const main = async () => {

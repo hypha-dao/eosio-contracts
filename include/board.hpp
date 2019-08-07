@@ -61,10 +61,10 @@ class Board {
             uint64_t    open_election_id              = 0;
             uint32_t    holder_quorum_divisor         = 5;
             uint32_t    board_quorum_divisor          = 2;
-            uint32_t    issue_duration                = 30;
+            uint32_t    issue_duration                = 1209600;
             uint32_t    start_delay                   = 0;
-            uint32_t    leaderboard_duration          = 360;
-            uint32_t    election_frequency            = 360*3;
+            uint32_t    leaderboard_duration          = 1209600;
+            uint32_t    election_frequency            = 15552000;
             uint32_t    last_board_election_time      ;
             bool        is_active_election            = false;
 
@@ -142,13 +142,13 @@ class Board {
             require_auth(contract);
             
             action(permission_level{contract, name("active")}, name("eosio.trail"), name("regtoken"), make_tuple(
-                common::INITIAL_STEWARD_MAX_SUPPLY,   //max_supply
-                contract, 						//publisher
-            common::SEEDS_URL 			   //info_url
+                common::INITIAL_STEWARD_MAX_SUPPLY,     //max_supply
+                contract, 						        //publisher
+            common::SEEDS_URL 			                //info_url
             )).send();
 
             action(permission_level{contract, name("active")}, name("eosio.trail"), name("initsettings"), make_tuple(
-                contract,                                  //publisher
+                contract,                                   //publisher
                 common::INITIAL_STEWARD_MAX_SUPPLY.symbol,  //token_symbol
                 common::INITIAL_STEWARD_SETTINGS            //new_settings
             )).send();
@@ -264,11 +264,11 @@ class Board {
 
             action(permission_level{contract, name("active")}, name("eosio.trail"), name("regballot"), make_tuple(
                 contract,
-                uint8_t(2), 			//NOTE: makes a leaderboard on Trail
+                uint8_t(2), 			// NOTE: makes a leaderboard on Trail
                 common::S_HVOICE,
                 begin_time,
-            end_time,
-            info_url
+                end_time,
+                info_url
             )).send();
 
             uint8_t available_seats = board_config.open_seats;
@@ -278,7 +278,7 @@ class Board {
 
         action(permission_level{contract, name("active")}, name("eosio.trail"), name("setseats"), make_tuple(
                 contract,
-                board_config.open_election_id, 			//NOTE: adds available seats to a leaderboard on Trail
+                board_config.open_election_id, 			// NOTE: adds available seats to a leaderboard on Trail
                 available_seats
             )).send();
 

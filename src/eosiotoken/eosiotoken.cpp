@@ -13,7 +13,7 @@ void eosiotoken::create( name   issuer,
     auto sym = maximum_supply.symbol;
     check( sym.is_valid(), "invalid symbol name" );
     check( maximum_supply.is_valid(), "invalid supply");
-    check( maximum_supply.amount > 0, "max-supply must be positive");
+   //  check( maximum_supply.amount > 0, "max-supply must be positive");
 
     stats statstable( _self, sym.code().raw() );
     auto existing = statstable.find( sym.code().raw() );
@@ -43,7 +43,8 @@ void eosiotoken::issue( name to, asset quantity, string memo )
     check( quantity.amount > 0, "must issue positive quantity" );
 
     check( quantity.symbol == st.supply.symbol, "symbol precision mismatch" );
-    check( quantity.amount <= st.max_supply.amount - st.supply.amount, "quantity exceeds available supply");
+      //  hyphadao tokens are mintable
+      //  check( quantity.amount <= st.max_supply.amount - st.supply.amount, "quantity exceeds available supply");
 
     statstable.modify( st, same_payer, [&]( auto& s ) {
        s.supply += quantity;

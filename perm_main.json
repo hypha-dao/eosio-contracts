@@ -1,0 +1,50 @@
+cleos -u https://telos.caleos.io  push action eosio updateauth '{
+    "account": "hyphadaomain",
+    "permission": "active",
+    "parent": "owner",
+    "auth": {
+        "keys": [
+            {
+                "key": "EOS56sZ8yXVpZMMXR62RwhJ6sQyAibuuZFUPUphZp4GqQkMPwX1LW",
+                "weight": 1
+            }
+        ],
+        "threshold": 1,
+        "accounts": [
+            {
+                "permission": {
+                    "actor": "hyphadaomain",
+                    "permission": "eosio.code"
+                },
+                "weight": 1
+            }
+        ],
+        "waits": []
+    }
+}' -p hyphadaomain@owner
+
+cleos -u https://telos.caleos.io push action eosio updateauth '{
+    "account": "hyphadaomain",
+    "permission": "owner",
+    "parent": "",
+    "auth": {
+        "keys": [
+            {
+                "key": "EOS56sZ8yXVpZMMXR62RwhJ6sQyAibuuZFUPUphZp4GqQkMPwX1LW",
+                "weight": 1
+            }
+        ],
+        "threshold": 1,
+        "accounts": [
+            {
+                "permission": {
+                    "actor": "hyphadaomain",
+                    "permission": "eosio.code"
+                },
+                "weight": 1
+            }
+        ],
+        "waits": []
+    }
+}' -p hyphadaomain@owner
+
