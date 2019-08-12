@@ -6,7 +6,7 @@ const { JsSignatureProvider } = require("eosjs/dist/eosjs-jssig"); // developmen
 const fetch = require("node-fetch"); // node only; not needed in browsers
 const { TextEncoder, TextDecoder } = require("util");
 
-const defaultPrivateKey = "5JaqE5sipd4xwZJ2SVB8iSqRwmpyTxSien7zG4himc1peGEXQUo"; // bob
+const defaultPrivateKey = "<insert key here>"; // bob
 const signatureProvider = new JsSignatureProvider([defaultPrivateKey]);
 
 const rpc = new JsonRpc("https://telos.caleos.io", { fetch });
