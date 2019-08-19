@@ -17,3 +17,6 @@ cleos -u https://telos.caleos.io push action hyphadaotokn issue '["hyphanewyork"
 
 
 cleos -u https://telos.caleos.io set contract hyphadaomain hyphdao/hyphadao
+
+
+cleos -u https://telos.caleos.io push action hyphadaomain setvconfig '[9, 9, 5, 5, 259200, 0, 1080]' -p hyphadaomain

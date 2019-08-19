@@ -55,6 +55,29 @@ CONTRACT hyphadao : public contract {
          uint8_t        status                  ;
          transaction    trx                     ;
 
+         uint64_t       start_period            ;
+         uint64_t       end_period              ;
+
+         time_point     created_date            = current_block_time().to_time_point();
+         time_point     executed_date           ;
+
+		   uint64_t primary_key() const { return proposal_id; }
+      };
+
+      struct [[eosio::table, eosio::contract("hyphadao") ]] RoleProposalOld
+      {
+         uint64_t       proposal_id             = 0;
+         uint64_t       ballot_id               ;
+         name           proposer                ; 
+         string         role_name               ;
+         string         info_url                ;
+         string         description             ;
+         asset          hypha_salary            = asset { 0, common::S_HYPHA };
+         asset          preseeds_salary         = asset { 0, common::S_PRESEEDS };
+         asset          voice_salary            = asset { 0, common::S_HVOICE };
+         uint8_t        status                  ;
+         transaction    trx                     ;
+
          time_point     created_date            = current_block_time().to_time_point();
          time_point     executed_date           ;
 
@@ -71,6 +94,7 @@ CONTRACT hyphadao : public contract {
          string         info_url                ;
          string         notes                   ;
          uint64_t       start_period            ;
+         uint64_t       end_period              ;
          float          time_share              = 0.000000000000000;
          uint8_t        status                  ;
          transaction    trx                     ;
@@ -108,6 +132,9 @@ CONTRACT hyphadao : public contract {
       typedef multi_index<"roleprops"_n, RoleProposal> roleprop_table;
       typedef multi_index<"assprops"_n, AssignmentProposal> assprop_table;
 
+      typedef multi_index<"rolepropsbu"_n, RoleProposalOld> roleprop_table_bu;
+
+
       ACTION reset ();
       ACTION resetperiods();
       ACTION init ();
@@ -115,15 +142,28 @@ CONTRACT hyphadao : public contract {
       ACTION setconfig (const name&    hypha_token_contract,
                         const name&    trail_contract);
 
+      ACTION setvconfig  (const uint8_t& max_board_seats,
+                            const uint8_t&  open_seats,
+                            const uint32_t& holder_quorum_divisor,
+                            const uint32_t& board_quorum_divisor,
+                            const uint32_t& issue_duration,
+                            const uint32_t& start_delay,
+                            const uint32_t& election_frequency);
+
       ACTION proposerole (const name& proposer,
                            const string& role_name,
                            const string& info_url,
                            const string& description,
                            const asset& hypha_salary,
                            const asset& preseeds_salary,
-                           const asset& voice_salary);
+                           const asset& voice_salary,
+                           const uint64_t& start_period,
+                           const uint64_t& end_period);
 
       ACTION newrole (  const uint64_t& proposal_id);
+
+      // ACTION copyroleprop ();
+      ACTION copyroleback ();
 
       // ACTION updaterole (  const name& role_name, 
       //                      const string& description,
@@ -137,6 +177,7 @@ CONTRACT hyphadao : public contract {
                            const string&      info_url,
                            const string&      notes,
                            const uint64_t&    start_period,
+                           const uint64_t&    end_period,
                            const float&       time_share);
 
       ACTION assign (const uint64_t& 		proposal_id);
@@ -155,7 +196,7 @@ CONTRACT hyphadao : public contract {
       ACTION closeprop(const uint64_t& proposal_id);
       ACTION payassign(const uint64_t& assignment_id, const uint64_t& period_id);
 
-      //NOTE: sends inline actions to register and initialize HVOICE token registry
+      // NOTE: sends inline actions to register and initialize HVOICE token registry
       ACTION inithvoice(const string initial_info_link);
 
       // NOTE: sends inline actions to register and initialize STEWARD token registry

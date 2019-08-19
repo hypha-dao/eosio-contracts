@@ -98,38 +98,6 @@ class Board {
         boardconfig_table   boardconfig_s;
         name                contract;
 
-    //     void init ();
-    //     void setconfig (const name& member, BoardConfig new_config);
-    //     void init_token ();
-    //     void reset();
-    //     void nominate (const name& nominee, const name& nominator);
-    //     void makeelection(const name& holder, const string& info_url);
-    //     void addcand(name nominee, string info_link);
-    //     void removecand(name candidate);
-    //     void endelection(name holder);
-    //     void removemember(name member_to_remove);
-
-    // private:
-
-    //     name        contract;
-
-    //     #pragma region Helper_Functions
-    //     // BoardConfig get_default_config();
-    //     void        add_steward             (name nominee);
-    //     void        rmv_steward             (name member);
-    //     void        addseats                (name member, uint8_t num_seats);
-    //     bool        is_steward              (name user);
-    //     bool        is_nominee              (name user);
-    //     bool        is_hvoice_holder        (name user);
-    //     bool        is_steward_holder       (name user);
-    //     bool        is_term_expired         ();
-    //     void        remove_and_seize_all    ();
-    //     void        remove_and_seize        (name member);
-    //     void        set_permissions         (vector<permission_level_weight> perms);
-    //     uint8_t     get_occupied_seats      ();
-    //     vector<permission_level_weight> perms_from_members();
-    //     #pragma endregion Helper_Functions
-
         BoardConfig get_config() {
             return boardconfig_s.get_or_create (contract, BoardConfig());
         }
@@ -165,7 +133,26 @@ class Board {
             print("\nSTEWARD Registration and Initialization Actions Sent...");
         }
 
-        void setconfig(const name& member, BoardConfig new_config) { 
+        void setvconfig (const uint8_t& max_board_seats,
+                            const uint8_t&  open_seats,
+                            const uint32_t& holder_quorum_divisor,
+                            const uint32_t& board_quorum_divisor,
+                            const uint32_t& issue_duration,
+                            const uint32_t& start_delay,
+                            const uint32_t& election_frequency) {
+
+            BoardConfig bc = boardconfig_s.get_or_create(contract, BoardConfig());
+            bc.max_board_seats          = max_board_seats;
+            bc.open_seats               = open_seats;
+            bc.holder_quorum_divisor    = holder_quorum_divisor;
+            bc.board_quorum_divisor     = board_quorum_divisor;
+            bc.issue_duration           = issue_duration;
+            bc.start_delay              = start_delay;
+            bc.election_frequency       = election_frequency;
+            setconfig (bc);
+        }
+
+        void setconfig(BoardConfig new_config) { 
 
             require_auth(contract);
 
@@ -234,22 +221,22 @@ class Board {
         // }
 
         void nominate(const name& nominee, const name& nominator) {
-        require_auth(nominator);
-        check(is_account(nominee), "nominee account must exist");
-        check(is_hvoice_holder(nominator), "caller must be a HVOICE holder");
-        check(!is_steward(nominee) || is_term_expired(), "nominee is a steward, nominee's term must be expired");
+            require_auth(nominator);
+            check(is_account(nominee), "nominee account must exist");
+            check(is_hvoice_holder(nominator), "caller must be a HVOICE holder");
+            check(!is_steward(nominee) || is_term_expired(), "nominee is a steward, nominee's term must be expired");
 
-        nominee_table noms(contract, contract.value);
-        auto n = noms.find(nominee.value);
-        check(n == noms.end(), "nominee has already been nominated");
+            nominee_table noms(contract, contract.value);
+            auto n = noms.find(nominee.value);
+            check(n == noms.end(), "nominee has already been nominated");
 
-        noms.emplace(contract, [&](auto& m) {
-            m.nominee = nominee;
-        });
+            noms.emplace(contract, [&](auto& m) {
+                m.nominee = nominee;
+            });
         }
 
         void makeelection(const name& holder, const string& info_url) {
-        require_auth(holder);
+            require_auth(holder);
 
             BoardConfig board_config = boardconfig_s.get_or_create (contract, BoardConfig());
             check(!board_config.is_active_election, "there is already an election is progress");
@@ -276,7 +263,7 @@ class Board {
                 available_seats = board_config.max_board_seats;
             }
 
-        action(permission_level{contract, name("active")}, name("eosio.trail"), name("setseats"), make_tuple(
+            action(permission_level{contract, name("active")}, name("eosio.trail"), name("setseats"), make_tuple(
                 contract,
                 board_config.open_election_id, 			// NOTE: adds available seats to a leaderboard on Trail
                 available_seats

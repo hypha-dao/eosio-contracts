@@ -34,6 +34,86 @@ void hyphadao::resetperiods () {
 	bank.reset_periods();
 }
 
+// void hyphadao::copyassprop () {
+// 	require_auth (get_self());
+// 	assprop_table_bu assprop_bu_t (get_self(), get_self().value);
+// 	assprop_table assprop_t (get_self(), get_self().value);
+
+// 	auto a_itr = assprop_t.begin();
+// 	while (a_itr != assprop_t.end()) {
+// 		assprop_bu_t.emplace (get_self(), [&](auto& a) {
+// 			a.proposal_id 		= a_itr->proposal_id;
+// 			a.ballot_id			= a_itr->ballot_id;
+// 			a.proposer			= a_itr->proposer;
+// 			a.assigned_account 	= a_itr->assigned_account;
+// 			a.role_id			= a_itr->role_id;
+// 			a.info_url			= a_itr->info_url;
+// 			a.notes 			= a_itr->notes;
+// 			a.start_period 		= a_itr->start_period;
+// 			a.time_share 		= a_itr->time_share;
+// 			a.status	 		= a_itr->status;
+// 			a.trx 				= a_itr->trx;
+// 			a.created_date 		= a_itr->created_date;
+// 			a.executed_date		= a_itr->executed_date;
+// 		});
+// 		a_itr = assprop_t.erase (a_itr);
+// 	}
+// }
+
+// void hyphadao::copyroleprop () {
+// 	require_auth (get_self());
+// 	roleprop_table_bu roleprop_bu_t (get_self(), get_self().value);
+// 	roleprop_table roleprop_t (get_self(), get_self().value);
+
+// 	auto r_itr = roleprop_t.begin();
+// 	while (r_itr != roleprop_t.end()) {
+// 		roleprop_bu_t.emplace (get_self(), [&](auto& r) {
+// 			r.proposal_id 	= r_itr->proposal_id;
+// 			r.ballot_id 	= r_itr->ballot_id;
+// 			r.proposer 	= r_itr->proposer;
+// 			r.role_name 	= r_itr->role_name;
+// 			r.info_url 	= r_itr->info_url;
+// 			r.description 	= r_itr->description;
+// 			r.hypha_salary 	= r_itr->hypha_salary;
+// 			r.preseeds_salary 	= r_itr->preseeds_salary;
+// 			r.voice_salary 	= r_itr->voice_salary;
+// 			r.status 	= r_itr->status;
+// 			r.trx 	= r_itr->trx;
+// 			r.created_date  = r_itr->created_date;
+// 			r.executed_date	= r_itr->executed_date; 
+// 		});
+// 		r_itr = roleprop_t.erase (r_itr);
+// 	}
+// }
+
+void hyphadao::copyroleback () {
+	require_auth (get_self());
+	roleprop_table_bu roleprop_bu_t (get_self(), get_self().value);
+	roleprop_table roleprop_t (get_self(), get_self().value);
+
+	auto r_itr = roleprop_bu_t.begin();
+	while (r_itr != roleprop_bu_t.end()) {
+		roleprop_t.emplace (get_self(), [&](auto& r) {
+			r.proposal_id 	= r_itr->proposal_id;
+			r.ballot_id 	= r_itr->ballot_id;
+			r.proposer 	= r_itr->proposer;
+			r.role_name 	= r_itr->role_name;
+			r.info_url 	= r_itr->info_url;
+			r.description 	= r_itr->description;
+			r.hypha_salary 	= r_itr->hypha_salary;
+			r.preseeds_salary 	= r_itr->preseeds_salary;
+			r.voice_salary 	= r_itr->voice_salary;
+			r.status 	= r_itr->status;
+			r.trx 	= r_itr->trx;
+			r.created_date  = r_itr->created_date;
+			r.executed_date	= r_itr->executed_date; 
+			r.start_period = 3;
+			r.end_period = 16;
+		});
+		r_itr = roleprop_bu_t.erase (r_itr);
+	}
+}
+
 void hyphadao::init () {
 	board.init ();
 	inithvoice ( string { "https://joinseeds.com" });
@@ -50,6 +130,19 @@ void hyphadao::setconfig ( const name&     	hypha_token_contract,
    	bank.set_config (hypha_token_contract, hypha_token_contract);
 }
 
+void hyphadao::setvconfig (const uint8_t& max_board_seats,
+                            const uint8_t&  open_seats,
+                            const uint32_t& holder_quorum_divisor,
+                            const uint32_t& board_quorum_divisor,
+                            const uint32_t& issue_duration,
+                            const uint32_t& start_delay,
+                            const uint32_t& election_frequency) {
+
+    board.setvconfig (max_board_seats, open_seats, holder_quorum_divisor, board_quorum_divisor,
+						issue_duration, start_delay, election_frequency);
+}
+						
+
 uint64_t hyphadao::register_ballot (const name& proposer,
 									const string& info_url) {
 	require_auth(proposer);
@@ -61,7 +154,8 @@ uint64_t hyphadao::register_ballot (const name& proposer,
 	ballots_table ballots(c.trail_contract, c.trail_contract.value);
 	uint64_t next_ballot_id = ballots.available_primary_key();
 	uint32_t begin_time = current_block_time().to_time_point().sec_since_epoch() + board.get_config().start_delay;
-	uint32_t end_time = begin_time + 259'200; //board.get_config().issue_duration;
+	// uint32_t end_time = begin_time + 259'200; //board.get_config().issue_duration;
+	uint32_t end_time = begin_time + board.get_config().issue_duration;
 
    	action(permission_level{get_self(), "active"_n}, c.trail_contract, "regballot"_n, make_tuple(
 		get_self(),
@@ -81,7 +175,9 @@ void hyphadao::proposerole (const name& proposer,
                            const string& description,
                            const asset& hypha_salary,
                            const asset& preseeds_salary,
-                           const asset& voice_salary) {
+                           const asset& voice_salary,
+                           const uint64_t& start_period,
+                           const uint64_t& end_period) {
 
     require_auth (proposer);
 	qualify_proposer (proposer);
@@ -117,6 +213,8 @@ void hyphadao::proposerole (const name& proposer,
 		p.hypha_salary		= hypha_salary;
 		p.preseeds_salary	= preseeds_salary;
 		p.voice_salary		= voice_salary;
+		p.start_period		= start_period;
+		p.end_period		= end_period;
 		p.created_date		= current_block_time().to_time_point();
 	});
 }
@@ -138,7 +236,9 @@ void hyphadao::newrole (const uint64_t& proposal_id) {
 						rp_itr->description, 
 						rp_itr->hypha_salary, 
 						rp_itr->preseeds_salary, 
-						rp_itr->voice_salary);
+						rp_itr->voice_salary,
+						rp_itr->start_period,
+						rp_itr->end_period);
 }
 
 void hyphadao::addperiod (const time_point& start_date, const time_point& end_date, const string& phase) {
@@ -151,6 +251,7 @@ void hyphadao::propassign (const name&      proposer,
                         const string&      	info_url,
                         const string&      	notes,
                         const uint64_t&  	start_period,
+						const uint64_t& 	end_period,
                         const float&       	time_share) {
 
     require_auth (proposer);
@@ -182,6 +283,7 @@ void hyphadao::propassign (const name&      proposer,
 		a.info_url			= info_url;
 		a.notes				= notes;
 		a.start_period 		= start_period;
+		a.end_period		= end_period;
 		a.time_share 		= time_share;
 		a.status 			= common::OPEN;
 		a.created_date		= current_block_time().to_time_point();
@@ -206,6 +308,7 @@ void hyphadao::assign ( const uint64_t& 		proposal_id) {
 						ass_itr->info_url,
 						ass_itr->notes,
 						ass_itr->start_period,
+						ass_itr->end_period,
 						ass_itr->time_share);
 }
 
@@ -334,15 +437,15 @@ void hyphadao::closeprop(const uint64_t& proposal_id) {
 	
 	uint32_t unique_voters = trail_prop.unique_voters;
      
-	uint32_t quorum_threshold = total_voters / (board.get_config().board_quorum_divisor - 1);
+	uint32_t quorum_threshold = total_voters / (board.get_config().holder_quorum_divisor - 1);
 	common::PROP_STATE state = common::FAIL;
 	if(unique_voters > quorum_threshold)
 		state = common::COUNT;
 	
 	if(state == common::COUNT) {
-		if(trail_prop.yes_count > trail_prop.no_count)
+		if(trail_prop.yes_count > (trail_prop.no_count * 4))
 			state = common::PASS;
-		else if(trail_prop.yes_count == trail_prop.no_count)
+		else if(trail_prop.yes_count == (trail_prop.no_count * 4))
 			state = common::TIE;
 		else
 			state = common::FAIL;
@@ -361,12 +464,12 @@ void hyphadao::closeprop(const uint64_t& proposal_id) {
 		uint32_t begin_time = current_block_time().to_time_point().sec_since_epoch() + board.get_config().start_delay;
 		uint32_t end_time = begin_time + board.get_config().issue_duration;
 		action(permission_level{get_self(), "active"_n}, c.trail_contract, "regballot"_n, make_tuple(
-			get_self(),		      //proposer name
-			uint8_t(0), 			//ballot_type uint8_t
-			common::S_HVOICE,	   //voting_symbol symbol
-			begin_time,				//begin_time uint32_t
-			end_time,				//end_time uint32_t
-			prop.info_url			//info_url string
+			get_self(),		      	// proposer name
+			uint8_t(0), 			// ballot_type uint8_t
+			common::S_HVOICE,	   	// voting_symbol symbol
+			begin_time,				// begin_time uint32_t
+			end_time,				// end_time uint32_t
+			prop.info_url			// info_url string
 		)).send();
 
 		props.modify(prop, same_payer, [&](auto& i) {
@@ -388,15 +491,15 @@ void hyphadao::inithvoice(string initial_info_link) {
    	DAOConfig c = config_s.get_or_create (get_self(), DAOConfig());
     
     action(permission_level{get_self(), name("active")}, c.trail_contract, name("regtoken"), make_tuple(
-		common::INITIAL_HVOICE_MAX_SUPPLY, //max_supply
-		get_self(), //publisher
-		initial_info_link //info_url
+		common::INITIAL_HVOICE_MAX_SUPPLY, 	// max_supply
+		get_self(), 						// publisher
+		initial_info_link 					// info_url
 	)).send();
 
     action(permission_level{get_self(), name("active")}, c.trail_contract, name("initsettings"), make_tuple(
-		get_self(), //publisher
-		common::INITIAL_HVOICE_MAX_SUPPLY.symbol, //token_symbol
-		common::INITIAL_HVOICE_SETTINGS //new_settings
+		get_self(), 								// publisher
+		common::INITIAL_HVOICE_MAX_SUPPLY.symbol, 	// token_symbol
+		common::INITIAL_HVOICE_SETTINGS 			// new_settings
 	)).send();
 
     print("\nHVOICE Registration and Initialization Actions Sent...");

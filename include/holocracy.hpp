@@ -24,6 +24,9 @@ class Holocracy {
             asset           hypha_salary            = asset { 0, common::S_HYPHA };
             asset           preseeds_salary         = asset { 0, common::S_PRESEEDS };
             asset           voice_salary            = asset { 0, common::S_HVOICE };
+            uint64_t        start_period            ;
+            uint64_t        end_period              ;
+
             time_point      created_date            = current_block_time().to_time_point();
             time_point      updated_date            = current_block_time().to_time_point();
 
@@ -38,6 +41,7 @@ class Holocracy {
             string          notes                   ;
             string          info_url                ;
             uint64_t        start_period            ;
+            uint64_t        end_period              ;
             float           time_share              = 0.000000000000000;
 
             time_point      created_date            = current_block_time().to_time_point();
@@ -62,16 +66,6 @@ class Holocracy {
             uint64_t        by_period ()            const { return period_id; }
             uint64_t        by_recipient()          const { return recipient.value; }
         };
-        // struct [[eosio::table, eosio::contract("hyphadao") ]] Date
-        // {
-        //     uint64_t    date_id;
-        //     uint32_t    num1 ;
-        //     uint32_t    num2;
-        //     uint32_t    den1;
-        //     uint32_t    den2;
-        //     uint64_t    primary_key() const { return date_id; }
-        // };
-        // typedef multi_index<"dates2"_n, Date> date_table;
 
         typedef multi_index<"asspayouts"_n, AssignmentPayout,
             indexed_by<"byassignment"_n,
@@ -123,7 +117,9 @@ class Holocracy {
                         const string& description,
                         const asset& hypha_salary,
                         const asset& preseeds_salary,
-                        const asset& voice_salary) {
+                        const asset& voice_salary,
+                        const uint64_t& start_period,
+                        const uint64_t& end_period) {
 
             require_auth (contract);
 
@@ -134,6 +130,8 @@ class Holocracy {
                 r.hypha_salary      = hypha_salary;
                 r.preseeds_salary   = preseeds_salary;
                 r.voice_salary      = voice_salary;
+                r.start_period      = start_period;
+                r.end_period        = end_period;
                 r.created_date      = current_block_time().to_time_point();
             });
         }
@@ -151,12 +149,13 @@ class Holocracy {
             role_t.erase (r_itr);
         }
 
-        void newassign (const name&        assigned_account,
-                        const uint64_t&    role_id,
-                        const string&      info_url,
-                        const string&      notes,
-                        const uint64_t&    start_period,
-                        const float&       time_share) {
+        void newassign (const name&         assigned_account,
+                        const uint64_t&     role_id,
+                        const string&       info_url,
+                        const string&       notes,
+                        const uint64_t&     start_period,
+                        const uint64_t&     end_period,
+                        const float&        time_share) {
                                 
             require_auth (contract);
 
@@ -177,6 +176,7 @@ class Holocracy {
                 a.notes              = notes;
                 a.time_share         = time_share;
                 a.start_period       = start_period;
+                a.end_period        = end_period;
                 a.created_date       = current_block_time().to_time_point();
             });
         }
@@ -220,16 +220,16 @@ class Holocracy {
             check (p_itr->end_date.sec_since_epoch() < current_block_time().to_time_point().sec_since_epoch(), 
                 "Cannot make payment. Period ID " + std::to_string(period_id) + " has not closed yet.");
 
-            // date_table d_t (contract, contract.value);
-            // d_t.emplace (contract, [&](auto &d) {
-            //     d.date_id   = d_t.available_primary_key();
-            //     d.assignment_date = a_itr->created_date.sec_since_epoch();
-            //     d.period_end_date = p_itr->end_date.sec_since_epoch();
-            // });
-
             // check that the creation date of the assignment is before the end of the period
             check (a_itr->created_date.sec_since_epoch() < p_itr->end_date.sec_since_epoch(), 
                 "Cannot make payment to assignment. Assignment was not approved before this period.");
+
+            // check that pay period is between (inclusive) the start and end period of the role and the assignment
+            check (a_itr->start_period <= period_id && a_itr->end_period >= period_id, "For assignment, period ID must be between " +
+                std::to_string(a_itr->start_period) + " and " + std::to_string(a_itr->end_period) + " (inclusive). You tried: " + std::to_string(period_id));
+
+            check (r_itr->start_period <= period_id && r_itr->end_period >= period_id, "For role, period ID must be between " +
+                std::to_string(r_itr->start_period) + " and " + std::to_string(r_itr->end_period) + " (inclusive). You tried: " + std::to_string(period_id));
 
             float time_share_calc = a_itr->time_share;
 
