@@ -20,3 +20,5 @@ cleos -u https://telos.caleos.io set contract hyphadaomain hyphdao/hyphadao
 
 
 cleos -u https://telos.caleos.io push action hyphadaomain setvconfig '[9, 9, 5, 5, 259200, 0, 1080]' -p hyphadaomain
+
+cleos -u https://telos.caleos.io push action hyphadaomain proposerole '["hyphadaomain", "techsupport", "https://joinseeds.com", "Technical support", "10 HYPHA", "500.00000000 PRESEED", "10 HVOICE", 6, 12]' -p hyphadaomain

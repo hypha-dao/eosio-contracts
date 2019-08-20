@@ -209,6 +209,9 @@ CONTRACT hyphadao : public contract {
       ACTION endelection(const name& holder);
       ACTION removemember(const name& member_to_remove);
       ACTION addperiod (const time_point& start_time, const time_point& end_time, const string& phase);
+      ACTION delroleprop (uint64_t& roleprop_id);
+      ACTION delassprop (uint64_t& assprop_id);
+      ACTION delpayprop (uint64_t& payprop_id);
       
    private:
       Board board = Board (get_self());

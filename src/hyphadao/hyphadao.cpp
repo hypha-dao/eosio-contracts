@@ -34,6 +34,27 @@ void hyphadao::resetperiods () {
 	bank.reset_periods();
 }
 
+void hyphadao::delroleprop (uint64_t& roleprop_id) {
+	require_auth (get_self());
+	roleprop_table rp_t (get_self(), get_self().value);
+	auto rp_itr = rp_t.find (roleprop_id);
+	rp_t.erase (rp_itr);
+}
+
+void hyphadao::delassprop (uint64_t& assprop_id) {
+	require_auth (get_self());
+	assprop_table ap_t (get_self(), get_self().value);
+	auto ap_itr = ap_t.find(assprop_id);
+	ap_t.erase (ap_itr);
+}
+
+void hyphadao::delpayprop (uint64_t& payprop_id) {
+	require_auth (get_self());
+	payoutprop_table pp_t (get_self(), get_self().value);
+	auto pp_itr = pp_t.find(payprop_id);
+	pp_t.erase (pp_itr);
+}
+
 // void hyphadao::copyassprop () {
 // 	require_auth (get_self());
 // 	assprop_table_bu assprop_bu_t (get_self(), get_self().value);
