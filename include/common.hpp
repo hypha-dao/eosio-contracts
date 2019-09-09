@@ -10,7 +10,7 @@ using std::string;
 namespace common {
 
     static const symbol         S_HYPHA                         ("HYPHA", 0);
-    static const symbol         S_HVOICE                        ("HVOICE", 0);
+    static const symbol         S_HVOICE                        ("HVOIC", 0);
     static const symbol         S_PRESEEDS                      ("PRESEED", 8);
     static const symbol         S_STEWARD                       ("STEWARD", 0);
     

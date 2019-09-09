@@ -1,0 +1,1303 @@
+{
+    "____comment": "This file was generated with eosio-abigen. DO NOT EDIT ",
+    "version": "eosio::abi/1.1",
+    "types": [],
+    "structs": [
+        {
+            "name": "Assignment",
+            "base": "",
+            "fields": [
+                {
+                    "name": "assignment_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "assigned_account",
+                    "type": "name"
+                },
+                {
+                    "name": "role_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "notes",
+                    "type": "string"
+                },
+                {
+                    "name": "info_url",
+                    "type": "string"
+                },
+                {
+                    "name": "start_period",
+                    "type": "uint64"
+                },
+                {
+                    "name": "end_period",
+                    "type": "uint64"
+                },
+                {
+                    "name": "time_share",
+                    "type": "float32"
+                },
+                {
+                    "name": "created_date",
+                    "type": "time_point"
+                },
+                {
+                    "name": "updated_date",
+                    "type": "time_point"
+                }
+            ]
+        },
+        {
+            "name": "AssignmentPayout",
+            "base": "",
+            "fields": [
+                {
+                    "name": "ass_payment_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "assignment_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "recipient",
+                    "type": "name"
+                },
+                {
+                    "name": "period_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "payments",
+                    "type": "asset[]"
+                },
+                {
+                    "name": "payment_date",
+                    "type": "time_point"
+                }
+            ]
+        },
+        {
+            "name": "AssignmentProposal",
+            "base": "",
+            "fields": [
+                {
+                    "name": "proposal_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "ballot_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "proposer",
+                    "type": "name"
+                },
+                {
+                    "name": "assigned_account",
+                    "type": "name"
+                },
+                {
+                    "name": "role_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "info_url",
+                    "type": "string"
+                },
+                {
+                    "name": "notes",
+                    "type": "string"
+                },
+                {
+                    "name": "start_period",
+                    "type": "uint64"
+                },
+                {
+                    "name": "end_period",
+                    "type": "uint64"
+                },
+                {
+                    "name": "time_share",
+                    "type": "float32"
+                },
+                {
+                    "name": "status",
+                    "type": "uint8"
+                },
+                {
+                    "name": "trx",
+                    "type": "transaction"
+                },
+                {
+                    "name": "created_date",
+                    "type": "time_point"
+                },
+                {
+                    "name": "executed_date",
+                    "type": "time_point"
+                }
+            ]
+        },
+        {
+            "name": "BankConfig",
+            "base": "",
+            "fields": [
+                {
+                    "name": "hypha_token_contract",
+                    "type": "name"
+                },
+                {
+                    "name": "voice_token_contract",
+                    "type": "name"
+                },
+                {
+                    "name": "preseeds_token_contract",
+                    "type": "name"
+                }
+            ]
+        },
+        {
+            "name": "BoardConfig",
+            "base": "",
+            "fields": [
+                {
+                    "name": "max_board_seats",
+                    "type": "uint8"
+                },
+                {
+                    "name": "open_seats",
+                    "type": "uint8"
+                },
+                {
+                    "name": "open_election_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "holder_quorum_divisor",
+                    "type": "uint32"
+                },
+                {
+                    "name": "board_quorum_divisor",
+                    "type": "uint32"
+                },
+                {
+                    "name": "issue_duration",
+                    "type": "uint32"
+                },
+                {
+                    "name": "start_delay",
+                    "type": "uint32"
+                },
+                {
+                    "name": "leaderboard_duration",
+                    "type": "uint32"
+                },
+                {
+                    "name": "election_frequency",
+                    "type": "uint32"
+                },
+                {
+                    "name": "last_board_election_time",
+                    "type": "uint32"
+                },
+                {
+                    "name": "is_active_election",
+                    "type": "bool"
+                }
+            ]
+        },
+        {
+            "name": "DAOConfig",
+            "base": "",
+            "fields": [
+                {
+                    "name": "trail_contract",
+                    "type": "name"
+                }
+            ]
+        },
+        {
+            "name": "Nominee",
+            "base": "",
+            "fields": [
+                {
+                    "name": "nominee",
+                    "type": "name"
+                }
+            ]
+        },
+        {
+            "name": "Payment",
+            "base": "",
+            "fields": [
+                {
+                    "name": "payment_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "payment_date",
+                    "type": "time_point"
+                },
+                {
+                    "name": "period_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "assignment_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "recipient",
+                    "type": "name"
+                },
+                {
+                    "name": "amount",
+                    "type": "asset"
+                },
+                {
+                    "name": "memo",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "PayoutProposal",
+            "base": "",
+            "fields": [
+                {
+                    "name": "proposal_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "ballot_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "recipient",
+                    "type": "name"
+                },
+                {
+                    "name": "notes",
+                    "type": "string"
+                },
+                {
+                    "name": "info_url",
+                    "type": "string"
+                },
+                {
+                    "name": "hypha_value",
+                    "type": "asset"
+                },
+                {
+                    "name": "preseeds_value",
+                    "type": "asset"
+                },
+                {
+                    "name": "voice_value",
+                    "type": "asset"
+                },
+                {
+                    "name": "status",
+                    "type": "uint8"
+                },
+                {
+                    "name": "trx",
+                    "type": "transaction"
+                },
+                {
+                    "name": "created_date",
+                    "type": "time_point"
+                },
+                {
+                    "name": "executed_date",
+                    "type": "time_point"
+                },
+                {
+                    "name": "contribution_date",
+                    "type": "time_point"
+                }
+            ]
+        },
+        {
+            "name": "Period",
+            "base": "",
+            "fields": [
+                {
+                    "name": "period_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "start_date",
+                    "type": "time_point"
+                },
+                {
+                    "name": "end_date",
+                    "type": "time_point"
+                },
+                {
+                    "name": "phase",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "Proposal",
+            "base": "",
+            "fields": [
+                {
+                    "name": "proposal_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "proposer",
+                    "type": "name"
+                },
+                {
+                    "name": "proposal_name",
+                    "type": "name"
+                },
+                {
+                    "name": "notes",
+                    "type": "string"
+                },
+                {
+                    "name": "info_url",
+                    "type": "string"
+                },
+                {
+                    "name": "ballot_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "trx",
+                    "type": "transaction"
+                },
+                {
+                    "name": "proposal_type",
+                    "type": "uint8"
+                },
+                {
+                    "name": "proposal_fk",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "Role",
+            "base": "",
+            "fields": [
+                {
+                    "name": "role_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "role_name",
+                    "type": "string"
+                },
+                {
+                    "name": "description",
+                    "type": "string"
+                },
+                {
+                    "name": "hypha_salary",
+                    "type": "asset"
+                },
+                {
+                    "name": "preseeds_salary",
+                    "type": "asset"
+                },
+                {
+                    "name": "voice_salary",
+                    "type": "asset"
+                },
+                {
+                    "name": "start_period",
+                    "type": "uint64"
+                },
+                {
+                    "name": "end_period",
+                    "type": "uint64"
+                },
+                {
+                    "name": "created_date",
+                    "type": "time_point"
+                },
+                {
+                    "name": "updated_date",
+                    "type": "time_point"
+                }
+            ]
+        },
+        {
+            "name": "RoleProposal",
+            "base": "",
+            "fields": [
+                {
+                    "name": "proposal_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "ballot_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "proposer",
+                    "type": "name"
+                },
+                {
+                    "name": "role_name",
+                    "type": "string"
+                },
+                {
+                    "name": "info_url",
+                    "type": "string"
+                },
+                {
+                    "name": "description",
+                    "type": "string"
+                },
+                {
+                    "name": "hypha_salary",
+                    "type": "asset"
+                },
+                {
+                    "name": "preseeds_salary",
+                    "type": "asset"
+                },
+                {
+                    "name": "voice_salary",
+                    "type": "asset"
+                },
+                {
+                    "name": "status",
+                    "type": "uint8"
+                },
+                {
+                    "name": "trx",
+                    "type": "transaction"
+                },
+                {
+                    "name": "start_period",
+                    "type": "uint64"
+                },
+                {
+                    "name": "end_period",
+                    "type": "uint64"
+                },
+                {
+                    "name": "created_date",
+                    "type": "time_point"
+                },
+                {
+                    "name": "executed_date",
+                    "type": "time_point"
+                }
+            ]
+        },
+        {
+            "name": "RoleProposalOld",
+            "base": "",
+            "fields": [
+                {
+                    "name": "proposal_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "ballot_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "proposer",
+                    "type": "name"
+                },
+                {
+                    "name": "role_name",
+                    "type": "string"
+                },
+                {
+                    "name": "info_url",
+                    "type": "string"
+                },
+                {
+                    "name": "description",
+                    "type": "string"
+                },
+                {
+                    "name": "hypha_salary",
+                    "type": "asset"
+                },
+                {
+                    "name": "preseeds_salary",
+                    "type": "asset"
+                },
+                {
+                    "name": "voice_salary",
+                    "type": "asset"
+                },
+                {
+                    "name": "status",
+                    "type": "uint8"
+                },
+                {
+                    "name": "trx",
+                    "type": "transaction"
+                },
+                {
+                    "name": "created_date",
+                    "type": "time_point"
+                },
+                {
+                    "name": "executed_date",
+                    "type": "time_point"
+                }
+            ]
+        },
+        {
+            "name": "Steward",
+            "base": "",
+            "fields": [
+                {
+                    "name": "member",
+                    "type": "name"
+                }
+            ]
+        },
+        {
+            "name": "action",
+            "base": "",
+            "fields": [
+                {
+                    "name": "account",
+                    "type": "name"
+                },
+                {
+                    "name": "name",
+                    "type": "name"
+                },
+                {
+                    "name": "authorization",
+                    "type": "permission_level[]"
+                },
+                {
+                    "name": "data",
+                    "type": "bytes"
+                }
+            ]
+        },
+        {
+            "name": "addcand",
+            "base": "",
+            "fields": [
+                {
+                    "name": "nominee",
+                    "type": "name"
+                },
+                {
+                    "name": "info_url",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "addperiod",
+            "base": "",
+            "fields": [
+                {
+                    "name": "start_time",
+                    "type": "time_point"
+                },
+                {
+                    "name": "end_time",
+                    "type": "time_point"
+                },
+                {
+                    "name": "phase",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "assign",
+            "base": "",
+            "fields": [
+                {
+                    "name": "proposal_id",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "closeprop",
+            "base": "",
+            "fields": [
+                {
+                    "name": "proposal_id",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "copyroleback",
+            "base": "",
+            "fields": []
+        },
+        {
+            "name": "delassprop",
+            "base": "",
+            "fields": [
+                {
+                    "name": "assprop_id",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "delpayprop",
+            "base": "",
+            "fields": [
+                {
+                    "name": "payprop_id",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "delroleprop",
+            "base": "",
+            "fields": [
+                {
+                    "name": "roleprop_id",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "endelection",
+            "base": "",
+            "fields": [
+                {
+                    "name": "holder",
+                    "type": "name"
+                }
+            ]
+        },
+        {
+            "name": "eraseprop",
+            "base": "",
+            "fields": [
+                {
+                    "name": "proposal_id",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "extension",
+            "base": "",
+            "fields": [
+                {
+                    "name": "type",
+                    "type": "uint16"
+                },
+                {
+                    "name": "data",
+                    "type": "bytes"
+                }
+            ]
+        },
+        {
+            "name": "init",
+            "base": "",
+            "fields": []
+        },
+        {
+            "name": "inithvoice",
+            "base": "",
+            "fields": [
+                {
+                    "name": "initial_info_link",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "initsteward",
+            "base": "",
+            "fields": [
+                {
+                    "name": "initial_info_link",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "makeelection",
+            "base": "",
+            "fields": [
+                {
+                    "name": "holder",
+                    "type": "name"
+                },
+                {
+                    "name": "info_url",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "makepayout",
+            "base": "",
+            "fields": [
+                {
+                    "name": "proposal_id",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "newrole",
+            "base": "",
+            "fields": [
+                {
+                    "name": "proposal_id",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "nominate",
+            "base": "",
+            "fields": [
+                {
+                    "name": "nominee",
+                    "type": "name"
+                },
+                {
+                    "name": "nominator",
+                    "type": "name"
+                }
+            ]
+        },
+        {
+            "name": "payassign",
+            "base": "",
+            "fields": [
+                {
+                    "name": "assignment_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "period_id",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "permission_level",
+            "base": "",
+            "fields": [
+                {
+                    "name": "actor",
+                    "type": "name"
+                },
+                {
+                    "name": "permission",
+                    "type": "name"
+                }
+            ]
+        },
+        {
+            "name": "propassign",
+            "base": "",
+            "fields": [
+                {
+                    "name": "proposer",
+                    "type": "name"
+                },
+                {
+                    "name": "assigned_account",
+                    "type": "name"
+                },
+                {
+                    "name": "role_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "info_url",
+                    "type": "string"
+                },
+                {
+                    "name": "notes",
+                    "type": "string"
+                },
+                {
+                    "name": "start_period",
+                    "type": "uint64"
+                },
+                {
+                    "name": "end_period",
+                    "type": "uint64"
+                },
+                {
+                    "name": "time_share",
+                    "type": "float32"
+                }
+            ]
+        },
+        {
+            "name": "proposerole",
+            "base": "",
+            "fields": [
+                {
+                    "name": "proposer",
+                    "type": "name"
+                },
+                {
+                    "name": "role_name",
+                    "type": "string"
+                },
+                {
+                    "name": "info_url",
+                    "type": "string"
+                },
+                {
+                    "name": "description",
+                    "type": "string"
+                },
+                {
+                    "name": "hypha_salary",
+                    "type": "asset"
+                },
+                {
+                    "name": "preseeds_salary",
+                    "type": "asset"
+                },
+                {
+                    "name": "voice_salary",
+                    "type": "asset"
+                },
+                {
+                    "name": "start_period",
+                    "type": "uint64"
+                },
+                {
+                    "name": "end_period",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "proppayout",
+            "base": "",
+            "fields": [
+                {
+                    "name": "proposer",
+                    "type": "name"
+                },
+                {
+                    "name": "recipient",
+                    "type": "name"
+                },
+                {
+                    "name": "notes",
+                    "type": "string"
+                },
+                {
+                    "name": "info_url",
+                    "type": "string"
+                },
+                {
+                    "name": "hypha_value",
+                    "type": "asset"
+                },
+                {
+                    "name": "preseeds_value",
+                    "type": "asset"
+                },
+                {
+                    "name": "voice_value",
+                    "type": "asset"
+                },
+                {
+                    "name": "contribution_date",
+                    "type": "time_point"
+                }
+            ]
+        },
+        {
+            "name": "removecand",
+            "base": "",
+            "fields": [
+                {
+                    "name": "candidate",
+                    "type": "name"
+                }
+            ]
+        },
+        {
+            "name": "removemember",
+            "base": "",
+            "fields": [
+                {
+                    "name": "member_to_remove",
+                    "type": "name"
+                }
+            ]
+        },
+        {
+            "name": "reset",
+            "base": "",
+            "fields": []
+        },
+        {
+            "name": "resetperiods",
+            "base": "",
+            "fields": []
+        },
+        {
+            "name": "setconfig",
+            "base": "",
+            "fields": [
+                {
+                    "name": "hypha_token_contract",
+                    "type": "name"
+                },
+                {
+                    "name": "trail_contract",
+                    "type": "name"
+                }
+            ]
+        },
+        {
+            "name": "setvconfig",
+            "base": "",
+            "fields": [
+                {
+                    "name": "max_board_seats",
+                    "type": "uint8"
+                },
+                {
+                    "name": "open_seats",
+                    "type": "uint8"
+                },
+                {
+                    "name": "holder_quorum_divisor",
+                    "type": "uint32"
+                },
+                {
+                    "name": "board_quorum_divisor",
+                    "type": "uint32"
+                },
+                {
+                    "name": "issue_duration",
+                    "type": "uint32"
+                },
+                {
+                    "name": "start_delay",
+                    "type": "uint32"
+                },
+                {
+                    "name": "election_frequency",
+                    "type": "uint32"
+                }
+            ]
+        },
+        {
+            "name": "transaction",
+            "base": "transaction_header",
+            "fields": [
+                {
+                    "name": "context_free_actions",
+                    "type": "action[]"
+                },
+                {
+                    "name": "actions",
+                    "type": "action[]"
+                },
+                {
+                    "name": "transaction_extensions",
+                    "type": "extension[]"
+                }
+            ]
+        },
+        {
+            "name": "transaction_header",
+            "base": "",
+            "fields": [
+                {
+                    "name": "expiration",
+                    "type": "time_point_sec"
+                },
+                {
+                    "name": "ref_block_num",
+                    "type": "uint16"
+                },
+                {
+                    "name": "ref_block_prefix",
+                    "type": "uint32"
+                },
+                {
+                    "name": "max_net_usage_words",
+                    "type": "varuint32"
+                },
+                {
+                    "name": "max_cpu_usage_ms",
+                    "type": "uint8"
+                },
+                {
+                    "name": "delay_sec",
+                    "type": "varuint32"
+                }
+            ]
+        }
+    ],
+    "actions": [
+        {
+            "name": "addcand",
+            "type": "addcand",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "addperiod",
+            "type": "addperiod",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "assign",
+            "type": "assign",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "closeprop",
+            "type": "closeprop",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "copyroleback",
+            "type": "copyroleback",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "delassprop",
+            "type": "delassprop",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "delpayprop",
+            "type": "delpayprop",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "delroleprop",
+            "type": "delroleprop",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "endelection",
+            "type": "endelection",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "eraseprop",
+            "type": "eraseprop",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "init",
+            "type": "init",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "inithvoice",
+            "type": "inithvoice",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "initsteward",
+            "type": "initsteward",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "makeelection",
+            "type": "makeelection",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "makepayout",
+            "type": "makepayout",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "newrole",
+            "type": "newrole",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "nominate",
+            "type": "nominate",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "payassign",
+            "type": "payassign",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "propassign",
+            "type": "propassign",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "proposerole",
+            "type": "proposerole",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "proppayout",
+            "type": "proppayout",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "removecand",
+            "type": "removecand",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "removemember",
+            "type": "removemember",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "reset",
+            "type": "reset",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "resetperiods",
+            "type": "resetperiods",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "setconfig",
+            "type": "setconfig",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "setvconfig",
+            "type": "setvconfig",
+            "ricardian_contract": ""
+        }
+    ],
+    "tables": [
+        {
+            "name": "assignments",
+            "type": "Assignment",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "asspayouts",
+            "type": "AssignmentPayout",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "assprops",
+            "type": "AssignmentProposal",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "bankconfig",
+            "type": "BankConfig",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "bconfig",
+            "type": "BoardConfig",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "config",
+            "type": "DAOConfig",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "nominees",
+            "type": "Nominee",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "payments",
+            "type": "Payment",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "payoutprops",
+            "type": "PayoutProposal",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "periods",
+            "type": "Period",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "proposals",
+            "type": "Proposal",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "roleprops",
+            "type": "RoleProposal",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "rolepropsbu",
+            "type": "RoleProposalOld",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "roles",
+            "type": "Role",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "stewards",
+            "type": "Steward",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        }
+    ],
+    "ricardian_clauses": [],
+    "variants": []
+}

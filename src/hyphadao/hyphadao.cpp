@@ -236,6 +236,7 @@ void hyphadao::proposerole (const name& proposer,
 		p.voice_salary		= voice_salary;
 		p.start_period		= start_period;
 		p.end_period		= end_period;
+		p.status			= common::OPEN;
 		p.created_date		= current_block_time().to_time_point();
 	});
 }

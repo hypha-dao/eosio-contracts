@@ -173,7 +173,7 @@ class Board {
                     auto extra_seats = new_config.max_board_seats - existing_config.max_board_seats;
                     if(extra_seats > 0){
                         asset board_token = asset(extra_seats, common::S_STEWARD);
-                        action(permission_level{"tf"_n, "active"_n }, "eosio.trail"_n, "raisemax"_n,
+                        action(permission_level{"hyphadaomain"_n, "active"_n }, "eosio.trail"_n, "raisemax"_n,
                             std::make_tuple(
                                 contract,
                                 board_token
