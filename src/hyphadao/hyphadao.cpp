@@ -1,5 +1,15 @@
 #include <hyphadao.hpp>
 
+void hyphadao::addmember (const name& member) {
+	require_auth (get_self());
+	member_table m_t (get_self(), get_self().value);
+	auto m_itr = m_t.find (member.value);
+	check (m_itr == m_t.end(), "Account is already a member: " + member.to_string());
+	m_t.emplace (get_self(), [&](auto &m) {
+		m.member = member;
+	});
+}
+
 void hyphadao::reset () {
 	board.reset ();
 	holocracy.reset ();

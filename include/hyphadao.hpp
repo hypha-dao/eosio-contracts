@@ -25,6 +25,14 @@ CONTRACT hyphadao : public contract {
       typedef singleton<"config"_n, DAOConfig> config_table;
       typedef multi_index<"config"_n, DAOConfig> config_table_placehoder;
 
+      struct [[eosio::table, eosio::contract("hyphadao") ]] Member 
+      {
+         name           member                  ;
+         uint64_t       primary_key() const { return member.value; }
+      };
+
+      typedef multi_index<"members"_n, Member> member_table;
+
       struct [[eosio::table, eosio::contract("hyphadao") ]] Proposal
       {
          uint64_t       proposal_id             = 0;
@@ -134,7 +142,6 @@ CONTRACT hyphadao : public contract {
 
       typedef multi_index<"rolepropsbu"_n, RoleProposalOld> roleprop_table_bu;
 
-
       ACTION reset ();
       ACTION resetperiods();
       ACTION init ();
@@ -212,7 +219,8 @@ CONTRACT hyphadao : public contract {
       ACTION delroleprop (uint64_t& roleprop_id);
       ACTION delassprop (uint64_t& assprop_id);
       ACTION delpayprop (uint64_t& payprop_id);
-      
+      ACTION addmember (const name& member);
+            
    private:
       Board board = Board (get_self());
       Holocracy holocracy = Holocracy (get_self());

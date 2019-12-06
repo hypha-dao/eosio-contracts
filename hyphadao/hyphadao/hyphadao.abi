@@ -220,6 +220,16 @@
             ]
         },
         {
+            "name": "Member",
+            "base": "",
+            "fields": [
+                {
+                    "name": "member",
+                    "type": "name"
+                }
+            ]
+        },
+        {
             "name": "Nominee",
             "base": "",
             "fields": [
@@ -598,6 +608,16 @@
                 {
                     "name": "info_url",
                     "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "addmember",
+            "base": "",
+            "fields": [
+                {
+                    "name": "member",
+                    "type": "name"
                 }
             ]
         },
@@ -1061,6 +1081,11 @@
             "ricardian_contract": ""
         },
         {
+            "name": "addmember",
+            "type": "addmember",
+            "ricardian_contract": ""
+        },
+        {
             "name": "addperiod",
             "type": "addperiod",
             "ricardian_contract": ""
@@ -1230,6 +1255,13 @@
         {
             "name": "config",
             "type": "DAOConfig",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "members",
+            "type": "Member",
             "index_type": "i64",
             "key_names": [],
             "key_types": []

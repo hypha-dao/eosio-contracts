@@ -27,6 +27,12 @@ cleos -u https://test.telos.kitchen push action hyphatokens1 create '["hyphadaom
 cleos -u https://test.telos.kitchen push action hyphatokens1 issue '["hyphadaomain", "1.00000000 PRESEED", "memo"]' -p hyphadaomain
 cleos -u https://test.telos.kitchen push action hyphatokens1 transfer '["hyphadaomain", "johnnyhypha1", "1.00000000 PRESEED", "memo"]' -p hyphadaomain
 
+cleos -u https://test.telos.kitchen push action hyphadaomain addmember '["johnnyhypha1"]' -p hyphadaomain
+cleos -u https://test.telos.kitchen push action hyphadaomain addmember '["samanthahyph"]' -p hyphadaomain
+cleos -u https://test.telos.kitchen push action hyphadaomain addmember '["jameshypha11"]' -p hyphadaomain
+cleos -u https://test.telos.kitchen push action hyphadaomain addmember '["thomashypha1"]' -p hyphadaomain
+cleos -u https://test.telos.kitchen push action hyphadaomain addmember '["haydenhypha1"]' -p hyphadaomain
+
 
 cleos -u https://test.telos.kitchen push action hyphatokens1 issue '["hyphadaomain", "1 HYPHA", "memo"]' -p hyphadaomain
 cleos -u https://test.telos.kitchen push action hyphatokens1 transfer '["hyphadaomain", "johnnyhypha1", "1 HYPHA", "memo"]' -p hyphadaomain
