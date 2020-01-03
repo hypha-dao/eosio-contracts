@@ -17,10 +17,82 @@ haydenhypha1
 cleos -u https://test.telos.kitchen set contract hyphadaomain hyphadao/hyphadao
 cleos -u https://test.telos.kitchen set contract hyphatokens1 ~/dev/token/token/
 
-cleos -u https://test.telos.kitchen push action hyphadaomain setconfig '["hyphatokens1", "eosio.trail"]' -p hyphadaomain
-cleos -u https://test.telos.kitchen push action hyphadaomain setvconfig '[13, 13, 6, 3, 3600, 1, 36000]' -p hyphadaomain
+cleos -u https://test.telos.kitchen push action eosio.token transfer '["teloskitchen", "hyphadaomain", "1000.0000 TLOS", "for testing"]' -p teloskitchen
+cleos -u https://test.telos.kitchen push action eosio.token transfer '["hyphadaomain", "trailservice", "1000.0000 TLOS", "deposit"]' -p hyphadaomain
+cleos -u https://test.telos.kitchen push action trailservice newtreasury '["hyphadaomain", "1000000000 HVOICE", "public"]' -p hyphadaomain
+cleos -u https://test.telos.kitchen push action trailservice toggle '["0,HVOICE", "transferable"]' -p hyphadaomain
 
-cleos -u https://test.telos.kitchen push action hyphadaomain init '[]' -p hyphadaomain
+## Enrolling a user in hypha DAO
+cleos -u https://test.telos.kitchen push action trailservice regvoter '["hyphadaomain", "0,HVOICE", null]' -p hyphadaomain
+cleos -u https://test.telos.kitchen push action trailservice mint '["hyphadaomain", "1 HVOICE", "original mint"]' -p hyphadaomain
+
+cleos -u https://test.telos.kitchen push action trailservice regvoter '["haydenhypha1", "0,HVOICE", null]' -p haydenhypha1
+cleos -u https://test.telos.kitchen push action trailservice mint '["haydenhypha1", "1 HVOICE", "original mint"]' -p hyphadaomain
+
+cleos -u https://test.telos.kitchen push action trailservice castvote '["haydenhypha1", "hypha1......2", ["pass"]]' -p haydenhypha1
+
+cleos -u https://test.telos.kitchen push action hyphadaomain closeprop '["roles", 0'
+
+cleos -u https://test.telos.kitchen push action hyphadaomain proposerole '["johnnyhypha1", "Underwater Basketweaver", "Weave baskets at the bottom of the sea", "We make *great* baskets.", "11 HYPHA", "11.00000000 PRESEED", "11 HVOICE", 0, 10]' -p johnnyhypha1
+cleos -u https://test.telos.kitchen push action trailservice castvote '["haydenhypha1", "hypha1.....1d", ["pass"]]' -p haydenhypha1
+cleos -u https://test.telos.kitchen push action hyphadaomain closeprop '["roles", 26]' -p haydenhypha1
+
+
+# You can run these statements over and over because the commands end with the same state as the beginning
+# The applicant must run these two actions (preferably as the same transaction)
+cleos -u https://test.telos.kitchen push action trailservice regvoter '["hyphalondon2", "0,HVOICE", null]' -p hyphalondon2
+cleos -u https://test.telos.kitchen push action hyphadaomain apply '["hyphalondon2", "I met with Debbie at the regen conference and we talked about Hypha. I would like to join."]' -p hyphalondon2
+
+cleos -u https://test.telos.kitchen push action hyphadaomain enroll '["johnnyhypha1", "hyphalondon2", "Debbie confirmed she made this referral"]' -p johnnyhypha1
+
+# The account can be unregistered if they transfer away their HVOICE and call unregvoter
+cleos -u https://test.telos.kitchen push action hyphadaomain removemember '["hyphalondon2"]' -p hyphadaomain  
+cleos -u https://test.telos.kitchen push action trailservice transfer '["hyphalondon2", "johnnyhypha1", "1 HVOICE", "memo"]' -p hyphalondon2
+cleos -u https://test.telos.kitchen push action trailservice unregvoter '["hyphalondon2", "0,HVOICE"]' -p hyphalondon2
+
+
+cleos -u https://test.telos.kitchen push action trailservice castvote '["haydenhypha1", "hypha1.....", ["pass"]]' -p haydenhypha1
+cleos -u https://test.telos.kitchen push action hyphadaomain closeprop '["payouts", 0]' -p haydenhypha1
+cleos -u https://test.telos.kitchen push action hyphadaomain setlastballt '["hypha1.....1f"]' -p hyphadaomain
+
+
+cleos -u https://test.telos.kitchen push action -sjd -x 86400 eosio.token transfer '["hyphadaomain", "johnnyhypha1", "1.2345 TLOS", "testing native approval trx"]' -p hyphadaomain > hypha_xfer_test.json
+cleos -u https://test.telos.kitchen push action hyphadaomain 
+cleos -u https://api.eosnewyork.io multisig propose_trx unpause '[{"actor": "gftma.x", "permission": "active"}, {"actor": "danielflora3", "permission": "active"}]' ./gyftietokens_unpause.json gftma.x
+
+cleos -u https://test.telos.kitchen push action hyphatokens1 issue '["hyphadaomain", "100 HYPHA", "memo"]' -p hyphadaomain
+cleos -u https://test.telos.kitchen push action hyphatokens1 transfer '["hyphadaomain", "haydenhypha1", "1 HYPHA", "memo"]' -p hyphadaomain
+
+## new format
+
+cleos -u https://test.telos.kitchen push action hyphadaomain mapit '{"key":"strings":"value":{"key":"tester":"value":"tester value"}}' -p hyphadaomain
+
+cleos -u https://test.telos.kitchen push action hyphadaomain propose '{"proposer":"johnnyhypha1", 
+                                                                        "proposal_type":"role", 
+                                                                        "trx_action_name":"newrole", 
+                                                                        "names":null, 
+                                                                        "strings":{   
+                                                                            "name":"Underwater Basketweaver", 
+                                                                            "description":"Weave baskets at the bottom of the sea",
+                                                                            "content":"We make *great* baskets."
+                                                                        }, 
+                                                                        "assets":{
+                                                                            "hypha_amount":"11 HYPHA", 
+                                                                            "seeds_amount":"11.00000000 SEEDS", 
+                                                                            "hvoice_amount":"11 HVOICE"
+                                                                        }, 
+                                                                        "time_points":null, 
+                                                                        "ints":{
+                                                                            "start_period":"41", 
+                                                                            "end_period":"51"
+                                                                        }, 
+                                                                        "floats":null,
+                                                                        "trxs":null' -p johnnyhypha1
+
+
+
+##
+cleos -u https://test.telos.kitchen push action hyphadaomain setconfig '["hyphatokens1", "trailservice"]' -p hyphadaomain
 
 cleos -u https://test.telos.kitchen push action hyphatokens1 create '["hyphadaomain", "1000000000000 HYPHA"]' -p hyphatokens1
 cleos -u https://test.telos.kitchen push action hyphatokens1 create '["hyphadaomain", "1000000.00000000 PRESEED"]' -p hyphatokens1
@@ -51,7 +123,7 @@ cleos -u https://test.telos.kitchen push action eosio.trail issuetoken '["hyphad
 # cleos -u https://test.telos.kitchen push action eosio.trail issuetoken '["hyphadaomain", "hyphamember5", "1 HVOICE", false]' -p hyphadaomain
 
 
-cleos -u https://test.telos.kitchen push action hyphadaomain proposerole '["johnnyhypha1", "Underwater Basketweaver", "https://joinseeds.com", "Weave baskets at the bottom of the sea", "11 HYPHA", "11.00000000 PRESEED", "11 HVOIC", 0, 10]' -p johnnyhypha1
+cleos -u https://test.telos.kitchen push action hyphadaomain proposerole '["johnnyhypha1", "Underwater Basketweaver", "Weave baskets at the bottom of the sea", "We make *great* baskets.", "11 HYPHA", "11.00000000 PRESEED", "11 HVOICE", 0, 10]' -p johnnyhypha1
 cleos -u https://test.telos.kitchen push action hyphadaomain propassign '["johnnyhypha1", "johnnyhypha1", 0, "https://joinseeds.com", "I am a professional basket maker and scuba diver", 0, 6, 1.000000000]' -p johnnyhypha1
 
 cleos -u https://test.telos.kitchen push action eosio.trail castvote '["johnnyhypha1", 1, 1]' -p johnnyhypha1
@@ -89,6 +161,9 @@ does work:
 
 
 # Trail experimentation
+
+cleos -u https://test.telos.kitchen get table hyphadaomain hyphadaomain applicants
+
 
 cleos -u https://test.telos.kitchen get table hyphadaomain hyphadaomain config
 cleos -u https://test.telos.kitchen get table hyphadaomain hyphadaomain nominees

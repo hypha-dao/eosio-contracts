@@ -5,21 +5,33 @@
 #include <eosio/asset.hpp>
 #include <eosio/singleton.hpp>
 #include <eosio/multi_index.hpp>
+#include <eosio/transaction.hpp>
 
 #include "common.hpp"
-#include "board.hpp"
 #include "holocracy.hpp"
+#include "trail.hpp"
+#include <cryptoutil.hpp>
 
 using namespace eosio;
+using cryptoutil::hash;
 using std::string;
 
 CONTRACT hyphadao : public contract {
    public:
       using contract::contract;
 
+      struct [[ eosio::table, eosio::contract("hyphadao") ]] AppState 
+      {
+         uint64_t    last_sender_id;
+      };
+
+      typedef singleton<"appstates"_n, AppState> appstate_table;
+      typedef eosio::multi_index<"appstates"_n, AppState> appstate_table_placeholder;
+
       struct [[eosio::table, eosio::contract("hyphadao") ]] DAOConfig 
       {
          name           trail_contract          ;
+         name           last_ballot_id          = name("hypha1");
       };
 
       typedef singleton<"config"_n, DAOConfig> config_table;
@@ -33,203 +45,191 @@ CONTRACT hyphadao : public contract {
 
       typedef multi_index<"members"_n, Member> member_table;
 
+      struct [[eosio::table, eosio::contract("hyphadao") ]] Applicant 
+      {
+         name           applicant                  ;
+         string         content                    ;
+         
+         time_point  created_date = current_time_point();
+         time_point  updated_date = current_time_point();
+
+         uint64_t       primary_key() const { return applicant.value; }
+      };
+      typedef multi_index<"applicants"_n, Applicant> applicant_table;
+
+      // scope: proposal type (name)
       struct [[eosio::table, eosio::contract("hyphadao") ]] Proposal
       {
-         uint64_t       proposal_id             = 0;
-         name           proposer                ; 
-         name           proposal_name           ;
-         string         notes                   ;
-         string         info_url                ;
-         uint64_t       ballot_id               ;
-         transaction    trx                     ;
-         uint8_t        proposal_type           = 0;
-         uint64_t       proposal_fk             ;
-
-		   uint64_t       primary_key() const { return proposal_id; }
-         uint64_t       by_proposal_fk() const { return proposal_fk; }
-      };
-
-      struct [[eosio::table, eosio::contract("hyphadao") ]] RoleProposal
-      {
-         uint64_t       proposal_id             = 0;
-         uint64_t       ballot_id               ;
-         name           proposer                ; 
-         string         role_name               ;
-         string         info_url                ;
-         string         description             ;
-         asset          hypha_salary            = asset { 0, common::S_HYPHA };
-         asset          preseeds_salary         = asset { 0, common::S_PRESEEDS };
-         asset          voice_salary            = asset { 0, common::S_HVOICE };
-         uint8_t        status                  ;
-         transaction    trx                     ;
-
-         uint64_t       start_period            ;
-         uint64_t       end_period              ;
-
-         time_point     created_date            = current_block_time().to_time_point();
-         time_point     executed_date           ;
-
-		   uint64_t primary_key() const { return proposal_id; }
-      };
-
-      struct [[eosio::table, eosio::contract("hyphadao") ]] RoleProposalOld
-      {
-         uint64_t       proposal_id             = 0;
-         uint64_t       ballot_id               ;
-         name           proposer                ; 
-         string         role_name               ;
-         string         info_url                ;
-         string         description             ;
-         asset          hypha_salary            = asset { 0, common::S_HYPHA };
-         asset          preseeds_salary         = asset { 0, common::S_PRESEEDS };
-         asset          voice_salary            = asset { 0, common::S_HVOICE };
-         uint8_t        status                  ;
-         transaction    trx                     ;
-
-         time_point     created_date            = current_block_time().to_time_point();
-         time_point     executed_date           ;
-
-		   uint64_t primary_key() const { return proposal_id; }
-      };
-
-      struct [[eosio::table, eosio::contract("hyphadao") ]] AssignmentProposal
-      {
-         uint64_t       proposal_id             ;
-         uint64_t       ballot_id               ;
-         name           proposer                ;
-         name           assigned_account        ;
-         uint64_t       role_id                 ;
-         string         info_url                ;
-         string         notes                   ;
-         uint64_t       start_period            ;
-         uint64_t       end_period              ;
-         float          time_share              = 0.000000000000000;
-         uint8_t        status                  ;
-         transaction    trx                     ;
-
-         time_point     created_date            = current_block_time().to_time_point();
-         time_point     executed_date           ;
-
-         uint64_t       primary_key()           const { return proposal_id; }
-         uint64_t       by_assigned()           const { return assigned_account.value; }
-         uint64_t       by_role()               const { return role_id; }
-      };
-
-      struct [[eosio::table, eosio::contract("hyphadao") ]] PayoutProposal
-      {
-         uint64_t       proposal_id             ;
-         uint64_t       ballot_id               ;
-         name           recipient               ;
-         string         notes                   ;
-         string         info_url                ;
-         asset          hypha_value             = asset { 0, common::S_HYPHA };
-         asset          preseeds_value          = asset { 0, common::S_PRESEEDS };
-         asset          voice_value             = asset { 0, common::S_HVOICE };
-         uint8_t        status                  = common::OPEN;
-         transaction    trx                     ;
+         uint64_t                   id                ;
          
-         time_point     created_date            = current_block_time().to_time_point();
-         time_point     executed_date           ;
-         time_point     contribution_date       ;
+         // core maps
+         map<string, name>          names             ;
+         map<string, string>        strings           ;
+         map<string, asset>         assets            ;
+         map<string, time_point>    time_points       ;
+         map<string, uint64_t>      ints              ;
+         map<string, transaction>   trxs              ;
+         map<string, float>         floats            ;
+         uint64_t                   primary_key()     const { return id; }
 
-         uint64_t       primary_key()           const { return proposal_id; }
+         // indexes
+         name                       proposer          ; 
+         uint64_t                   by_proposer()     const { return proposer.value; }
+
+         time_point                 created_date    = current_time_point();
+         time_point                 updated_date    = current_time_point();
+         uint64_t    by_created () const { return created_date.sec_since_epoch(); }
+         uint64_t    by_updated () const { return updated_date.sec_since_epoch(); }
+
+         uint64_t    by_type () const { return names.at("proposal_type").value; }
       };
 
-      typedef multi_index<"proposals"_n, Proposal> proposal_table;
-      typedef multi_index<"payoutprops"_n, PayoutProposal> payoutprop_table;
-      typedef multi_index<"roleprops"_n, RoleProposal> roleprop_table;
-      typedef multi_index<"assprops"_n, AssignmentProposal> assprop_table;
+      typedef multi_index<"proposals"_n, Proposal,
+         indexed_by<"bycreated"_n, const_mem_fun<Proposal, uint64_t, &Proposal::by_created>>,
+         indexed_by<"byupdated"_n, const_mem_fun<Proposal, uint64_t, &Proposal::by_updated>>,
+         indexed_by<"byproposer"_n, const_mem_fun<Proposal, uint64_t, &Proposal::by_proposer>>,
+         indexed_by<"bytype"_n, const_mem_fun<Proposal, uint64_t, &Proposal::by_type>>
+      > proposal_table;
 
-      typedef multi_index<"rolepropsbu"_n, RoleProposalOld> roleprop_table_bu;
+      struct [[eosio::table, eosio::contract("hyphadao") ]] Debug
+      {
+         uint64_t    debug_id;
+         string      notes;
+         time_point  created_date = current_time_point();
+         uint64_t    primary_key()  const { return debug_id; }
+      };
 
+      typedef multi_index<"debugs"_n, Debug> debug_table;
+
+      /*
+         Comments in code may be outdated. See docs at https://docs.hypha.earth
+         
+         Proposal attributes (all proposals)
+
+            - type: int
+               - "status"
+               - "start_period"
+               - "end_period"
+            
+            - type: name
+               - "ballot_id": used to interface to Trail
+
+            - type: string
+               - "title"  
+               - "description"
+               - "content"
+
+            - type: asset
+               - "hypha_amount"
+               - "seeds_amount"
+               - "hvoice_amount"
+
+            - type: time_point_sec
+               - "created_date"
+               - "updated_date"
+
+            - type: transaction
+               - "transaction"
+
+         Role proposals
+            - scoped to "roles"_n.value
+
+         Assignment Proposals:
+            - scoped to "assignments"_n.value
+            - type: float
+               - "time_share"
+
+            - type: name
+               - "assigned_account"
+
+            - type: int
+               - "role_id"
+         
+         Payout Proposal:
+            - scoped to "payouts"_n.value
+            - type: name
+               - "recipient"
+            - type: time_point
+               - "contribution_date"
+
+      */
+     ACTION propose (const map<string, name> 		   names,
+                     const map<string, string>       strings,
+                     const map<string, asset>        assets,
+                     const map<string, time_point>   time_points,
+                     const map<string, uint64_t>     ints,
+                     const map<string, float>        floats,
+                     const map<string, transaction>  trxs);
+      
+      ACTION apply (const name&     applicant, const string& content);
+
+      ACTION enroll (const name& enroller,
+                     const name& applicant, 
+					      const string& content);
+
+      // Admin
       ACTION reset ();
       ACTION resetperiods();
-      ACTION init ();
-      ACTION eraseprop (const uint64_t& proposal_id);
+      ACTION eraseprop (const name&       proposal_type,
+                        const uint64_t&   proposal_id);
+
       ACTION setconfig (const name&    hypha_token_contract,
                         const name&    trail_contract);
+      ACTION setlastballt (const name& last_ballot_id);
 
-      ACTION setvconfig  (const uint8_t& max_board_seats,
-                            const uint8_t&  open_seats,
-                            const uint32_t& holder_quorum_divisor,
-                            const uint32_t& board_quorum_divisor,
-                            const uint32_t& issue_duration,
-                            const uint32_t& start_delay,
-                            const uint32_t& election_frequency);
+      ACTION clrdebugs (const uint64_t& starting_id, const uint64_t& batch_size);
 
-      ACTION proposerole (const name& proposer,
-                           const string& role_name,
-                           const string& info_url,
-                           const string& description,
-                           const asset& hypha_salary,
-                           const asset& preseeds_salary,
-                           const asset& voice_salary,
-                           const uint64_t& start_period,
-                           const uint64_t& end_period);
+      ACTION addperiod (const time_point& start_time, 
+                        const time_point& end_time, 
+                        const string& phase);
+      ACTION remperiods (const uint64_t& begin_period_id, 
+                         const uint64_t& end_period_id);
 
-      ACTION newrole (  const uint64_t& proposal_id);
-
-      // ACTION copyroleprop ();
-      ACTION copyroleback ();
-
-      // ACTION updaterole (  const name& role_name, 
-      //                      const string& description,
-      //                      const asset& hypha_salary,
-      //                      const asset& preseeds_salary,
-      //                      const asset& voice_salary); 
-
-      ACTION propassign (const name&       proposer,
-                           const name&        assigned_account,
-                           const uint64_t&    role_id,
-                           const string&      info_url,
-                           const string&      notes,
-                           const uint64_t&    start_period,
-                           const uint64_t&    end_period,
-                           const float&       time_share);
-
-      ACTION assign (const uint64_t& 		proposal_id);
-
-      ACTION proppayout (  const name&   	   proposer,
-                           const name&       recipient,
-                           const string&     notes,
-                           const string&     info_url,
-                           const asset&      hypha_value,
-                           const asset&      preseeds_value, 
-						         const asset& 		voice_value,
-                           const time_point& contribution_date);
-
+      // These actions are executed only on approval of a proposal. 
+      // To introduce a new proposal type, we would add another action to the below.
+      ACTION newrole    (  const uint64_t&   proposal_id);
+      ACTION assign     (  const uint64_t& 	proposal_id);
       ACTION makepayout (  const uint64_t&   proposal_id);
+      ACTION exectrx    (  const uint64_t&   proposal_id);
       
-      ACTION closeprop(const uint64_t& proposal_id);
+      // anyone can call closeprop, it executes the transaction if the voting passed
+      ACTION closeprop(const name& proposal_type, const uint64_t& proposal_id);
+
+      // users can claim their salary pay
       ACTION payassign(const uint64_t& assignment_id, const uint64_t& period_id);
-
-      // NOTE: sends inline actions to register and initialize HVOICE token registry
-      ACTION inithvoice(const string initial_info_link);
-
-      // NOTE: sends inline actions to register and initialize STEWARD token registry
-      ACTION initsteward(const string initial_info_link);
-
-      ACTION nominate(const name& nominee, const name& nominator);
-      ACTION makeelection(const name& holder, const string& info_url);
-      ACTION addcand(const name& nominee, const string& info_url);
-      ACTION removecand(const name& candidate);
-      ACTION endelection(const name& holder);
-      ACTION removemember(const name& member_to_remove);
-      ACTION addperiod (const time_point& start_time, const time_point& end_time, const string& phase);
-      ACTION delroleprop (uint64_t& roleprop_id);
-      ACTION delassprop (uint64_t& assprop_id);
-      ACTION delpayprop (uint64_t& payprop_id);
-      ACTION addmember (const name& member);
             
+      // temporary hack - keep a list of the members, although true membership is governed by token holdings
+      ACTION removemember(const name& member_to_remove);
+      ACTION addmember (const name& member);
+      
    private:
-      Board board = Board (get_self());
       Holocracy holocracy = Holocracy (get_self());
       Bank bank = Bank (get_self());
 
       void defcloseprop (const uint64_t& proposal_id);
       void qualify_proposer (const name& proposer);
-      uint64_t register_ballot (const name& proposer,
-									      const string& info_url);
+      name register_ballot (const name& proposer, 
+								      const map<string, string>& strings);
+
+      uint64_t get_next_sender_id()
+      {
+         appstate_table a_t (get_self(), get_self().value);
+         AppState state = a_t.get_or_create (get_self(), AppState());
+
+         uint64_t return_senderid = state.last_sender_id;
+         return_senderid++;
+         state.last_sender_id = return_senderid;
+         a_t.set (state, get_self());
+         return return_senderid;
+      }
+
+      void debug (const string& notes) {
+         debug_table d_t (get_self(), get_self().value);
+         d_t.emplace (get_self(), [&](auto &d) {
+            d.debug_id = d_t.available_primary_key();
+            d.notes = notes;
+         });
+      }
 };
 
 #endif

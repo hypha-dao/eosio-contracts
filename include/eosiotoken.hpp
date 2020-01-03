@@ -63,12 +63,16 @@ using namespace eosio;
          using transfer_action = eosio::action_wrapper<"transfer"_n, &eosiotoken::transfer>;
          using open_action = eosio::action_wrapper<"open"_n, &eosiotoken::open>;
          using close_action = eosio::action_wrapper<"close"_n, &eosiotoken::close>;
-      private:
+
          struct [[eosio::table]] account {
             asset    balance;
 
             uint64_t primary_key()const { return balance.symbol.code().raw(); }
          };
+         typedef eosio::multi_index< "accounts"_n, account > accounts;
+
+      private:
+         
 
          struct [[eosio::table]] currency_stats {
             asset    supply;
@@ -78,7 +82,6 @@ using namespace eosio;
             uint64_t primary_key()const { return supply.symbol.code().raw(); }
          };
 
-         typedef eosio::multi_index< "accounts"_n, account > accounts;
          typedef eosio::multi_index< "stat"_n, currency_stats > stats;
 
          void sub_balance( name owner, asset value );

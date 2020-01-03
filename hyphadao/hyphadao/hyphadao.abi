@@ -4,6 +4,38 @@
     "types": [],
     "structs": [
         {
+            "name": "AppState",
+            "base": "",
+            "fields": [
+                {
+                    "name": "last_sender_id",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "Applicant",
+            "base": "",
+            "fields": [
+                {
+                    "name": "applicant",
+                    "type": "name"
+                },
+                {
+                    "name": "content",
+                    "type": "string"
+                },
+                {
+                    "name": "created_date",
+                    "type": "time_point"
+                },
+                {
+                    "name": "updated_date",
+                    "type": "time_point"
+                }
+            ]
+        },
+        {
             "name": "Assignment",
             "base": "",
             "fields": [
@@ -20,11 +52,15 @@
                     "type": "uint64"
                 },
                 {
-                    "name": "notes",
+                    "name": "title",
                     "type": "string"
                 },
                 {
-                    "name": "info_url",
+                    "name": "description",
+                    "type": "string"
+                },
+                {
+                    "name": "content",
                     "type": "string"
                 },
                 {
@@ -80,68 +116,6 @@
             ]
         },
         {
-            "name": "AssignmentProposal",
-            "base": "",
-            "fields": [
-                {
-                    "name": "proposal_id",
-                    "type": "uint64"
-                },
-                {
-                    "name": "ballot_id",
-                    "type": "uint64"
-                },
-                {
-                    "name": "proposer",
-                    "type": "name"
-                },
-                {
-                    "name": "assigned_account",
-                    "type": "name"
-                },
-                {
-                    "name": "role_id",
-                    "type": "uint64"
-                },
-                {
-                    "name": "info_url",
-                    "type": "string"
-                },
-                {
-                    "name": "notes",
-                    "type": "string"
-                },
-                {
-                    "name": "start_period",
-                    "type": "uint64"
-                },
-                {
-                    "name": "end_period",
-                    "type": "uint64"
-                },
-                {
-                    "name": "time_share",
-                    "type": "float32"
-                },
-                {
-                    "name": "status",
-                    "type": "uint8"
-                },
-                {
-                    "name": "trx",
-                    "type": "transaction"
-                },
-                {
-                    "name": "created_date",
-                    "type": "time_point"
-                },
-                {
-                    "name": "executed_date",
-                    "type": "time_point"
-                }
-            ]
-        },
-        {
             "name": "BankConfig",
             "base": "",
             "fields": [
@@ -154,58 +128,8 @@
                     "type": "name"
                 },
                 {
-                    "name": "preseeds_token_contract",
+                    "name": "seeds_token_contract",
                     "type": "name"
-                }
-            ]
-        },
-        {
-            "name": "BoardConfig",
-            "base": "",
-            "fields": [
-                {
-                    "name": "max_board_seats",
-                    "type": "uint8"
-                },
-                {
-                    "name": "open_seats",
-                    "type": "uint8"
-                },
-                {
-                    "name": "open_election_id",
-                    "type": "uint64"
-                },
-                {
-                    "name": "holder_quorum_divisor",
-                    "type": "uint32"
-                },
-                {
-                    "name": "board_quorum_divisor",
-                    "type": "uint32"
-                },
-                {
-                    "name": "issue_duration",
-                    "type": "uint32"
-                },
-                {
-                    "name": "start_delay",
-                    "type": "uint32"
-                },
-                {
-                    "name": "leaderboard_duration",
-                    "type": "uint32"
-                },
-                {
-                    "name": "election_frequency",
-                    "type": "uint32"
-                },
-                {
-                    "name": "last_board_election_time",
-                    "type": "uint32"
-                },
-                {
-                    "name": "is_active_election",
-                    "type": "bool"
                 }
             ]
         },
@@ -216,6 +140,28 @@
                 {
                     "name": "trail_contract",
                     "type": "name"
+                },
+                {
+                    "name": "last_ballot_id",
+                    "type": "name"
+                }
+            ]
+        },
+        {
+            "name": "Debug",
+            "base": "",
+            "fields": [
+                {
+                    "name": "debug_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "notes",
+                    "type": "string"
+                },
+                {
+                    "name": "created_date",
+                    "type": "time_point"
                 }
             ]
         },
@@ -225,16 +171,6 @@
             "fields": [
                 {
                     "name": "member",
-                    "type": "name"
-                }
-            ]
-        },
-        {
-            "name": "Nominee",
-            "base": "",
-            "fields": [
-                {
-                    "name": "nominee",
                     "type": "name"
                 }
             ]
@@ -274,64 +210,6 @@
             ]
         },
         {
-            "name": "PayoutProposal",
-            "base": "",
-            "fields": [
-                {
-                    "name": "proposal_id",
-                    "type": "uint64"
-                },
-                {
-                    "name": "ballot_id",
-                    "type": "uint64"
-                },
-                {
-                    "name": "recipient",
-                    "type": "name"
-                },
-                {
-                    "name": "notes",
-                    "type": "string"
-                },
-                {
-                    "name": "info_url",
-                    "type": "string"
-                },
-                {
-                    "name": "hypha_value",
-                    "type": "asset"
-                },
-                {
-                    "name": "preseeds_value",
-                    "type": "asset"
-                },
-                {
-                    "name": "voice_value",
-                    "type": "asset"
-                },
-                {
-                    "name": "status",
-                    "type": "uint8"
-                },
-                {
-                    "name": "trx",
-                    "type": "transaction"
-                },
-                {
-                    "name": "created_date",
-                    "type": "time_point"
-                },
-                {
-                    "name": "executed_date",
-                    "type": "time_point"
-                },
-                {
-                    "name": "contribution_date",
-                    "type": "time_point"
-                }
-            ]
-        },
-        {
             "name": "Period",
             "base": "",
             "fields": [
@@ -358,40 +236,48 @@
             "base": "",
             "fields": [
                 {
-                    "name": "proposal_id",
+                    "name": "id",
                     "type": "uint64"
+                },
+                {
+                    "name": "names",
+                    "type": "pair_string_name[]"
+                },
+                {
+                    "name": "strings",
+                    "type": "pair_string_string[]"
+                },
+                {
+                    "name": "assets",
+                    "type": "pair_string_asset[]"
+                },
+                {
+                    "name": "time_points",
+                    "type": "pair_string_time_point[]"
+                },
+                {
+                    "name": "ints",
+                    "type": "pair_string_uint64[]"
+                },
+                {
+                    "name": "trxs",
+                    "type": "pair_string_transaction[]"
+                },
+                {
+                    "name": "floats",
+                    "type": "pair_string_float32[]"
                 },
                 {
                     "name": "proposer",
                     "type": "name"
                 },
                 {
-                    "name": "proposal_name",
-                    "type": "name"
+                    "name": "created_date",
+                    "type": "time_point"
                 },
                 {
-                    "name": "notes",
-                    "type": "string"
-                },
-                {
-                    "name": "info_url",
-                    "type": "string"
-                },
-                {
-                    "name": "ballot_id",
-                    "type": "uint64"
-                },
-                {
-                    "name": "trx",
-                    "type": "transaction"
-                },
-                {
-                    "name": "proposal_type",
-                    "type": "uint8"
-                },
-                {
-                    "name": "proposal_fk",
-                    "type": "uint64"
+                    "name": "updated_date",
+                    "type": "time_point"
                 }
             ]
         },
@@ -404,7 +290,7 @@
                     "type": "uint64"
                 },
                 {
-                    "name": "role_name",
+                    "name": "title",
                     "type": "string"
                 },
                 {
@@ -412,11 +298,15 @@
                     "type": "string"
                 },
                 {
+                    "name": "content",
+                    "type": "string"
+                },
+                {
                     "name": "hypha_salary",
                     "type": "asset"
                 },
                 {
-                    "name": "preseeds_salary",
+                    "name": "seeds_salary",
                     "type": "asset"
                 },
                 {
@@ -442,140 +332,6 @@
             ]
         },
         {
-            "name": "RoleProposal",
-            "base": "",
-            "fields": [
-                {
-                    "name": "proposal_id",
-                    "type": "uint64"
-                },
-                {
-                    "name": "ballot_id",
-                    "type": "uint64"
-                },
-                {
-                    "name": "proposer",
-                    "type": "name"
-                },
-                {
-                    "name": "role_name",
-                    "type": "string"
-                },
-                {
-                    "name": "info_url",
-                    "type": "string"
-                },
-                {
-                    "name": "description",
-                    "type": "string"
-                },
-                {
-                    "name": "hypha_salary",
-                    "type": "asset"
-                },
-                {
-                    "name": "preseeds_salary",
-                    "type": "asset"
-                },
-                {
-                    "name": "voice_salary",
-                    "type": "asset"
-                },
-                {
-                    "name": "status",
-                    "type": "uint8"
-                },
-                {
-                    "name": "trx",
-                    "type": "transaction"
-                },
-                {
-                    "name": "start_period",
-                    "type": "uint64"
-                },
-                {
-                    "name": "end_period",
-                    "type": "uint64"
-                },
-                {
-                    "name": "created_date",
-                    "type": "time_point"
-                },
-                {
-                    "name": "executed_date",
-                    "type": "time_point"
-                }
-            ]
-        },
-        {
-            "name": "RoleProposalOld",
-            "base": "",
-            "fields": [
-                {
-                    "name": "proposal_id",
-                    "type": "uint64"
-                },
-                {
-                    "name": "ballot_id",
-                    "type": "uint64"
-                },
-                {
-                    "name": "proposer",
-                    "type": "name"
-                },
-                {
-                    "name": "role_name",
-                    "type": "string"
-                },
-                {
-                    "name": "info_url",
-                    "type": "string"
-                },
-                {
-                    "name": "description",
-                    "type": "string"
-                },
-                {
-                    "name": "hypha_salary",
-                    "type": "asset"
-                },
-                {
-                    "name": "preseeds_salary",
-                    "type": "asset"
-                },
-                {
-                    "name": "voice_salary",
-                    "type": "asset"
-                },
-                {
-                    "name": "status",
-                    "type": "uint8"
-                },
-                {
-                    "name": "trx",
-                    "type": "transaction"
-                },
-                {
-                    "name": "created_date",
-                    "type": "time_point"
-                },
-                {
-                    "name": "executed_date",
-                    "type": "time_point"
-                }
-            ]
-        },
-        {
-            "name": "Steward",
-            "base": "",
-            "fields": [
-                {
-                    "name": "member",
-                    "type": "name"
-                }
-            ]
-        },
-        {
             "name": "action",
             "base": "",
             "fields": [
@@ -594,20 +350,6 @@
                 {
                     "name": "data",
                     "type": "bytes"
-                }
-            ]
-        },
-        {
-            "name": "addcand",
-            "base": "",
-            "fields": [
-                {
-                    "name": "nominee",
-                    "type": "name"
-                },
-                {
-                    "name": "info_url",
-                    "type": "string"
                 }
             ]
         },
@@ -640,6 +382,20 @@
             ]
         },
         {
+            "name": "apply",
+            "base": "",
+            "fields": [
+                {
+                    "name": "applicant",
+                    "type": "name"
+                },
+                {
+                    "name": "content",
+                    "type": "string"
+                }
+            ]
+        },
+        {
             "name": "assign",
             "base": "",
             "fields": [
@@ -654,58 +410,63 @@
             "base": "",
             "fields": [
                 {
+                    "name": "proposal_type",
+                    "type": "name"
+                },
+                {
                     "name": "proposal_id",
                     "type": "uint64"
                 }
             ]
         },
         {
-            "name": "copyroleback",
-            "base": "",
-            "fields": []
-        },
-        {
-            "name": "delassprop",
+            "name": "clrdebugs",
             "base": "",
             "fields": [
                 {
-                    "name": "assprop_id",
+                    "name": "starting_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "batch_size",
                     "type": "uint64"
                 }
             ]
         },
         {
-            "name": "delpayprop",
+            "name": "enroll",
             "base": "",
             "fields": [
                 {
-                    "name": "payprop_id",
-                    "type": "uint64"
-                }
-            ]
-        },
-        {
-            "name": "delroleprop",
-            "base": "",
-            "fields": [
-                {
-                    "name": "roleprop_id",
-                    "type": "uint64"
-                }
-            ]
-        },
-        {
-            "name": "endelection",
-            "base": "",
-            "fields": [
-                {
-                    "name": "holder",
+                    "name": "enroller",
                     "type": "name"
+                },
+                {
+                    "name": "applicant",
+                    "type": "name"
+                },
+                {
+                    "name": "content",
+                    "type": "string"
                 }
             ]
         },
         {
             "name": "eraseprop",
+            "base": "",
+            "fields": [
+                {
+                    "name": "proposal_type",
+                    "type": "name"
+                },
+                {
+                    "name": "proposal_id",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "exectrx",
             "base": "",
             "fields": [
                 {
@@ -725,45 +486,6 @@
                 {
                     "name": "data",
                     "type": "bytes"
-                }
-            ]
-        },
-        {
-            "name": "init",
-            "base": "",
-            "fields": []
-        },
-        {
-            "name": "inithvoice",
-            "base": "",
-            "fields": [
-                {
-                    "name": "initial_info_link",
-                    "type": "string"
-                }
-            ]
-        },
-        {
-            "name": "initsteward",
-            "base": "",
-            "fields": [
-                {
-                    "name": "initial_info_link",
-                    "type": "string"
-                }
-            ]
-        },
-        {
-            "name": "makeelection",
-            "base": "",
-            "fields": [
-                {
-                    "name": "holder",
-                    "type": "name"
-                },
-                {
-                    "name": "info_url",
-                    "type": "string"
                 }
             ]
         },
@@ -788,16 +510,100 @@
             ]
         },
         {
-            "name": "nominate",
+            "name": "pair_string_asset",
             "base": "",
             "fields": [
                 {
-                    "name": "nominee",
-                    "type": "name"
+                    "name": "key",
+                    "type": "string"
                 },
                 {
-                    "name": "nominator",
+                    "name": "value",
+                    "type": "asset"
+                }
+            ]
+        },
+        {
+            "name": "pair_string_float32",
+            "base": "",
+            "fields": [
+                {
+                    "name": "key",
+                    "type": "string"
+                },
+                {
+                    "name": "value",
+                    "type": "float32"
+                }
+            ]
+        },
+        {
+            "name": "pair_string_name",
+            "base": "",
+            "fields": [
+                {
+                    "name": "key",
+                    "type": "string"
+                },
+                {
+                    "name": "value",
                     "type": "name"
+                }
+            ]
+        },
+        {
+            "name": "pair_string_string",
+            "base": "",
+            "fields": [
+                {
+                    "name": "key",
+                    "type": "string"
+                },
+                {
+                    "name": "value",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "pair_string_time_point",
+            "base": "",
+            "fields": [
+                {
+                    "name": "key",
+                    "type": "string"
+                },
+                {
+                    "name": "value",
+                    "type": "time_point"
+                }
+            ]
+        },
+        {
+            "name": "pair_string_transaction",
+            "base": "",
+            "fields": [
+                {
+                    "name": "key",
+                    "type": "string"
+                },
+                {
+                    "name": "value",
+                    "type": "transaction"
+                }
+            ]
+        },
+        {
+            "name": "pair_string_uint64",
+            "base": "",
+            "fields": [
+                {
+                    "name": "key",
+                    "type": "string"
+                },
+                {
+                    "name": "value",
+                    "type": "uint64"
                 }
             ]
         },
@@ -830,130 +636,36 @@
             ]
         },
         {
-            "name": "propassign",
+            "name": "propose",
             "base": "",
             "fields": [
                 {
-                    "name": "proposer",
-                    "type": "name"
+                    "name": "names",
+                    "type": "pair_string_name[]"
                 },
                 {
-                    "name": "assigned_account",
-                    "type": "name"
+                    "name": "strings",
+                    "type": "pair_string_string[]"
                 },
                 {
-                    "name": "role_id",
-                    "type": "uint64"
+                    "name": "assets",
+                    "type": "pair_string_asset[]"
                 },
                 {
-                    "name": "info_url",
-                    "type": "string"
+                    "name": "time_points",
+                    "type": "pair_string_time_point[]"
                 },
                 {
-                    "name": "notes",
-                    "type": "string"
+                    "name": "ints",
+                    "type": "pair_string_uint64[]"
                 },
                 {
-                    "name": "start_period",
-                    "type": "uint64"
+                    "name": "floats",
+                    "type": "pair_string_float32[]"
                 },
                 {
-                    "name": "end_period",
-                    "type": "uint64"
-                },
-                {
-                    "name": "time_share",
-                    "type": "float32"
-                }
-            ]
-        },
-        {
-            "name": "proposerole",
-            "base": "",
-            "fields": [
-                {
-                    "name": "proposer",
-                    "type": "name"
-                },
-                {
-                    "name": "role_name",
-                    "type": "string"
-                },
-                {
-                    "name": "info_url",
-                    "type": "string"
-                },
-                {
-                    "name": "description",
-                    "type": "string"
-                },
-                {
-                    "name": "hypha_salary",
-                    "type": "asset"
-                },
-                {
-                    "name": "preseeds_salary",
-                    "type": "asset"
-                },
-                {
-                    "name": "voice_salary",
-                    "type": "asset"
-                },
-                {
-                    "name": "start_period",
-                    "type": "uint64"
-                },
-                {
-                    "name": "end_period",
-                    "type": "uint64"
-                }
-            ]
-        },
-        {
-            "name": "proppayout",
-            "base": "",
-            "fields": [
-                {
-                    "name": "proposer",
-                    "type": "name"
-                },
-                {
-                    "name": "recipient",
-                    "type": "name"
-                },
-                {
-                    "name": "notes",
-                    "type": "string"
-                },
-                {
-                    "name": "info_url",
-                    "type": "string"
-                },
-                {
-                    "name": "hypha_value",
-                    "type": "asset"
-                },
-                {
-                    "name": "preseeds_value",
-                    "type": "asset"
-                },
-                {
-                    "name": "voice_value",
-                    "type": "asset"
-                },
-                {
-                    "name": "contribution_date",
-                    "type": "time_point"
-                }
-            ]
-        },
-        {
-            "name": "removecand",
-            "base": "",
-            "fields": [
-                {
-                    "name": "candidate",
-                    "type": "name"
+                    "name": "trxs",
+                    "type": "pair_string_transaction[]"
                 }
             ]
         },
@@ -964,6 +676,20 @@
                 {
                     "name": "member_to_remove",
                     "type": "name"
+                }
+            ]
+        },
+        {
+            "name": "remperiods",
+            "base": "",
+            "fields": [
+                {
+                    "name": "begin_period_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "end_period_id",
+                    "type": "uint64"
                 }
             ]
         },
@@ -992,36 +718,12 @@
             ]
         },
         {
-            "name": "setvconfig",
+            "name": "setlastballt",
             "base": "",
             "fields": [
                 {
-                    "name": "max_board_seats",
-                    "type": "uint8"
-                },
-                {
-                    "name": "open_seats",
-                    "type": "uint8"
-                },
-                {
-                    "name": "holder_quorum_divisor",
-                    "type": "uint32"
-                },
-                {
-                    "name": "board_quorum_divisor",
-                    "type": "uint32"
-                },
-                {
-                    "name": "issue_duration",
-                    "type": "uint32"
-                },
-                {
-                    "name": "start_delay",
-                    "type": "uint32"
-                },
-                {
-                    "name": "election_frequency",
-                    "type": "uint32"
+                    "name": "last_ballot_id",
+                    "type": "name"
                 }
             ]
         },
@@ -1076,11 +778,6 @@
     ],
     "actions": [
         {
-            "name": "addcand",
-            "type": "addcand",
-            "ricardian_contract": ""
-        },
-        {
             "name": "addmember",
             "type": "addmember",
             "ricardian_contract": ""
@@ -1088,6 +785,11 @@
         {
             "name": "addperiod",
             "type": "addperiod",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "apply",
+            "type": "apply",
             "ricardian_contract": ""
         },
         {
@@ -1101,28 +803,13 @@
             "ricardian_contract": ""
         },
         {
-            "name": "copyroleback",
-            "type": "copyroleback",
+            "name": "clrdebugs",
+            "type": "clrdebugs",
             "ricardian_contract": ""
         },
         {
-            "name": "delassprop",
-            "type": "delassprop",
-            "ricardian_contract": ""
-        },
-        {
-            "name": "delpayprop",
-            "type": "delpayprop",
-            "ricardian_contract": ""
-        },
-        {
-            "name": "delroleprop",
-            "type": "delroleprop",
-            "ricardian_contract": ""
-        },
-        {
-            "name": "endelection",
-            "type": "endelection",
+            "name": "enroll",
+            "type": "enroll",
             "ricardian_contract": ""
         },
         {
@@ -1131,23 +818,8 @@
             "ricardian_contract": ""
         },
         {
-            "name": "init",
-            "type": "init",
-            "ricardian_contract": ""
-        },
-        {
-            "name": "inithvoice",
-            "type": "inithvoice",
-            "ricardian_contract": ""
-        },
-        {
-            "name": "initsteward",
-            "type": "initsteward",
-            "ricardian_contract": ""
-        },
-        {
-            "name": "makeelection",
-            "type": "makeelection",
+            "name": "exectrx",
+            "type": "exectrx",
             "ricardian_contract": ""
         },
         {
@@ -1161,38 +833,23 @@
             "ricardian_contract": ""
         },
         {
-            "name": "nominate",
-            "type": "nominate",
-            "ricardian_contract": ""
-        },
-        {
             "name": "payassign",
             "type": "payassign",
             "ricardian_contract": ""
         },
         {
-            "name": "propassign",
-            "type": "propassign",
-            "ricardian_contract": ""
-        },
-        {
-            "name": "proposerole",
-            "type": "proposerole",
-            "ricardian_contract": ""
-        },
-        {
-            "name": "proppayout",
-            "type": "proppayout",
-            "ricardian_contract": ""
-        },
-        {
-            "name": "removecand",
-            "type": "removecand",
+            "name": "propose",
+            "type": "propose",
             "ricardian_contract": ""
         },
         {
             "name": "removemember",
             "type": "removemember",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "remperiods",
+            "type": "remperiods",
             "ricardian_contract": ""
         },
         {
@@ -1211,12 +868,26 @@
             "ricardian_contract": ""
         },
         {
-            "name": "setvconfig",
-            "type": "setvconfig",
+            "name": "setlastballt",
+            "type": "setlastballt",
             "ricardian_contract": ""
         }
     ],
     "tables": [
+        {
+            "name": "applicants",
+            "type": "Applicant",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "appstates",
+            "type": "AppState",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
         {
             "name": "assignments",
             "type": "Assignment",
@@ -1232,22 +903,8 @@
             "key_types": []
         },
         {
-            "name": "assprops",
-            "type": "AssignmentProposal",
-            "index_type": "i64",
-            "key_names": [],
-            "key_types": []
-        },
-        {
             "name": "bankconfig",
             "type": "BankConfig",
-            "index_type": "i64",
-            "key_names": [],
-            "key_types": []
-        },
-        {
-            "name": "bconfig",
-            "type": "BoardConfig",
             "index_type": "i64",
             "key_names": [],
             "key_types": []
@@ -1260,6 +917,13 @@
             "key_types": []
         },
         {
+            "name": "debugs",
+            "type": "Debug",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
             "name": "members",
             "type": "Member",
             "index_type": "i64",
@@ -1267,22 +931,8 @@
             "key_types": []
         },
         {
-            "name": "nominees",
-            "type": "Nominee",
-            "index_type": "i64",
-            "key_names": [],
-            "key_types": []
-        },
-        {
             "name": "payments",
             "type": "Payment",
-            "index_type": "i64",
-            "key_names": [],
-            "key_types": []
-        },
-        {
-            "name": "payoutprops",
-            "type": "PayoutProposal",
             "index_type": "i64",
             "key_names": [],
             "key_types": []
@@ -1302,29 +952,8 @@
             "key_types": []
         },
         {
-            "name": "roleprops",
-            "type": "RoleProposal",
-            "index_type": "i64",
-            "key_names": [],
-            "key_types": []
-        },
-        {
-            "name": "rolepropsbu",
-            "type": "RoleProposalOld",
-            "index_type": "i64",
-            "key_names": [],
-            "key_types": []
-        },
-        {
             "name": "roles",
             "type": "Role",
-            "index_type": "i64",
-            "key_names": [],
-            "key_types": []
-        },
-        {
-            "name": "stewards",
-            "type": "Steward",
             "index_type": "i64",
             "key_names": [],
             "key_types": []

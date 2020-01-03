@@ -6,6 +6,7 @@
 #include <eosio/singleton.hpp>
 #include <eosio/multi_index.hpp>
 
+#include "eosiotoken.hpp"
 #include "common.hpp"
 
 using namespace eosio;
@@ -17,9 +18,9 @@ class Bank {
 
         struct [[ eosio::table, eosio::contract("hyphadao") ]] BankConfig
         {
-            name           hypha_token_contract    = "hyphatoken"_n;
-            name           voice_token_contract    = "hyphatoken"_n;
-            name           preseeds_token_contract = "hyphatoken"_n;
+            name           hypha_token_contract     = "hyphatoken"_n;
+            name           voice_token_contract     = "hyphatoken"_n;
+            name           seeds_token_contract     = "hyphatoken"_n;
         };
 
         struct [[eosio::table, eosio::contract("hyphadao") ]] Period
@@ -73,14 +74,27 @@ class Bank {
        void reset () {
             require_auth (contract);
             bankconfig_s.remove ();
-            auto per_itr = period_t.begin();
-            while (per_itr != period_t.end()) {
-                per_itr = period_t.erase (per_itr);
-            }
-
+            
             auto pay_itr = payment_t.begin();
             while (pay_itr != payment_t.end()) {
                 pay_itr = payment_t.erase (pay_itr);
+            }
+        }
+
+        void reset_config () {
+            require_auth (contract);
+            bankconfig_s.remove ();
+        }
+
+        void remove_periods (const uint64_t& begin_period_id, 
+                           const uint64_t& end_period_id) {
+            require_auth (contract);
+
+            auto p_itr = period_t.find (begin_period_id);
+            check (p_itr != period_t.end(), "Begin period ID not found: " + std::to_string(begin_period_id));
+
+            while (p_itr->period_id <= end_period_id) {
+                p_itr = period_t.erase (p_itr);
             }
         }
 
@@ -93,15 +107,17 @@ class Bank {
         }
 
         void set_config  (const name& hypha_token_contract, 
-                                const name& preseeds_token_contract) {
+                            const name& seeds_token_contract,
+                            const name& trail_contract) {
             require_auth (contract);
 
             check (is_account(hypha_token_contract), "HYPHA token contract is not an account: " + hypha_token_contract.to_string());
-            check (is_account(preseeds_token_contract), "HYPHA token contract is not an account: " + preseeds_token_contract.to_string());
+            check (is_account(seeds_token_contract), "HYPHA token contract is not an account: " + seeds_token_contract.to_string());
 
             BankConfig bc = bankconfig_s.get_or_create (contract, BankConfig());
             bc.hypha_token_contract = hypha_token_contract;
-            bc.preseeds_token_contract = preseeds_token_contract;
+            bc.seeds_token_contract = seeds_token_contract;
+            bc.voice_token_contract = trail_contract;
             bankconfig_s.set (bc, contract);
         }
                                 
@@ -114,8 +130,8 @@ class Bank {
             if (quantity.symbol == common::S_HVOICE) {
                 action(
                     permission_level{contract, "active"_n},
-                    "eosio.trail"_n, "issuetoken"_n,
-                    std::make_tuple(contract, recipient, quantity, false))
+                    bc.voice_token_contract, "mint"_n,
+                    std::make_tuple(recipient, quantity, memo))
                 .send();
             } else {
                 issuetoken (bc.hypha_token_contract, recipient, quantity, memo );
@@ -156,8 +172,29 @@ class Bank {
             action(
                 permission_level{contract, "active"_n},
                 token_contract, "issue"_n,
-                std::make_tuple(to, token_amount, memo))
+                std::make_tuple(contract, token_amount, memo))
             .send();
+
+            action(
+                permission_level{contract, "active"_n},
+                token_contract, "transfer"_n,
+                std::make_tuple(contract, to, token_amount, memo))
+            .send();
+        }
+
+        bool holds_hypha (const name& account) 
+        {
+            BankConfig bc = bankconfig_s.get_or_create (contract, BankConfig());
+
+            eosiotoken::accounts a_t (bc.hypha_token_contract, account.value);
+            auto a_itr = a_t.find (common::S_HYPHA.code().raw());
+            if (a_itr == a_t.end()) {
+                return false;
+            } else if (a_itr->balance.amount > 0) {
+                return true;
+            } else {
+                return false;
+            }
         }
 
 };

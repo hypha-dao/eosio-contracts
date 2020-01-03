@@ -1,0 +1,59 @@
+{
+  "data": {
+    "names": [
+      {
+        "key":"proposal_type",
+        "value":"roles"
+      },
+      {
+        "key":"proposer",
+        "value":"johnnyhypha1"
+      },
+      {
+        "key":"trx_action_name",
+        "value":"newrole"
+      }
+    ],
+    "strings": [
+      {
+        "key": "title",
+        "value": "Underwater Basketweaver"
+      },
+      {
+        "key": "description",
+        "value": "Weave baskets at the bottom of the sea"
+      },
+      {
+        "key": "content",
+        "value": "We make *great* baskets."
+      }
+    ],
+    "assets": [
+      {
+        "key": "hypha_amount",
+        "value": "11 HYPHA"
+      },
+      {
+        "key": "seeds_amount",
+        "value": "11.00000000 SEEDS"
+      },
+      {
+        "key": "hvoice_amount",
+        "value": "11 HVOICE"
+      }
+    ],
+    "time_points": [],
+    "ints": [
+      {
+        "key": "start_period",
+        "value": "250"
+      },
+      {
+        "key": "end_period",
+        "value": "331"
+      }
+    ],
+    "floats": [],
+    "trxs": []
+  }
+}

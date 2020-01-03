@@ -1,0 +1,59 @@
+{
+  "data": {
+    "names": [
+      {
+        "key": "assigned_account",
+        "value": "johnnyhypha1"
+      },
+      {
+        "key":"proposer",
+        "value":"johnnyhypha1"
+      },
+      {
+        "key":"proposal_type",
+        "value":"assignments"
+      },
+      {
+        "key":"trx_action_name",
+        "value": "assign"
+      }
+    ],
+    "strings": [
+      {
+        "key": "title",
+        "value": "Underwater Basketweaver - Atlantic"
+      },
+      {
+        "key": "description",
+        "value": "Weave baskets at the bottom of the sea - Atlantic Ocean"
+      },
+      {
+        "key": "content",
+        "value": "We make *great* baskets. The unique seaweed of the caribbean makes strong baskets."
+      }
+    ],
+    "assets": [],
+    "time_points": [],
+    "ints": [
+      {
+        "key": "start_period",
+        "value": "250"
+      },
+      {
+        "key": "end_period",
+        "value": "331"
+      },
+      {
+        "key": "role_id",
+        "value": "0"
+      }
+    ],
+    "floats": [
+      {
+        "key": "time_share",
+        "value": "1.000000000000"
+      }
+    ],
+    "trxs": []
+  }
+}
