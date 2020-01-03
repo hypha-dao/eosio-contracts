@@ -10,6 +10,7 @@
 #include "common.hpp"
 
 using namespace eosio;
+using std::vector;
 using std::string;
 
 class Holocracy {
@@ -19,10 +20,11 @@ class Holocracy {
         struct [[eosio::table, eosio::contract("hyphadao") ]] Role
         {
             uint64_t        role_id                 = 0;
-            string          role_name               ;
+            string          title                   ;
             string          description             ;
+            string          content                 ;
             asset           hypha_salary            = asset { 0, common::S_HYPHA };
-            asset           preseeds_salary         = asset { 0, common::S_PRESEEDS };
+            asset           seeds_salary            = asset { 0, common::S_SEEDS };
             asset           voice_salary            = asset { 0, common::S_HVOICE };
             uint64_t        start_period            ;
             uint64_t        end_period              ;
@@ -38,8 +40,9 @@ class Holocracy {
             uint64_t        assignment_id           = 0;
             name            assigned_account        ;
             uint64_t        role_id                 ;
-            string          notes                   ;
-            string          info_url                ;
+            string          title                   ;
+            string          description             ;
+            string          content                 ;
             uint64_t        start_period            ;
             uint64_t        end_period              ;
             float           time_share              = 0.000000000000000;
@@ -113,22 +116,26 @@ class Holocracy {
             }
         }
 
-        void newrole (  const string& role_name, 
+        void newrole (  const string& title, 
                         const string& description,
+                        const string& content,
                         const asset& hypha_salary,
-                        const asset& preseeds_salary,
+                        const asset& seeds_salary,
                         const asset& voice_salary,
                         const uint64_t& start_period,
                         const uint64_t& end_period) {
 
             require_auth (contract);
 
+            check (end_period >= start_period, "End period must be greater than or equal to start period.");
+
             role_t.emplace (contract, [&](auto &r) {
                 r.role_id           = role_t.available_primary_key();
-                r.role_name         = role_name;
+                r.title             = title;
                 r.description       = description;
+                r.content           = content;
                 r.hypha_salary      = hypha_salary;
-                r.preseeds_salary   = preseeds_salary;
+                r.seeds_salary      = seeds_salary;
                 r.voice_salary      = voice_salary;
                 r.start_period      = start_period;
                 r.end_period        = end_period;
@@ -151,16 +158,17 @@ class Holocracy {
 
         void newassign (const name&         assigned_account,
                         const uint64_t&     role_id,
-                        const string&       info_url,
-                        const string&       notes,
+                        const string&       title,
+                        const string&       description,
+                        const string&       content,
                         const uint64_t&     start_period,
                         const uint64_t&     end_period,
                         const float&        time_share) {
                                 
             require_auth (contract);
 
+            // ensure that the account doesn't already have this role
             auto sorted_by_assigned = assignment_t.get_index<"byassigned"_n>();
-
             auto a_itr = sorted_by_assigned.begin();
             while (a_itr != sorted_by_assigned.end()) {
                 check (! (a_itr->role_id == role_id && a_itr->assigned_account == assigned_account), "Assigned account already has this role. Assigned account: " 
@@ -169,15 +177,16 @@ class Holocracy {
             }
 
             assignment_t.emplace (contract, [&](auto &a) {
-                a.assignment_id      = assignment_t.available_primary_key();
-                a.assigned_account   = assigned_account;
-                a.role_id            = role_id;
-                a.info_url           = info_url;
-                a.notes              = notes;
-                a.time_share         = time_share;
-                a.start_period       = start_period;
+                a.assignment_id     = assignment_t.available_primary_key();
+                a.assigned_account  = assigned_account;
+                a.role_id           = role_id;
+                a.title             = title;
+                a.description       = description;
+                a.content           = content;
+                a.time_share        = time_share;
+                a.start_period      = start_period;
                 a.end_period        = end_period;
-                a.created_date       = current_block_time().to_time_point();
+                a.created_date      = current_block_time().to_time_point();
             });
         }
 
@@ -190,10 +199,6 @@ class Holocracy {
                 "Cannot delete assignment. Assignment ID does not exist: " + std::to_string(assignment_id));
             assignment_t.erase (a_itr);
         }
-
-        asset adjust_asset (const asset& original_asset, const float& adjustment) {
-            return asset { static_cast<int64_t> (original_asset.amount * adjustment), original_asset.symbol };
-        }   
 
         void payassign (const uint64_t& assignment_id, const uint64_t& period_id) {
 
@@ -220,6 +225,12 @@ class Holocracy {
             check (p_itr->end_date.sec_since_epoch() < current_block_time().to_time_point().sec_since_epoch(), 
                 "Cannot make payment. Period ID " + std::to_string(period_id) + " has not closed yet.");
 
+            // debug ( "Assignment created date : " + a_itr->created_date.to_string() + "; Seconds    : " + std::to_string(a_itr->created_date.sec_since_epoch()));
+            // debug ( "Period end              : " + p_itr->end_date.to_string() + ";  Seconds: " + std::to_string(p_itr->end_date.sec_since_epoch()));
+
+            debug ( "Assignment created date Seconds    : " + std::to_string(a_itr->created_date.sec_since_epoch()));
+            debug ( "Period end Seconds : " + std::to_string(p_itr->end_date.sec_since_epoch()));
+
             // check that the creation date of the assignment is before the end of the period
             check (a_itr->created_date.sec_since_epoch() < p_itr->end_date.sec_since_epoch(), 
                 "Cannot make payment to assignment. Assignment was not approved before this period.");
@@ -239,9 +250,9 @@ class Holocracy {
                                     ( (float) p_itr->end_date.sec_since_epoch() - p_itr->start_date.sec_since_epoch());
             }
 
-            print ("Time share used in payout calculation: ", std::to_string(time_share_calc), "\n");
+            // print ("Time share used in payout calculation: ", std::to_string(time_share_calc), "\n");
             asset hypha_payment = adjust_asset(r_itr->hypha_salary, time_share_calc);
-            asset preseeds_payment = adjust_asset(r_itr->preseeds_salary, time_share_calc);
+            asset seeds_payment = adjust_asset(r_itr->seeds_salary, time_share_calc);
             asset voice_payment = adjust_asset(r_itr->voice_salary, time_share_calc);
 
             asspay_t.emplace (contract, [&](auto &a) {
@@ -251,7 +262,7 @@ class Holocracy {
                 a.period_id             = period_id;
                 a.payment_date          = current_block_time().to_time_point();
                 a.payments.push_back (hypha_payment);
-                a.payments.push_back (preseeds_payment);
+                a.payments.push_back (seeds_payment);
                 a.payments.push_back (voice_payment);
             });
 
@@ -259,13 +270,35 @@ class Holocracy {
                 "Payment for role " + std::to_string(a_itr->role_id) + "; Period ID: " + std::to_string(period_id),
                 assignment_id);
 
-            bank.makepayment (period_id, a_itr->assigned_account, preseeds_payment, 
+            bank.makepayment (period_id, a_itr->assigned_account, seeds_payment, 
                 "Payment for role " + std::to_string(a_itr->role_id) + "; Period ID: " + std::to_string(period_id),
                 assignment_id);
 
             bank.makepayment (period_id, a_itr->assigned_account, voice_payment, 
                 "Payment for role " + std::to_string(a_itr->role_id) + "; Period ID: " + std::to_string(period_id),
                 assignment_id);
+        }
+
+        asset adjust_asset (const asset& original_asset, const float& adjustment) {
+            return asset { static_cast<int64_t> (original_asset.amount * adjustment), original_asset.symbol };
+        }   
+
+        struct [[eosio::table, eosio::contract("hyphadao") ]] Debug
+        {
+            uint64_t    debug_id;
+            string      notes;
+            time_point  created_date = current_time_point();
+            uint64_t    primary_key()  const { return debug_id; }
+        };
+
+        typedef multi_index<"debugs"_n, Debug> debug_table;
+
+        void debug (const string& notes) {
+            debug_table d_t (contract, contract.value);
+            d_t.emplace (contract, [&](auto &d) {
+                d.debug_id = d_t.available_primary_key();
+                d.notes = notes;
+            });
         }
 };
 

@@ -1,0 +1,90 @@
+{
+  "data": {
+    "names": [
+      {
+        "key": "proposal_type",
+        "value": "transactions"
+      },
+      {
+        "key": "proposer",
+        "value": "johnnyhypha1"
+      },
+      {
+        "key": "trx_action_name",
+        "value": "exectrx"
+      }
+    ],
+    "strings": [
+      {
+        "key": "title",
+        "value": "Sends a transfer to Johnny and Samantha for the project"
+      },
+      {
+        "key": "description",
+        "value": "description"
+      },
+      {
+        "key": "content",
+        "value": "content"
+      }
+    ],
+    "assets": [],
+    "time_points": [],
+    "ints": [],
+    "floats": [],
+    "trxs": [
+      {
+        "key": "First transfer to send to Johnny",
+        "value": {
+          "expiration": "2019-12-23T21:14:59",
+          "ref_block_num": 46596,
+          "ref_block_prefix": 2054908746,
+          "max_net_usage_words": 0,
+          "max_cpu_usage_ms": 0,
+          "delay_sec": 0,
+          "context_free_actions": [],
+          "actions": [{
+              "account": "eosio.token",
+              "name": "transfer",
+              "authorization": [{
+                  "actor": "hyphadaomain",
+                  "permission": "active"
+                }
+              ],
+              "data": "309d91d424d3aa6f104cabbef9391b7d512c00000000000004544c4f530000001b74657374696e67206e617469766520617070726f76616c20747278"
+            }
+          ],
+          "transaction_extensions": [],
+          "signatures": [],
+          "context_free_data": []
+        }
+      },
+      {
+        "key": "Second transfer to send to Samantha",
+        "value": {
+          "expiration": "2019-12-23T21:15:45",
+          "ref_block_num": 46692,
+          "ref_block_prefix": 239391055,
+          "max_net_usage_words": 0,
+          "max_cpu_usage_ms": 0,
+          "delay_sec": 0,
+          "context_free_actions": [],
+          "actions": [{
+              "account": "eosio.token",
+              "name": "transfer",
+              "authorization": [{
+                  "actor": "hyphadaomain",
+                  "permission": "active"
+                }
+              ],
+              "data": "309d91d424d3aa6fd0aa6fa6e569a4c1016300000000000004544c4f530000001b74657374696e67206e617469766520617070726f76616c20747278"
+            }
+          ],
+          "transaction_extensions": [],
+          "signatures": [],
+          "context_free_data": []
+        }
+      }
+    ]
+  }
+}

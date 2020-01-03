@@ -8,14 +8,12 @@ const EOSIOTOKEN_WASM = "../hyphadac/hyphadao/eosiotoken/eosiotoken.wasm";
 const EOSIOTOKEN_ABI = "../hyphadac/hyphadao/eosiotoken/eosiotoken.abi";
 const TRAIL_WASM = "../telos.contracts/eosio.trail/eosio.trail.wasm";
 const TRAIL_ABI = "../telos.contracts/eosio.trail/eosio.trail.abi";
-// const BOARD_WASM = "../hyphadac/hyphadao/telos.tfvt/telos.tfvt.wasm";
-// const BOARD_ABI = "../hyphadac/hyphadao/telos.tfvt/telos.tfvt.abi";
 
 describe("HyphaDAC Testing", function() {
   this.timeout(150000);
 
-  let hyphadaoContract, eosTokenContract, trailContract, hyphaBoardContract;
-  let hyphadaoAccount, eosTokenAccount, trailAccount, hyphaBoardAccount;
+  let hyphadaoContract, eosTokenContract, trailContract;
+  let hyphadaoAccount, eosTokenAccount, trailAccount;
   let member1, member2, member3, member4, member5;
   let accounts;
 

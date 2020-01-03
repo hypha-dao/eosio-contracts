@@ -87,6 +87,7 @@ const addPeriodsSync = async (periods) => {
     } catch (e) {
       console.error(e)
       console.log('Please, fix an error and run script again')
+      process.exit (1);
     }
   }
 }
@@ -100,7 +101,7 @@ const loadPeriods = () => {
 
   handler.on('end', () => addPeriodsSync(periods))
 
-  fs.createReadStream("../moon_phases.csv").pipe(handler)
+  fs.createReadStream("../moon_phases_test.csv").pipe(handler)
 }
 
 const main = async () => {
