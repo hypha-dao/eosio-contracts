@@ -26,7 +26,7 @@ cleos -u https://test.telos.kitchen push action trailservice toggle '["0,HVOICE"
 cleos -u https://test.telos.kitchen push action trailservice regvoter '["hyphadaomain", "0,HVOICE", null]' -p hyphadaomain
 cleos -u https://test.telos.kitchen push action trailservice mint '["hyphadaomain", "1 HVOICE", "original mint"]' -p hyphadaomain
 
-cleos -u https://test.telos.kitchen push action trailservice regvoter '["haydenhypha1", "0,HVOICE", null]' -p haydenhypha1
+cleos -u https://test.telos.kitchen push action trailservice regvoter '["haydenhypha1", "0,HYPHA", null]' -p haydenhypha1
 cleos -u https://test.telos.kitchen push action trailservice mint '["haydenhypha1", "1 HVOICE", "original mint"]' -p hyphadaomain
 
 cleos -u https://test.telos.kitchen push action trailservice castvote '["haydenhypha1", "hypha1......2", ["pass"]]' -p haydenhypha1

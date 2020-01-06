@@ -22,23 +22,23 @@ void hyphadao::reset () {
 	holocracy.reset ();
 	// bank.reset_config ();
 
-	proposal_table p_t (get_self(), "roles"_n.value);
+	proposal_table p_t (get_self(),get_self().value);
 	auto  p_itr = p_t.begin();
 	while (p_itr != p_t.end()) {
 		p_itr = p_t.erase (p_itr);
 	}
 
-	p_t = proposal_table (get_self(), "assignments"_n.value);
-	p_itr = p_t.begin();
-	while (p_itr != p_t.end()) {
-		p_itr = p_t.erase (p_itr);
-	}
+	// p_t = proposal_table (get_self(), "assignments"_n.value);
+	// p_itr = p_t.begin();
+	// while (p_itr != p_t.end()) {
+	// 	p_itr = p_t.erase (p_itr);
+	// }
 
-	p_t = proposal_table (get_self(), "payouts"_n.value);
-	p_itr = p_t.begin();
-	while (p_itr != p_t.end()) {
-		p_itr = p_t.erase (p_itr);
-	}
+	// p_t = proposal_table (get_self(), "payouts"_n.value);
+	// p_itr = p_t.begin();
+	// while (p_itr != p_t.end()) {
+	// 	p_itr = p_t.erase (p_itr);
+	// }
 
 	// config_table      config_s (get_self(), get_self().value);
    	// DAOConfig c = config_s.get_or_create (get_self(), DAOConfig()); 
@@ -199,12 +199,11 @@ void hyphadao::propose (const map<string, name> 		names,
 						const map<string, transaction>  trxs)
 {
 	const name proposer = names.at("proposer");
-	const name proposal_type = names.at("proposal_type");
 
 	require_auth (proposer);
 	qualify_proposer (proposer);
 
-	proposal_table p_t (get_self(), proposal_type.value);
+	proposal_table p_t (get_self(), get_self().value);
 	p_t.emplace (get_self(), [&](auto &p) {
 		p.id                       	= p_t.available_primary_key();
 		p.proposer					= proposer;
@@ -272,8 +271,8 @@ void hyphadao::newrole (const uint64_t& proposal_id) {
 
    	require_auth (get_self());
 
-	name proposal_type { "roles" };
-	proposal_table p_t (get_self(), proposal_type.value);
+	// name proposal_type { "roles" };
+	proposal_table p_t (get_self(), get_self().value);
 	auto p_itr = p_t.find (proposal_id);
 	check (p_itr != p_t.end(), "Proposal Type: " + proposal_type.to_string() + "; ID: " + std::to_string(proposal_id) + " does not exist.");
 
@@ -299,10 +298,10 @@ void hyphadao::assign ( const uint64_t& 		proposal_id) {
 
    	require_auth (get_self());
 
-	name proposal_type { "assignments" };
-	proposal_table p_t (get_self(), proposal_type.value);
+	// name proposal_type { "assignments" };
+	proposal_table p_t (get_self(), get_self().value);
 	auto p_itr = p_t.find (proposal_id);
-	check (p_itr != p_t.end(), "Proposal Type: " + proposal_type.to_string() + "; ID: " + std::to_string(proposal_id) + " does not exist.");
+	check (p_itr != p_t.end(), "Proposal ID: " + std::to_string(proposal_id) + " does not exist.");
 
 	holocracy.newassign (	p_itr->names.at("assigned_account"),
 							p_itr->ints.at("role_id"),
@@ -322,10 +321,10 @@ void hyphadao::makepayout (const uint64_t&        proposal_id) {
 
 	require_auth (get_self());
 
-	name proposal_type { "payouts" };
-	proposal_table p_t (get_self(), proposal_type.value);
+	// name proposal_type { "payouts" };
+	proposal_table p_t (get_self(), get_self().value);
 	auto p_itr = p_t.find (proposal_id);
-	check (p_itr != p_t.end(), "Proposal Type: " + proposal_type.to_string() + "; ID: " + std::to_string(proposal_id) + " does not exist.");
+	check (p_itr != p_t.end(), "Proposal ID: " + std::to_string(proposal_id) + " does not exist.");
 
 	string memo { "One time payout for Hypha DAO Contribution: " + std::to_string(proposal_id) };
 	debug (" HYPHA payout: " + p_itr->assets.at("hypha_amount").to_string());
@@ -351,18 +350,17 @@ void hyphadao::makepayout (const uint64_t&        proposal_id) {
 	}
 }
 
-void hyphadao::eraseprop (const name& proposal_type, const uint64_t& proposal_id) {
+void hyphadao::eraseprop (const uint64_t& proposal_id) {
 	require_auth (get_self());
-	proposal_table props(get_self(), proposal_type.value);
+	proposal_table props(get_self(), get_self().value);
 	auto i_iter = props.find(proposal_id);
 	check(i_iter != props.end(), "prop not found");
 	props.erase (i_iter);
 }
 
-void hyphadao::closeprop(const name& proposal_type,
-						 const uint64_t& proposal_id) {
+void hyphadao::closeprop(const uint64_t& proposal_id) {
 
-	proposal_table props(get_self(), proposal_type.value);
+	proposal_table props(get_self(), get)self().value);
 	auto i_iter = props.find(proposal_id);
 	check(i_iter != props.end(), "prop not found");
 	auto prop = *i_iter;
@@ -400,5 +398,7 @@ void hyphadao::closeprop(const name& proposal_type,
 }
 
 void hyphadao::qualify_proposer (const name& proposer) {
-	check (bank.holds_hypha (proposer), "Proposer: " + proposer.to_string() + " does not hold HYPHA.");
+	// Should we require that users hold Hypha before they are allowed to propose?  Disabled for now.
+	
+	// check (bank.holds_hypha (proposer), "Proposer: " + proposer.to_string() + " does not hold HYPHA.");
 }

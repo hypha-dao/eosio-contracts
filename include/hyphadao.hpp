@@ -153,7 +153,7 @@ CONTRACT hyphadao : public contract {
                - "contribution_date"
 
       */
-     ACTION propose (const map<string, name> 		   names,
+     ACTION propose (const map<string, name> 		  names,
                      const map<string, string>       strings,
                      const map<string, asset>        assets,
                      const map<string, time_point>   time_points,
@@ -170,8 +170,7 @@ CONTRACT hyphadao : public contract {
       // Admin
       ACTION reset ();
       ACTION resetperiods();
-      ACTION eraseprop (const name&       proposal_type,
-                        const uint64_t&   proposal_id);
+      ACTION eraseprop (const uint64_t&   proposal_id);
 
       ACTION setconfig (const name&    hypha_token_contract,
                         const name&    trail_contract);
@@ -193,7 +192,7 @@ CONTRACT hyphadao : public contract {
       ACTION exectrx    (  const uint64_t&   proposal_id);
       
       // anyone can call closeprop, it executes the transaction if the voting passed
-      ACTION closeprop(const name& proposal_type, const uint64_t& proposal_id);
+      ACTION closeprop(const uint64_t& proposal_id);
 
       // users can claim their salary pay
       ACTION payassign(const uint64_t& assignment_id, const uint64_t& period_id);
