@@ -20,7 +20,7 @@ void hyphadao::removemember (const name& member) {
 
 void hyphadao::reset () {
 	holocracy.reset ();
-	// bank.reset_config ();
+	bank.reset_config ();
 
 	proposal_table p_t (get_self(),get_self().value);
 	auto  p_itr = p_t.begin();
@@ -28,21 +28,9 @@ void hyphadao::reset () {
 		p_itr = p_t.erase (p_itr);
 	}
 
-	// p_t = proposal_table (get_self(), "assignments"_n.value);
-	// p_itr = p_t.begin();
-	// while (p_itr != p_t.end()) {
-	// 	p_itr = p_t.erase (p_itr);
-	// }
-
-	// p_t = proposal_table (get_self(), "payouts"_n.value);
-	// p_itr = p_t.begin();
-	// while (p_itr != p_t.end()) {
-	// 	p_itr = p_t.erase (p_itr);
-	// }
-
-	// config_table      config_s (get_self(), get_self().value);
-   	// DAOConfig c = config_s.get_or_create (get_self(), DAOConfig()); 
-	// config_s.remove ();
+	config_table      config_s (get_self(), get_self().value);
+   	DAOConfig c = config_s.get_or_create (get_self(), DAOConfig()); 
+	config_s.remove ();
 }
 
 void hyphadao::remperiods (const uint64_t& begin_period_id, 
@@ -55,6 +43,7 @@ void hyphadao::resetperiods () {
 }
 
 void hyphadao::setconfig ( const name&     	hypha_token_contract,
+							const name&		seeds_token_contract,
 							const name& 	trail_contract) {
 
    	require_auth (get_self());
@@ -62,7 +51,7 @@ void hyphadao::setconfig ( const name&     	hypha_token_contract,
    	DAOConfig c = config_s.get_or_create (get_self(), DAOConfig());   
 	c.trail_contract 	= trail_contract;
 	config_s.set (c, get_self());
-   	bank.set_config (hypha_token_contract, hypha_token_contract, trail_contract);
+   	bank.set_config (hypha_token_contract, seeds_token_contract, trail_contract);
 }
 
 void hyphadao::setlastballt ( const name& last_ballot_id) {
@@ -78,7 +67,6 @@ void hyphadao::enroll (const name& enroller,
 						const string& content) {
 
 	// this action is linked to the hyphadaomain@enrollers permission
-
 	applicant_table a_t (get_self(), get_self().value);
 	auto a_itr = a_t.find (applicant.value);
 	check (a_itr != a_t.end(), "Applicant not found: " + applicant.to_string());
@@ -112,6 +100,11 @@ void hyphadao::apply (const name& applicant,
 						const string& content) {
 
 	require_auth (applicant);
+
+	member_table m_t (get_self(), get_self().value);
+	auto m_itr = m_t.find (applicant.value);
+	check (m_itr == m_t.end(), "Applicant is already a member: " + applicant.to_string());
+
 	applicant_table a_t (get_self(), get_self().value);
 	auto a_itr = a_t.find (applicant.value);
 
@@ -139,7 +132,6 @@ name hyphadao::register_ballot (const name& proposer,
 	
 	// increment the ballot_id
 	name new_ballot_id = name (c.last_ballot_id.value + 1);
-
 	c.last_ballot_id = new_ballot_id;
 	config_s.set(c, get_self());
 	
@@ -163,11 +155,12 @@ name hyphadao::register_ballot (const name& proposer,
 			options))
    .send();
 
-//    action (
-//       permission_level{get_self(), "active"_n},
-//       c.trail_contract, "togglebal"_n,
-//       std::make_tuple(new_ballot_id, "votestake"_n))
-//    .send();
+	//	  // default is to vote all tokens, not just staked tokens
+	//    action (
+	//       permission_level{get_self(), "active"_n},
+	//       c.trail_contract, "togglebal"_n,
+	//       std::make_tuple(new_ballot_id, "votestake"_n))
+	//    .send();
 
    action (
 	   	permission_level{get_self(), "active"_n},
@@ -179,7 +172,7 @@ name hyphadao::register_ballot (const name& proposer,
 			strings.at("content")))
    .send();
 
-   auto expiration = time_point_sec(current_time_point()) + 65;
+   auto expiration = time_point_sec(current_time_point()) +  (60 * 60); // 1 hour
    
    action (
       permission_level{get_self(), "active"_n},
@@ -188,6 +181,7 @@ name hyphadao::register_ballot (const name& proposer,
    .send();
 
 	return new_ballot_id;
+	return name(0);
 }
 
 void hyphadao::propose (const map<string, name> 		names,
@@ -209,6 +203,12 @@ void hyphadao::propose (const map<string, name> 		names,
 		p.proposer					= proposer;
 
 		p.names                    	= names;
+
+		/* default trx_action_account to hyphadaomain */
+		if (names.find("trx_action_contract") == names.end()) {
+			p.names["trx_action_contract"] = get_self();
+		}
+
 		p.names["ballot_id"]		= register_ballot (proposer, strings);
 
 		p.strings                  	= strings;
@@ -223,7 +223,7 @@ void hyphadao::propose (const map<string, name> 		names,
 			transaction trx (time_point_sec(current_time_point())+ (60 * 60 * 24 * 35));
 			trx.actions.emplace_back(
 				permission_level{get_self(), "active"_n}, 
-				get_self(), names.at("trx_action_name"), 
+				p.names.at("trx_action_contract"), p.names.at("trx_action_name"), 
 				std::make_tuple(p.id));
 			trx.delay_sec = 0;
 			p.trxs["exec_on_approval"]      = trx;      
@@ -250,10 +250,9 @@ void hyphadao::clrdebugs (const uint64_t& starting_id, const uint64_t& batch_siz
 void hyphadao::exectrx (const uint64_t& proposal_id) {
 	require_auth (get_self());
 
-	name proposal_type { "transactions" };
-	proposal_table p_t (get_self(), proposal_type.value);
+	proposal_table p_t (get_self(), get_self().value);
 	auto p_itr = p_t.find (proposal_id);
-	check (p_itr != p_t.end(), "Proposal Type: " + proposal_type.to_string() + "; ID: " + std::to_string(proposal_id) + " does not exist.");
+	check (p_itr != p_t.end(), "Proposal ID: " + std::to_string(proposal_id) + " does not exist.");
 	check (p_itr->trxs.size() > 1, "There are not transactions to execute. Trx map size: " + std::to_string(p_itr->trxs.size()) + "; Proposal ID: " + std::to_string(proposal_id));
 
 	for (auto trx_itr = p_itr->trxs.begin(); trx_itr != p_itr->trxs.end(); ++trx_itr) {
@@ -271,10 +270,9 @@ void hyphadao::newrole (const uint64_t& proposal_id) {
 
    	require_auth (get_self());
 
-	// name proposal_type { "roles" };
 	proposal_table p_t (get_self(), get_self().value);
 	auto p_itr = p_t.find (proposal_id);
-	check (p_itr != p_t.end(), "Proposal Type: " + proposal_type.to_string() + "; ID: " + std::to_string(proposal_id) + " does not exist.");
+	check (p_itr != p_t.end(), "Proposal ID: " + std::to_string(proposal_id) + " does not exist.");
 
 	debug ("Creating Role::Title: " + p_itr->strings.at("title"));
 
@@ -298,7 +296,6 @@ void hyphadao::assign ( const uint64_t& 		proposal_id) {
 
    	require_auth (get_self());
 
-	// name proposal_type { "assignments" };
 	proposal_table p_t (get_self(), get_self().value);
 	auto p_itr = p_t.find (proposal_id);
 	check (p_itr != p_t.end(), "Proposal ID: " + std::to_string(proposal_id) + " does not exist.");
@@ -321,7 +318,6 @@ void hyphadao::makepayout (const uint64_t&        proposal_id) {
 
 	require_auth (get_self());
 
-	// name proposal_type { "payouts" };
 	proposal_table p_t (get_self(), get_self().value);
 	auto p_itr = p_t.find (proposal_id);
 	check (p_itr != p_t.end(), "Proposal ID: " + std::to_string(proposal_id) + " does not exist.");
@@ -334,9 +330,9 @@ void hyphadao::makepayout (const uint64_t&        proposal_id) {
 		bank.makepayment (-1, p_itr->names.at("recipient"), p_itr->assets.at("hypha_amount"), memo, common::NO_ASSIGNMENT);
 	}
 
-	// if (p_itr->assets.at("seeds_amount").amount > 0) {
-	// 	bank.makepayment (-1, p_itr->names.at("recipient"), p_itr->assets.at("seeds_amount"), memo, common::NO_ASSIGNMENT);
-	// }
+	if (p_itr->assets.at("seeds_amount").amount > 0) {
+		bank.makepayment (-1, p_itr->names.at("recipient"), p_itr->assets.at("seeds_amount"), memo, common::NO_ASSIGNMENT);
+	}
 	
 	if (p_itr->assets.at("hvoice_amount").amount > 0) {
 		config_table      config_s (get_self(), get_self().value);
@@ -360,7 +356,7 @@ void hyphadao::eraseprop (const uint64_t& proposal_id) {
 
 void hyphadao::closeprop(const uint64_t& proposal_id) {
 
-	proposal_table props(get_self(), get)self().value);
+	proposal_table props(get_self(), get_self().value);
 	auto i_iter = props.find(proposal_id);
 	check(i_iter != props.end(), "prop not found");
 	auto prop = *i_iter;
@@ -394,11 +390,13 @@ void hyphadao::closeprop(const uint64_t& proposal_id) {
 	}
 
 	debug (debug_str);
-	// props.erase(i_iter);
+
+	archive (prop);	
+	props.erase(i_iter);
 }
 
 void hyphadao::qualify_proposer (const name& proposer) {
 	// Should we require that users hold Hypha before they are allowed to propose?  Disabled for now.
-	
+
 	// check (bank.holds_hypha (proposer), "Proposer: " + proposer.to_string() + " does not hold HYPHA.");
 }

@@ -19,7 +19,7 @@ cleos -u https://test.telos.kitchen set contract hyphatokens1 ~/dev/token/token/
 
 cleos -u https://test.telos.kitchen push action eosio.token transfer '["teloskitchen", "hyphadaomain", "1000.0000 TLOS", "for testing"]' -p teloskitchen
 cleos -u https://test.telos.kitchen push action eosio.token transfer '["hyphadaomain", "trailservice", "1000.0000 TLOS", "deposit"]' -p hyphadaomain
-cleos -u https://test.telos.kitchen push action trailservice newtreasury '["hyphadaomain", "1000000000 HVOICE", "public"]' -p hyphadaomain
+cleos -u https://test.telos.kitchen push action trailservice newtreasury '["hyphadaomain", "1000000000.00 HVOICE", "public"]' -p hyphadaomain
 cleos -u https://test.telos.kitchen push action trailservice toggle '["0,HVOICE", "transferable"]' -p hyphadaomain
 
 ## Enrolling a user in hypha DAO

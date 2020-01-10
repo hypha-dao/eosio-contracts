@@ -18,9 +18,9 @@ class Bank {
 
         struct [[ eosio::table, eosio::contract("hyphadao") ]] BankConfig
         {
-            name           hypha_token_contract     = "hyphatoken"_n;
-            name           voice_token_contract     = "hyphatoken"_n;
-            name           seeds_token_contract     = "hyphatoken"_n;
+            name           hypha_token_contract     = "token.hypha"_n;
+            name           seeds_token_contract     = "token.seeds"_n;
+            name           voice_token_contract     = "trailservice"_n;             
         };
 
         struct [[eosio::table, eosio::contract("hyphadao") ]] Period
@@ -132,6 +132,12 @@ class Bank {
                     permission_level{contract, "active"_n},
                     bc.voice_token_contract, "mint"_n,
                     std::make_tuple(recipient, quantity, memo))
+                .send();
+            } else if (quantity.symbol == common::S_SEEDS) {
+                action(
+                    permission_level{contract, "active"_n},
+                    bc.seeds_token_contract, "transfer"_n,
+                    std::make_tuple(contract, recipient, quantity, memo))
                 .send();
             } else {
                 issuetoken (bc.hypha_token_contract, recipient, quantity, memo );

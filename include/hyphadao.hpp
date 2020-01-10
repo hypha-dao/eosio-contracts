@@ -20,18 +20,11 @@ CONTRACT hyphadao : public contract {
    public:
       using contract::contract;
 
-      struct [[ eosio::table, eosio::contract("hyphadao") ]] AppState 
-      {
-         uint64_t    last_sender_id;
-      };
-
-      typedef singleton<"appstates"_n, AppState> appstate_table;
-      typedef eosio::multi_index<"appstates"_n, AppState> appstate_table_placeholder;
-
       struct [[eosio::table, eosio::contract("hyphadao") ]] DAOConfig 
       {
          name           trail_contract          ;
          name           last_ballot_id          = name("hypha1");
+         uint64_t       last_sender_id          ;
       };
 
       typedef singleton<"config"_n, DAOConfig> config_table;
@@ -101,58 +94,6 @@ CONTRACT hyphadao : public contract {
 
       typedef multi_index<"debugs"_n, Debug> debug_table;
 
-      /*
-         Comments in code may be outdated. See docs at https://docs.hypha.earth
-         
-         Proposal attributes (all proposals)
-
-            - type: int
-               - "status"
-               - "start_period"
-               - "end_period"
-            
-            - type: name
-               - "ballot_id": used to interface to Trail
-
-            - type: string
-               - "title"  
-               - "description"
-               - "content"
-
-            - type: asset
-               - "hypha_amount"
-               - "seeds_amount"
-               - "hvoice_amount"
-
-            - type: time_point_sec
-               - "created_date"
-               - "updated_date"
-
-            - type: transaction
-               - "transaction"
-
-         Role proposals
-            - scoped to "roles"_n.value
-
-         Assignment Proposals:
-            - scoped to "assignments"_n.value
-            - type: float
-               - "time_share"
-
-            - type: name
-               - "assigned_account"
-
-            - type: int
-               - "role_id"
-         
-         Payout Proposal:
-            - scoped to "payouts"_n.value
-            - type: name
-               - "recipient"
-            - type: time_point
-               - "contribution_date"
-
-      */
      ACTION propose (const map<string, name> 		  names,
                      const map<string, string>       strings,
                      const map<string, asset>        assets,
@@ -173,7 +114,9 @@ CONTRACT hyphadao : public contract {
       ACTION eraseprop (const uint64_t&   proposal_id);
 
       ACTION setconfig (const name&    hypha_token_contract,
+                        const name&    seeds_token_contract,
                         const name&    trail_contract);
+                        
       ACTION setlastballt (const name& last_ballot_id);
 
       ACTION clrdebugs (const uint64_t& starting_id, const uint64_t& batch_size);
@@ -212,13 +155,12 @@ CONTRACT hyphadao : public contract {
 
       uint64_t get_next_sender_id()
       {
-         appstate_table a_t (get_self(), get_self().value);
-         AppState state = a_t.get_or_create (get_self(), AppState());
-
-         uint64_t return_senderid = state.last_sender_id;
+         config_table      config_s (get_self(), get_self().value);
+   	   DAOConfig c = config_s.get_or_create (get_self(), DAOConfig());   
+         uint64_t return_senderid = c.last_sender_id;
          return_senderid++;
-         state.last_sender_id = return_senderid;
-         a_t.set (state, get_self());
+         c.last_sender_id = return_senderid;
+         config_s.set (c, get_self());
          return return_senderid;
       }
 
@@ -228,6 +170,19 @@ CONTRACT hyphadao : public contract {
             d.debug_id = d_t.available_primary_key();
             d.notes = notes;
          });
+      }
+
+      void archive (Proposal& prop) {
+         proposal_table p_t_archive (get_self(), "archive"_n.value);
+	      p_t_archive.emplace (get_self(), [&](auto &p) {
+            p.id           = prop.id;
+            p.proposer     = prop.proposer;
+            p.names        = prop.names;
+            p.assets       = prop.assets;
+            p.time_points  = prop.time_points;
+            p.ints         = prop.ints;
+            p.trxs         = prop.trxs;
+	      });
       }
 };
 

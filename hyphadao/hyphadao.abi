@@ -4,16 +4,6 @@
     "types": [],
     "structs": [
         {
-            "name": "AppState",
-            "base": "",
-            "fields": [
-                {
-                    "name": "last_sender_id",
-                    "type": "uint64"
-                }
-            ]
-        },
-        {
             "name": "Applicant",
             "base": "",
             "fields": [
@@ -124,11 +114,11 @@
                     "type": "name"
                 },
                 {
-                    "name": "voice_token_contract",
+                    "name": "seeds_token_contract",
                     "type": "name"
                 },
                 {
-                    "name": "seeds_token_contract",
+                    "name": "voice_token_contract",
                     "type": "name"
                 }
             ]
@@ -144,6 +134,10 @@
                 {
                     "name": "last_ballot_id",
                     "type": "name"
+                },
+                {
+                    "name": "last_sender_id",
+                    "type": "uint64"
                 }
             ]
         },
@@ -410,10 +404,6 @@
             "base": "",
             "fields": [
                 {
-                    "name": "proposal_type",
-                    "type": "name"
-                },
-                {
                     "name": "proposal_id",
                     "type": "uint64"
                 }
@@ -455,10 +445,6 @@
             "name": "eraseprop",
             "base": "",
             "fields": [
-                {
-                    "name": "proposal_type",
-                    "type": "name"
-                },
                 {
                     "name": "proposal_id",
                     "type": "uint64"
@@ -712,6 +698,10 @@
                     "type": "name"
                 },
                 {
+                    "name": "seeds_token_contract",
+                    "type": "name"
+                },
+                {
                     "name": "trail_contract",
                     "type": "name"
                 }
@@ -800,7 +790,7 @@
         {
             "name": "closeprop",
             "type": "closeprop",
-            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Close Proposal\nsummary: 'Close a given proposal'\nicon: http://dao-dev.hypha.earth/statics/app-logo-128x128.png#a71ba6431c13b623eccde41cd14f0f5e3ee694da7e3878407e74d8137bf89916\n---\n\n{{$action.authorization.[0].actor}} erases the given proposal with the id: {{proposal_id}} and the type: {{proposal_type}}."
+            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Close Proposal\nsummary: 'Close a given proposal'\nicon: http://dao-dev.hypha.earth/statics/app-logo-128x128.png#a71ba6431c13b623eccde41cd14f0f5e3ee694da7e3878407e74d8137bf89916\n---\n\n{{$action.authorization.[0].actor}} erases the given proposal with the id: {{proposal_id}}."
         },
         {
             "name": "clrdebugs",
@@ -815,7 +805,7 @@
         {
             "name": "eraseprop",
             "type": "eraseprop",
-            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Erase Proposal\nsummary: 'Erase a given proposal'\nicon: http://dao-dev.hypha.earth/statics/app-logo-128x128.png#a71ba6431c13b623eccde41cd14f0f5e3ee694da7e3878407e74d8137bf89916\n---\n\n{{$action.authorization.[0].actor}} erases the proposal with the given id: {{proposal_id}} and the given type: {{proposal_type}}."
+            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Erase Proposal\nsummary: 'Erase a given proposal'\nicon: http://dao-dev.hypha.earth/statics/app-logo-128x128.png#a71ba6431c13b623eccde41cd14f0f5e3ee694da7e3878407e74d8137bf89916\n---\n\n{{$action.authorization.[0].actor}} erases the proposal with the given id: {{proposal_id}}."
         },
         {
             "name": "exectrx",
@@ -877,13 +867,6 @@
         {
             "name": "applicants",
             "type": "Applicant",
-            "index_type": "i64",
-            "key_names": [],
-            "key_types": []
-        },
-        {
-            "name": "appstates",
-            "type": "AppState",
             "index_type": "i64",
             "key_names": [],
             "key_types": []
