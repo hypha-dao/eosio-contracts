@@ -20,7 +20,7 @@ void hyphadao::removemember (const name& member) {
 
 void hyphadao::reset () {
 	holocracy.reset ();
-	bank.reset_config ();
+	// bank.reset_config ();
 
 	proposal_table p_t (get_self(),get_self().value);
 	auto  p_itr = p_t.begin();
@@ -28,9 +28,15 @@ void hyphadao::reset () {
 		p_itr = p_t.erase (p_itr);
 	}
 
-	config_table      config_s (get_self(), get_self().value);
-   	DAOConfig c = config_s.get_or_create (get_self(), DAOConfig()); 
-	config_s.remove ();
+	p_t = proposal_table (get_self(), "archive"_n.value);
+	p_itr = p_t.begin();
+	while (p_itr != p_t.end()) {
+		p_itr = p_t.erase (p_itr);
+	}
+
+	// config_table      config_s (get_self(), get_self().value);
+   	// Config c = config_s.get_or_create (get_self(), Config()); 
+	// config_s.remove ();
 }
 
 void hyphadao::remperiods (const uint64_t& begin_period_id, 
@@ -42,27 +48,52 @@ void hyphadao::resetperiods () {
 	bank.reset_periods();
 }
 
-void hyphadao::setconfig ( const name&     	hypha_token_contract,
-							const name&		seeds_token_contract,
-							const name& 	trail_contract) {
+void hyphadao::setconfig (	const map<string, name> 		names,
+							const map<string, string>       strings,
+							const map<string, asset>        assets,
+							const map<string, time_point>   time_points,
+							const map<string, uint64_t>     ints,
+							const map<string, float>        floats,
+							const map<string, transaction>  trxs)
+{
+	require_auth (get_self());
 
-   	require_auth (get_self());
 	config_table      config_s (get_self(), get_self().value);
-   	DAOConfig c = config_s.get_or_create (get_self(), DAOConfig());   
-	c.trail_contract 	= trail_contract;
+   	Config c = config_s.get_or_create (get_self(), Config());   
+
+	c.names			= names;
+
+	// if last_ballot_id is not in the new configuration, but it is in the existing configuration, copy it over
+	if (names.find("last_ballot_id") == names.end() && c.names.find("last_ballot_id") != c.names.end()) { c.names["last_ballot_id"] = c.names.at("last_ballot_id"); }
+
+	c.strings		= strings;
+	c.assets		= assets;
+	c.time_points	= time_points;
+	c.ints			= ints;
+	c.floats		= floats;
+	c.trxs			= trxs;
+
 	config_s.set (c, get_self());
-   	bank.set_config (hypha_token_contract, seeds_token_contract, trail_contract);
+
+	// validate for required configurations
+    string required_names[]{ "hypha_token_contract", "seeds_token_contract", "telos_decide_contract", "last_ballot_id"};
+    for (int i{ 0 }; i < std::size(required_names); i++) {
+		// debug ("Required name: " + required_names[i]);
+		check (c.names.find(required_names[i]) != c.names.end(), "name configuration: " + required_names[i] + " is required but not provided.");
+	}
+
+	bank.set_config (names.at("hypha_token_contract"), names.at("seeds_token_contract"), names.at("telos_decide_contract"));
 }
 
 void hyphadao::setlastballt ( const name& last_ballot_id) {
 	require_auth (get_self());
 	config_table      config_s (get_self(), get_self().value);
-   	DAOConfig c = config_s.get_or_create (get_self(), DAOConfig());   
-	c.last_ballot_id 	= last_ballot_id;
+   	Config c = config_s.get_or_create (get_self(), Config());   
+	c.names["last_ballot_id"]			=	last_ballot_id;
 	config_s.set (c, get_self());
 }
 
-void hyphadao::enroll (const name& enroller,
+void hyphadao::enroll (	const name& enroller,
 						const name& applicant, 
 						const string& content) {
 
@@ -72,13 +103,13 @@ void hyphadao::enroll (const name& enroller,
 	check (a_itr != a_t.end(), "Applicant not found: " + applicant.to_string());
 
 	config_table      config_s (get_self(), get_self().value);
-   	DAOConfig c = config_s.get_or_create (get_self(), DAOConfig());  
+   	Config c = config_s.get_or_create (get_self(), Config());  
 
 	asset one_hvoice = asset { 1, common::S_HVOICE };
 	string memo { "Welcome to Hypha DAO!"};
 	action(	
 		permission_level{get_self(), "active"_n}, 
-		c.trail_contract, "mint"_n, 
+		c.names.at("telos_decide_contract"), "mint"_n, 
 		make_tuple(applicant, one_hvoice, memo))
 	.send();
 
@@ -128,14 +159,14 @@ name hyphadao::register_ballot (const name& proposer,
 	qualify_proposer(proposer);
 
 	config_table      config_s (get_self(), get_self().value);
-   	DAOConfig c = config_s.get_or_create (get_self(), DAOConfig());  
+   	Config c = config_s.get_or_create (get_self(), Config());  
 	
 	// increment the ballot_id
-	name new_ballot_id = name (c.last_ballot_id.value + 1);
-	c.last_ballot_id = new_ballot_id;
+	name new_ballot_id = name (c.names.at("last_ballot_id").value + 1);
+	c.names["last_ballot_id"] = new_ballot_id;
 	config_s.set(c, get_self());
 	
-	trailservice::trail::ballots_table b_t (c.trail_contract, c.trail_contract.value);
+	trailservice::trail::ballots_table b_t (c.names.at("telos_decide_contract"), c.names.at("telos_decide_contract").value);
 	auto b_itr = b_t.find (new_ballot_id.value);
 	check (b_itr == b_t.end(), "ballot_id: " + new_ballot_id.to_string() + " has already been used.");
 
@@ -145,7 +176,7 @@ name hyphadao::register_ballot (const name& proposer,
 
 	action (
       permission_level{get_self(), "active"_n},
-      c.trail_contract, "newballot"_n,
+      c.names.at("telos_decide_contract"), "newballot"_n,
       std::make_tuple(
 			new_ballot_id, 
 			"poll"_n, 
@@ -158,13 +189,13 @@ name hyphadao::register_ballot (const name& proposer,
 	//	  // default is to vote all tokens, not just staked tokens
 	//    action (
 	//       permission_level{get_self(), "active"_n},
-	//       c.trail_contract, "togglebal"_n,
+	//       c.telos_decide_contract, "togglebal"_n,
 	//       std::make_tuple(new_ballot_id, "votestake"_n))
 	//    .send();
 
    action (
 	   	permission_level{get_self(), "active"_n},
-		c.trail_contract, "editdetails"_n,
+		c.names.at("telos_decide_contract"), "editdetails"_n,
 		std::make_tuple(
 			new_ballot_id, 
 			strings.at("title"), 
@@ -172,16 +203,15 @@ name hyphadao::register_ballot (const name& proposer,
 			strings.at("content")))
    .send();
 
-   auto expiration = time_point_sec(current_time_point()) +  (60 * 60); // 1 hour
+   auto expiration = time_point_sec(current_time_point()) + c.ints.at("voting_duration_sec"); // (60 * 60); // 1 hour
    
    action (
       permission_level{get_self(), "active"_n},
-      c.trail_contract, "openvoting"_n,
+      c.names.at("telos_decide_contract"), "openvoting"_n,
       std::make_tuple(new_ballot_id, expiration))
    .send();
 
 	return new_ballot_id;
-	return name(0);
 }
 
 void hyphadao::propose (const map<string, name> 		names,
@@ -336,11 +366,11 @@ void hyphadao::makepayout (const uint64_t&        proposal_id) {
 	
 	if (p_itr->assets.at("hvoice_amount").amount > 0) {
 		config_table      config_s (get_self(), get_self().value);
-   		DAOConfig c = config_s.get_or_create (get_self(), DAOConfig());  
+   		Config c = config_s.get_or_create (get_self(), Config());  
 
 		action(	
 			permission_level{get_self(), "active"_n}, 
-			c.trail_contract, "mint"_n, 
+			c.names.at("telos_decide_contract"), "mint"_n, 
 			make_tuple(p_itr->names.at("recipient"), p_itr->assets.at("hvoice_amount"), memo
 		)).send();
 	}
@@ -362,16 +392,16 @@ void hyphadao::closeprop(const uint64_t& proposal_id) {
 	auto prop = *i_iter;
 
 	config_table      config_s (get_self(), get_self().value);
-   	DAOConfig c = config_s.get_or_create (get_self(), DAOConfig());  
+   	Config c = config_s.get_or_create (get_self(), Config());  
 
-	trailservice::trail::ballots_table b_t (c.trail_contract, c.trail_contract.value);
+	trailservice::trail::ballots_table b_t (c.names.at("telos_decide_contract"), c.names.at("telos_decide_contract").value);
 	auto b_itr = b_t.find (prop.names.at("ballot_id").value);
 	check (b_itr != b_t.end(), "ballot_id: " + prop.names.at("ballot_id").to_string() + " not found.");
 
 	string debug_str = string ("Ballot ID read from prop for closing ballot: " + prop.names.at("ballot_id").to_string() + "\n");
 	action (
 		permission_level{get_self(), "active"_n},
-		c.trail_contract, "closevoting"_n,
+		c.names.at("telos_decide_contract"), "closevoting"_n,
 		std::make_tuple(prop.names.at("ballot_id"), true))
 	.send();
 
@@ -391,8 +421,8 @@ void hyphadao::closeprop(const uint64_t& proposal_id) {
 
 	debug (debug_str);
 
-	archive (prop);	
-	props.erase(i_iter);
+	// archive (prop);	
+	// props.erase(i_iter);
 }
 
 void hyphadao::qualify_proposer (const name& proposer) {

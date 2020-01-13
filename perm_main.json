@@ -1,11 +1,11 @@
-cleos -u https://telos.caleos.io  push action eosio updateauth '{
-    "account": "hyphadaomain",
+cleos -u https://test.telos.kitchen  push action eosio updateauth '{
+    "account": "dao.hypha",
     "permission": "active",
     "parent": "owner",
     "auth": {
         "keys": [
             {
-                "key": "EOS56sZ8yXVpZMMXR62RwhJ6sQyAibuuZFUPUphZp4GqQkMPwX1LW",
+                "key": "EOS5tEdJd32ANvoxSecRnY5ucr1jbzaVN2rQZegj6NxsevGU8JoaJ",
                 "weight": 1
             }
         ],
@@ -13,7 +13,7 @@ cleos -u https://telos.caleos.io  push action eosio updateauth '{
         "accounts": [
             {
                 "permission": {
-                    "actor": "hyphadaomain",
+                    "actor": "dao.hypha",
                     "permission": "eosio.code"
                 },
                 "weight": 1
@@ -21,16 +21,16 @@ cleos -u https://telos.caleos.io  push action eosio updateauth '{
         ],
         "waits": []
     }
-}' -p hyphadaomain@owner
+}' -p dao.hypha@owner
 
-cleos -u https://telos.caleos.io push action eosio updateauth '{
-    "account": "hyphadaomain",
+cleos -u https://test.telos.kitchen push action eosio updateauth '{
+    "account": "dao.hypha",
     "permission": "owner",
     "parent": "",
     "auth": {
         "keys": [
             {
-                "key": "EOS56sZ8yXVpZMMXR62RwhJ6sQyAibuuZFUPUphZp4GqQkMPwX1LW",
+                "key": "EOS5tEdJd32ANvoxSecRnY5ucr1jbzaVN2rQZegj6NxsevGU8JoaJ",
                 "weight": 1
             }
         ],
@@ -38,7 +38,7 @@ cleos -u https://telos.caleos.io push action eosio updateauth '{
         "accounts": [
             {
                 "permission": {
-                    "actor": "hyphadaomain",
+                    "actor": "dao.hypha",
                     "permission": "eosio.code"
                 },
                 "weight": 1
@@ -46,5 +46,5 @@ cleos -u https://telos.caleos.io push action eosio updateauth '{
         ],
         "waits": []
     }
-}' -p hyphadaomain@owner
+}' -p dao.hypha@owner
 

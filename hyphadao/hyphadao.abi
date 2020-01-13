@@ -124,20 +124,36 @@
             ]
         },
         {
-            "name": "DAOConfig",
+            "name": "Config",
             "base": "",
             "fields": [
                 {
-                    "name": "trail_contract",
-                    "type": "name"
+                    "name": "names",
+                    "type": "pair_string_name[]"
                 },
                 {
-                    "name": "last_ballot_id",
-                    "type": "name"
+                    "name": "strings",
+                    "type": "pair_string_string[]"
                 },
                 {
-                    "name": "last_sender_id",
-                    "type": "uint64"
+                    "name": "assets",
+                    "type": "pair_string_asset[]"
+                },
+                {
+                    "name": "time_points",
+                    "type": "pair_string_time_point[]"
+                },
+                {
+                    "name": "ints",
+                    "type": "pair_string_uint64[]"
+                },
+                {
+                    "name": "trxs",
+                    "type": "pair_string_transaction[]"
+                },
+                {
+                    "name": "floats",
+                    "type": "pair_string_float32[]"
                 }
             ]
         },
@@ -694,16 +710,32 @@
             "base": "",
             "fields": [
                 {
-                    "name": "hypha_token_contract",
-                    "type": "name"
+                    "name": "names",
+                    "type": "pair_string_name[]"
                 },
                 {
-                    "name": "seeds_token_contract",
-                    "type": "name"
+                    "name": "strings",
+                    "type": "pair_string_string[]"
                 },
                 {
-                    "name": "trail_contract",
-                    "type": "name"
+                    "name": "assets",
+                    "type": "pair_string_asset[]"
+                },
+                {
+                    "name": "time_points",
+                    "type": "pair_string_time_point[]"
+                },
+                {
+                    "name": "ints",
+                    "type": "pair_string_uint64[]"
+                },
+                {
+                    "name": "floats",
+                    "type": "pair_string_float32[]"
+                },
+                {
+                    "name": "trxs",
+                    "type": "pair_string_transaction[]"
                 }
             ]
         },
@@ -894,7 +926,7 @@
         },
         {
             "name": "config",
-            "type": "DAOConfig",
+            "type": "Config",
             "index_type": "i64",
             "key_names": [],
             "key_types": []
