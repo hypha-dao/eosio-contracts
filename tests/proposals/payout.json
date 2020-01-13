@@ -35,15 +35,15 @@
     "assets": [
       {
         "key": "hypha_amount",
-        "value": "2 HYPHA"
+        "value": "2.00 HYPHA"
       },
       {
         "key": "seeds_amount",
-        "value": "7.00000000 SEEDS"
+        "value": "0.0000 SEEDS"
       },
       {
         "key": "hvoice_amount",
-        "value": "3 HVOICE"
+        "value": "3.00 HVOICE"
       }
     ],
     "time_points": [

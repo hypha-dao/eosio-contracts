@@ -47,15 +47,15 @@ ACTION killvoter (const name& voter, const symbol& treasury)  {
     v_t.erase (v_itr);
 }
 
-cleos -u https:/test.telos.kitchen push action trailservice killvoter '["samanthahyph", "0,HVOICE"]' -p trailservice
-cleos -u https:/test.telos.kitchen push action trailservice killvoter '["johnnyhypha1", "0,HVOICE"]' -p trailservice
-cleos -u https:/test.telos.kitchen push action trailservice killvoter '["jameshypha11", "0,HVOICE"]' -p trailservice
-cleos -u https:/test.telos.kitchen push action trailservice killvoter '["thomashypha1", "0,HVOICE"]' -p trailservice
-cleos -u https:/test.telos.kitchen push action trailservice killvoter '["haydenhypha1", "0,HVOICE"]' -p trailservice
-cleos -u https:/test.telos.kitchen push action trailservice killvoter '["cehraphaim11", "0,HVOICE"]' -p trailservice
-cleos -u https:/test.telos.kitchen push action trailservice killvoter '["hyphadaomain", "0,HVOICE"]' -p trailservice
+cleos -u https://test.telos.kitchen push action trailservice killvoter '["samanthahyph", "0,HVOICE"]' -p trailservice
+cleos -u https://test.telos.kitchen push action trailservice killvoter '["johnnyhypha1", "0,HVOICE"]' -p trailservice
+cleos -u https://test.telos.kitchen push action trailservice killvoter '["jameshypha11", "0,HVOICE"]' -p trailservice
+cleos -u https://test.telos.kitchen push action trailservice killvoter '["thomashypha1", "0,HVOICE"]' -p trailservice
+cleos -u https://test.telos.kitchen push action trailservice killvoter '["haydenhypha1", "0,HVOICE"]' -p trailservice
+cleos -u https://test.telos.kitchen push action trailservice killvoter '["cehraphaim11", "0,HVOICE"]' -p trailservice
+cleos -u https://test.telos.kitchen push action trailservice killvoter '["hyphadaomain", "0,HVOICE"]' -p trailservice
 
-cleos -u https:/test.telos.kitchen push action trailservice killtreas '["0,HVOICE"]' -p trailservice
+cleos -u https://test.telos.kitchen push action trailservice killtreas '["0,HVOICE"]' -p trailservice
 
 
 
@@ -81,3 +81,27 @@ cleos -u https://test.telos.kitchen get table trailservice cehraphaim11 voters
 
 
 cleos -u https://test.telos.kitchen get table trailservice cehraphaim11 voters
+
+
+
+docker create \
+  --name=letsencrypt \
+  --cap-add=NET_ADMIN \
+  -e PUID=0 \
+  -e PGID=0 \
+  -e TZ=Europe/London \
+  -e URL=digscar.com \
+  -e SUBDOMAINS=docs, \
+  -e VALIDATION=http \
+  -e DNSPLUGIN=cloudflare `#optional` \
+  -e DUCKDNSTOKEN=<token> `#optional` \
+  -e EMAIL=<e-mail> `#optional` \
+  -e DHLEVEL=2048 `#optional` \
+  -e ONLY_SUBDOMAINS=false `#optional` \
+  -e EXTRA_DOMAINS=<extradomains> `#optional` \
+  -e STAGING=false `#optional` \
+  -p 443:443 \
+  -p 80:80 `#optional` \
+  -v </path/to/appdata/config>:/config \
+  --restart unless-stopped \
+  linuxserver/letsencrypt

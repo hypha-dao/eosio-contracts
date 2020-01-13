@@ -24,7 +24,7 @@ Approving the proposal
 Transaction Successfull :  7071dd166dac2a3ba23a56f7125bedbfc5c8837777d34f1c59a2855a9f19e8d0
 
 Closing the proposal (after the wait)
--- calling hyphadaomain::closeprop with the following parms:
+-- calling dao.hypha::closeprop with the following parms:
 -- -- proposal_type :  roles
 -- -- proposal_id   :  0
 
@@ -46,7 +46,6 @@ node dao.js -f proposals/role.json -a -c && node dao.js -f proposals/assignment.
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++ 
 */
 
-
 const commandLineArgs = require("command-line-args");
 const fs = require('fs');
 
@@ -56,7 +55,7 @@ const fetch = require("node-fetch");
 const { TextEncoder, TextDecoder } = require("util");
 
 const defaultPrivateKey = process.env.PRIVATE_KEY;
-const DAO_CONTRACT = "hyphadaomain";
+const DAO_CONTRACT = "dao.hypha";
 const signatureProvider = new JsSignatureProvider([defaultPrivateKey]);
 
 async function sendtrx (host, contract, action, authorizer, data) {
@@ -67,13 +66,32 @@ async function sendtrx (host, contract, action, authorizer, data) {
   console.log("Transaction Successfull : ", result.transaction_id);
 }
 
-async function getLastCreatedProposal (host, proposalType) {
+async function getVotingPeriod (host) {
   let rpc;
   let options = {};
 
   rpc = new JsonRpc(host, { fetch });
-  options.code = "hyphadaomain";
-  options.scope = proposalType; 
+  options.code = DAO_CONTRACT;
+  options.scope = DAO_CONTRACT; 
+
+  options.json = true;
+  options.table = "config";
+
+  const result = await rpc.get_table_rows(options);
+  if (result.rows.length > 0) {
+    return result.rows[0].ints.find(o => o.key === 'voting_duration_sec').value;
+  } else {
+    console.log ("ERROR:: Configuration has not been set.");
+  }
+}
+
+async function getLastCreatedProposal (host) {
+  let rpc;
+  let options = {};
+
+  rpc = new JsonRpc(host, { fetch });
+  options.code = DAO_CONTRACT;
+  options.scope = DAO_CONTRACT; 
 
   options.json = true;
   options.table = "proposals";
@@ -84,7 +102,6 @@ async function getLastCreatedProposal (host, proposalType) {
   
   const result = await rpc.get_table_rows(options);
   if (result.rows.length > 0) {
-    // console.log ("result.rows[0]: ", JSON.stringify(result.rows[0], null, 2));
     return result.rows[0];
   } 
   
@@ -105,7 +122,8 @@ async function loadOptions() {
     { name: "host", alias: "h", type: String, defaultValue: "https://test.telos.kitchen" },
     { name: "approve", alias: "a", type: Boolean, defaultValue: false },
     { name: "close", alias: "c", type: Boolean, defaultValue: false },
-    { name: "propose", alias: "p", type: Boolean, defaultValue: true }
+    { name: "propose", alias: "p", type: Boolean, defaultValue: true },
+    { name: "config", type: Boolean, defaultValue: false }
     // see here to add new options:
     //   - https://github.com/75lb/command-line-args/blob/master/doc/option-definition.md
   ];
@@ -122,25 +140,38 @@ function sleep(ms, msg){
 
 const main = async () => {
   const opts = await loadOptions();
-  // console.log (opts);
-  if (opts.file && opts.propose) {
 
-      const proposal = JSON.parse(fs.readFileSync(opts.file.filename, 'utf8'));
-      console.log ("\nParsing the proposal from : ", opts.file.filename);
-      console.log ("-- title            : ", proposal.data.strings.find(o => o.key === 'title').value);
-      console.log ("-- proposal_type    : ", proposal.data.names.find(o => o.key === 'proposal_type').value);
-      console.log ("-- proposer         : ", proposal.data.names.find(o => o.key === 'proposer').value);
+  // setting configuration
+  if (opts.file && opts.config) {
+    const config = JSON.parse(fs.readFileSync(opts.file.filename, 'utf8'));
+    console.log ("\nParsing the configuration from : ", opts.file.filename);
+    console.log ("-- hypha_token_contract   : ", config.data.names.find(o => o.key === 'hypha_token_contract').value);
+    console.log ("-- seeds_token_contract   : ", config.data.names.find(o => o.key === 'seeds_token_contract').value);
+    console.log ("-- telos_decide_contract  : ", config.data.names.find(o => o.key === 'telos_decide_contract').value);
 
-      console.log ("\nSubmitting proposal : ", opts.file.filename);
-      await sendtrx(opts.host, DAO_CONTRACT, "propose", 
-        proposal.data.names.find(o => o.key === 'proposer').value, 
-        proposal.data);
+    console.log ("\nSubmitting configuration : ", opts.file.filename);
+    await sendtrx(opts.host, DAO_CONTRACT, "setconfig", DAO_CONTRACT, config.data);
+  }
+
+  // proposing
+  else if (opts.file && opts.propose) {
+
+    const proposal = JSON.parse(fs.readFileSync(opts.file.filename, 'utf8'));
+    console.log ("\nParsing the proposal from : ", opts.file.filename);
+    console.log ("-- title            : ", proposal.data.strings.find(o => o.key === 'title').value);
+    console.log ("-- proposal_type    : ", proposal.data.names.find(o => o.key === 'proposal_type').value);
+    console.log ("-- proposer         : ", proposal.data.names.find(o => o.key === 'proposer').value);
+
+    console.log ("\nSubmitting proposal : ", opts.file.filename);
+    await sendtrx(opts.host, DAO_CONTRACT, "propose", 
+      proposal.data.names.find(o => o.key === 'proposer').value, 
+      proposal.data);
 
     if (opts.approve || opts.close) {
 
       // sleep to ensure the table is written
       await sleep (10000, "Eliminating likelihood of microfork before retrieving proposal...");
-      const lastProposal = await getLastCreatedProposal(opts.host, proposal.data.names.find(o => o.key === 'proposal_type').value);
+      const lastProposal = await getLastCreatedProposal(opts.host);
 
       if (opts.approve) {
 
@@ -164,18 +195,18 @@ const main = async () => {
       if (opts.close) {
         
         console.log ("\nClosing the proposal (after the wait)");
-        console.log ("-- calling hyphadaomain::closeprop with the following parms:");
+        console.log ("-- calling dao.hypha::closeprop with the following parms:");
         console.log ("-- -- proposal_type : ", proposal.data.names.find(o => o.key === 'proposal_type').value);
         console.log ("-- -- proposal_id   : ", lastProposal.id);
 
-        // sleep another 75 seconds to ensure the 60 second ballot open window is complete
-        await sleep (75000, "Waiting while the ballot expiration expires...");
+        // sleep another 1 hour to ensure the ballot open window is complete
+        const sleepDuration = (await getVotingPeriod(opts.host) * 1000) + 20000;
+        await sleep (sleepDuration, "Waiting " + sleepDuration + " seconds while the ballot expiration expires...");
    
         // close the proposal
         await sendtrx(opts.host, DAO_CONTRACT, "closeprop", 
           proposal.data.names.find(o => o.key === 'proposer').value, 
-          { "proposal_type":proposal.data.names.find(o => o.key === 'proposal_type').value, 
-            "proposal_id":lastProposal.id });
+          { "proposal_id":lastProposal.id });
       }
     }
   } else {

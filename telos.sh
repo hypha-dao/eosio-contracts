@@ -15,7 +15,7 @@ cleos -u https://api.telos.kitchen push action eosio.token transfer '["dappbuild
 cleos -u https://api.telos.kitchen push action eosio.token transfer '["dao.hypha", "trailservice", "1000.0000 TLOS", "deposit"]' -p dao.hypha
 
 # create new treasury
-cleos -u https://api.telos.kitchen push action trailservice newtreasury '["dao.hypha", "1000000000 HVOICE", "public"]' -p dao.hypha
+cleos -u https://api.telos.kitchen push action trailservice newtreasury '["dao.hypha", "1000000000. HVOICE", "public"]' -p dao.hypha
 cleos -u https://api.telos.kitchen push action trailservice toggle '["0,HVOICE", "transferable"]' -p dao.hypha
 
 # register to vote

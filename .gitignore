@@ -13,3 +13,5 @@ hyphadac_project-prefix
 node_modules
 package-lock.json
 old_data
+perm_main.json
+readiness.txt

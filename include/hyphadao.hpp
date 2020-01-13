@@ -20,15 +20,22 @@ CONTRACT hyphadao : public contract {
    public:
       using contract::contract;
 
-      struct [[eosio::table, eosio::contract("hyphadao") ]] DAOConfig 
+      struct [[eosio::table, eosio::contract("hyphadao") ]] Config 
       {
-         name           trail_contract          ;
-         name           last_ballot_id          = name("hypha1");
-         uint64_t       last_sender_id          ;
+         // required configurations:
+         // names : telos_decide_contract, hypha_token_contract, seeds_token_contract, last_ballot_id
+         // ints  : voting_duration_sec
+         map<string, name>          names             ;
+         map<string, string>        strings           ;
+         map<string, asset>         assets            ;
+         map<string, time_point>    time_points       ;
+         map<string, uint64_t>      ints              ;
+         map<string, transaction>   trxs              ;
+         map<string, float>         floats            ;
       };
 
-      typedef singleton<"config"_n, DAOConfig> config_table;
-      typedef multi_index<"config"_n, DAOConfig> config_table_placehoder;
+      typedef singleton<"config"_n, Config> config_table;
+      typedef multi_index<"config"_n, Config> config_table_placeholder;
 
       struct [[eosio::table, eosio::contract("hyphadao") ]] Member 
       {
@@ -113,10 +120,14 @@ CONTRACT hyphadao : public contract {
       ACTION resetperiods();
       ACTION eraseprop (const uint64_t&   proposal_id);
 
-      ACTION setconfig (const name&    hypha_token_contract,
-                        const name&    seeds_token_contract,
-                        const name&    trail_contract);
-                        
+      ACTION setconfig (const map<string, name> 		  names,
+                        const map<string, string>       strings,
+                        const map<string, asset>        assets,
+                        const map<string, time_point>   time_points,
+                        const map<string, uint64_t>     ints,
+                        const map<string, float>        floats,
+                        const map<string, transaction>  trxs);
+
       ACTION setlastballt (const name& last_ballot_id);
 
       ACTION clrdebugs (const uint64_t& starting_id, const uint64_t& batch_size);
@@ -140,7 +151,7 @@ CONTRACT hyphadao : public contract {
       // users can claim their salary pay
       ACTION payassign(const uint64_t& assignment_id, const uint64_t& period_id);
             
-      // temporary hack - keep a list of the members, although true membership is governed by token holdings
+      // temporary hack (?) - keep a list of the members, although true membership is governed by token holdings
       ACTION removemember(const name& member_to_remove);
       ACTION addmember (const name& member);
       
@@ -156,10 +167,10 @@ CONTRACT hyphadao : public contract {
       uint64_t get_next_sender_id()
       {
          config_table      config_s (get_self(), get_self().value);
-   	   DAOConfig c = config_s.get_or_create (get_self(), DAOConfig());   
-         uint64_t return_senderid = c.last_sender_id;
+   	   Config c = config_s.get_or_create (get_self(), Config());   
+         uint64_t return_senderid = c.ints.at("last_sender_id");
          return_senderid++;
-         c.last_sender_id = return_senderid;
+         c.ints["last_sender_id"] = return_senderid;
          config_s.set (c, get_self());
          return return_senderid;
       }
@@ -175,13 +186,14 @@ CONTRACT hyphadao : public contract {
       void archive (Proposal& prop) {
          proposal_table p_t_archive (get_self(), "archive"_n.value);
 	      p_t_archive.emplace (get_self(), [&](auto &p) {
-            p.id           = prop.id;
-            p.proposer     = prop.proposer;
-            p.names        = prop.names;
-            p.assets       = prop.assets;
-            p.time_points  = prop.time_points;
-            p.ints         = prop.ints;
-            p.trxs         = prop.trxs;
+            p.id                          = p_t_archive.available_primary_key();
+            p.proposer                    = prop.proposer;
+            p.names                       = prop.names;
+            p.assets                      = prop.assets;
+            p.time_points                 = prop.time_points;
+            p.ints                        = prop.ints;
+            p.ints["prop_id_when_open"]   = prop.id;  // id of archived proposal may not match id open same proposal when opened because they use different scopes
+            p.trxs                        = prop.trxs;
 	      });
       }
 };
