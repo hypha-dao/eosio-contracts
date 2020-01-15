@@ -196,7 +196,6 @@ const main = async () => {
         
         console.log ("\nClosing the proposal (after the wait)");
         console.log ("-- calling dao.hypha::closeprop with the following parms:");
-        console.log ("-- -- proposal_type : ", proposal.data.names.find(o => o.key === 'proposal_type').value);
         console.log ("-- -- proposal_id   : ", lastProposal.id);
 
         // sleep another 1 hour to ensure the ballot open window is complete

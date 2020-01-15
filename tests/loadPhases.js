@@ -9,7 +9,7 @@ const { TextEncoder, TextDecoder } = require("util");
 const defaultPrivateKey = process.env.PRIVATE_KEY; //"<insert key here>"; // bob
 const signatureProvider = new JsSignatureProvider([defaultPrivateKey]);
 
-const rpc = new JsonRpc("https://test.telos.kitchen", { fetch });
+const rpc = new JsonRpc("https://api.telos.kitchen", { fetch });
 
 const api = new Api({
   rpc,
@@ -56,11 +56,11 @@ const addPeriodsSync = async (periods) => {
 
       const actions = [
         {
-          account: "hyphadaomain",
+          account: "dao.hypha",
           name: "addperiod",
           authorization: [
             {
-              actor: "hyphadaomain",
+              actor: "dao.hypha",
               permission: "active"
             }
           ],
@@ -101,7 +101,7 @@ const loadPeriods = () => {
 
   handler.on('end', () => addPeriodsSync(periods))
 
-  fs.createReadStream("../moon_phases_test.csv").pipe(handler)
+  fs.createReadStream("../moon_phases.csv").pipe(handler)
 }
 
 const main = async () => {

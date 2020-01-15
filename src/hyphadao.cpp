@@ -61,16 +61,22 @@ void hyphadao::setconfig (	const map<string, name> 		names,
 	config_table      config_s (get_self(), get_self().value);
    	Config c = config_s.get_or_create (get_self(), Config());   
 
-	c.names			= names;
+	// retain last_ballot_id from the current configuration if it is not provided in the new one
+	name last_ballot_id	;
+	if (names.find("last_ballot_id") != names.end()) { 
+		last_ballot_id	= names.at("last_ballot_id"); 
+	} else if (c.names.find("last_ballot_id") != c.names.end()) {
+		last_ballot_id	= c.names.at("last_ballot_id");
+	}
 
-	// if last_ballot_id is not in the new configuration, but it is in the existing configuration, copy it over
-	if (names.find("last_ballot_id") == names.end() && c.names.find("last_ballot_id") != c.names.end()) { c.names["last_ballot_id"] = c.names.at("last_ballot_id"); }
+	c.names						= names;
+	c.names["last_ballot_id"] 	= last_ballot_id;
 
 	c.strings		= strings;
-	c.assets		= assets;
+	c.assets			= assets;
 	c.time_points	= time_points;
 	c.ints			= ints;
-	c.floats		= floats;
+	c.floats			= floats;
 	c.trxs			= trxs;
 
 	config_s.set (c, get_self());
@@ -78,7 +84,6 @@ void hyphadao::setconfig (	const map<string, name> 		names,
 	// validate for required configurations
     string required_names[]{ "hypha_token_contract", "seeds_token_contract", "telos_decide_contract", "last_ballot_id"};
     for (int i{ 0 }; i < std::size(required_names); i++) {
-		// debug ("Required name: " + required_names[i]);
 		check (c.names.find(required_names[i]) != c.names.end(), "name configuration: " + required_names[i] + " is required but not provided.");
 	}
 
@@ -105,7 +110,7 @@ void hyphadao::enroll (	const name& enroller,
 	config_table      config_s (get_self(), get_self().value);
    	Config c = config_s.get_or_create (get_self(), Config());  
 
-	asset one_hvoice = asset { 1, common::S_HVOICE };
+	asset one_hvoice = asset { 100, common::S_HVOICE };
 	string memo { "Welcome to Hypha DAO!"};
 	action(	
 		permission_level{get_self(), "active"_n}, 

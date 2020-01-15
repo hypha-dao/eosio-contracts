@@ -3,11 +3,11 @@
     "names": [
       {
         "key": "proposer",
-        "value": "johnnyhypha1"
+        "value": "hyphanewyork"
       },
       {
         "key": "recipient",
-        "value": "johnnyhypha1"
+        "value": "hyphanewyork"
       },
       {
         "key": "proposal_type",
@@ -21,21 +21,21 @@
     "strings": [
       {
         "key": "title",
-        "value": "Payout for Beach Cleanup"
+        "value": "Testing Proposal Functionality"
       },
       {
         "key": "description",
-        "value": "We cleaned up a dirty beach"
+        "value": "Testing Proposal Functionality"
       },
       {
         "key": "content",
-        "value": "Cleaner beaches make better baskets"
+        "value": "Testing Proposal Functionality"
       }
     ],
     "assets": [
       {
         "key": "hypha_amount",
-        "value": "2.00 HYPHA"
+        "value": "0.01 HYPHA"
       },
       {
         "key": "seeds_amount",
@@ -43,7 +43,7 @@
       },
       {
         "key": "hvoice_amount",
-        "value": "3.00 HVOICE"
+        "value": "0.00 HVOICE"
       }
     ],
     "time_points": [

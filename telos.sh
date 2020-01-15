@@ -15,14 +15,14 @@ cleos -u https://api.telos.kitchen push action eosio.token transfer '["dappbuild
 cleos -u https://api.telos.kitchen push action eosio.token transfer '["dao.hypha", "trailservice", "1000.0000 TLOS", "deposit"]' -p dao.hypha
 
 # create new treasury
-cleos -u https://api.telos.kitchen push action trailservice newtreasury '["dao.hypha", "1000000000. HVOICE", "public"]' -p dao.hypha
+cleos -u https://api.telos.kitchen push action trailservice newtreasury '["dao.hypha", "1000000000.00 HVOICE", "public"]' -p dao.hypha
 cleos -u https://api.telos.kitchen push action trailservice toggle '["0,HVOICE", "transferable"]' -p dao.hypha
 
 # register to vote
-cleos -u https://api.telos.kitchen push action trailservice regvoter '["hyphanewyork", "0,HVOICE", null]' -p hyphanewyork
-cleos -u https://api.telos.kitchen push action trailservice mint '["dao.hypha", "1 HVOICE", "original mint"]' -p dao.hypha
+cleos -u https://api.telos.kitchen push action trailservice regvoter '["dao.hypha", "2,HVOICE", null]' -p dao.hypha
+cleos -u https://api.telos.kitchen push action trailservice mint '["dao.hypha", "1.00 HVOICE", "original mint"]' -p dao.hypha
 
 # apply to the DAO
-cleos -u https://api.telos.kitchen push action dao.hypha apply '["hyphanewyork", "I would like to join please"]' -p hyphanewyork
+cleos -u https://api.telos.kitchen push action dao.hypha apply '["hyphanewyork", "The Times 03/Jan/2009 Chancellor on the brink of second bailout for banks"]' -p hyphanewyork
 
 # propose a 1 HYPHA payout to test

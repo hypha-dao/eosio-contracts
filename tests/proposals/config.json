@@ -15,7 +15,7 @@
         },
         {
           "key": "last_ballot_id",
-          "value": "hypha1.....ck"
+          "value": "hypha1......3"
         }
       ],
       "strings": [],
@@ -24,7 +24,7 @@
       "ints": [
           {
               "key":"voting_duration_sec",
-              "value":"60"
+              "value":"604800"
           }
       ],
       "floats": [],
