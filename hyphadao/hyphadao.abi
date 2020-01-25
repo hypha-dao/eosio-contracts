@@ -106,24 +106,6 @@
             ]
         },
         {
-            "name": "BankConfig",
-            "base": "",
-            "fields": [
-                {
-                    "name": "hypha_token_contract",
-                    "type": "name"
-                },
-                {
-                    "name": "seeds_token_contract",
-                    "type": "name"
-                },
-                {
-                    "name": "voice_token_contract",
-                    "type": "name"
-                }
-            ]
-        },
-        {
             "name": "Config",
             "base": "",
             "fields": [
@@ -672,6 +654,16 @@
             ]
         },
         {
+            "name": "remapply",
+            "base": "",
+            "fields": [
+                {
+                    "name": "applicant",
+                    "type": "name"
+                }
+            ]
+        },
+        {
             "name": "removemember",
             "base": "",
             "fields": [
@@ -865,6 +857,11 @@
             "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Propose\nsummary: 'Create a new proposal'\nicon: http://dao-dev.hypha.earth/statics/app-logo-128x128.png#a71ba6431c13b623eccde41cd14f0f5e3ee694da7e3878407e74d8137bf89916\n---\n\n{{$action.authorization.[0].actor}} creates a new proposal to Hypha DAO with the following attributes:\nnames: {{to_json names}}\nstrings: {{to_json strings}}\nassets: {{to_json assets}}\ntime_points: {{to_json time_points}}\nints: {{to_json ints}}\nfloats: {{to_json floats}}\ntransactions: {{to_json trxs}}"
         },
         {
+            "name": "remapply",
+            "type": "remapply",
+            "ricardian_contract": ""
+        },
+        {
             "name": "removemember",
             "type": "removemember",
             "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Remove Member\nsummary: 'Remove a member'\nicon: http://dao-dev.hypha.earth/statics/app-logo-128x128.png#a71ba6431c13b623eccde41cd14f0f5e3ee694da7e3878407e74d8137bf89916\n---\n\n{{$action.authorization.[0].actor}} removes {{member_to_remove}} as a Member."
@@ -913,13 +910,6 @@
         {
             "name": "asspayouts",
             "type": "AssignmentPayout",
-            "index_type": "i64",
-            "key_names": [],
-            "key_types": []
-        },
-        {
-            "name": "bankconfig",
-            "type": "BankConfig",
             "index_type": "i64",
             "key_names": [],
             "key_types": []

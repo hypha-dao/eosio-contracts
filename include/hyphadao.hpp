@@ -138,6 +138,8 @@ CONTRACT hyphadao : public contract {
       ACTION remperiods (const uint64_t& begin_period_id, 
                          const uint64_t& end_period_id);
 
+      ACTION remapply (const name& applicant);
+
       // These actions are executed only on approval of a proposal. 
       // To introduce a new proposal type, we would add another action to the below.
       ACTION newrole    (  const uint64_t&   proposal_id);
@@ -183,18 +185,25 @@ CONTRACT hyphadao : public contract {
          });
       }
 
-      void archive (Proposal& prop) {
+      void archive (const uint64_t& proposal_id) {
+
+         proposal_table p_t_active (get_self(), get_self().value);
+	      auto p_itr_active = p_t_active.find(proposal_id);
+	      check(p_itr_active != p_t_active.end(), "Cannot archive proposal - proposal_id not found in active proposals: " + std::to_string(proposal_id));
+
          proposal_table p_t_archive (get_self(), "archive"_n.value);
 	      p_t_archive.emplace (get_self(), [&](auto &p) {
             p.id                          = p_t_archive.available_primary_key();
-            p.proposer                    = prop.proposer;
-            p.names                       = prop.names;
-            p.assets                      = prop.assets;
-            p.time_points                 = prop.time_points;
-            p.ints                        = prop.ints;
-            p.ints["prop_id_when_open"]   = prop.id;  // id of archived proposal may not match id open same proposal when opened because they use different scopes
-            p.trxs                        = prop.trxs;
+            p.proposer                    = p_itr_active->proposer;
+            p.names                       = p_itr_active->names;
+            p.assets                      = p_itr_active->assets;
+            p.time_points                 = p_itr_active->time_points;
+            p.ints                        = p_itr_active->ints;
+            p.ints["prop_id_when_open"]   = p_itr_active->id;  // id of archived proposal may not match id open same proposal when opened because they use different scopes
+            p.trxs                        = p_itr_active->trxs;
 	      });
+
+         p_t_active.erase (p_itr_active);
       }
 };
 

@@ -11,17 +11,27 @@
 
 using namespace eosio;
 using std::string;
+using std::map;
 
 class Bank {
 
     public:
 
-        struct [[ eosio::table, eosio::contract("hyphadao") ]] BankConfig
+        struct [[eosio::table, eosio::contract("hyphadao") ]] Config 
         {
-            name           hypha_token_contract     = "token.hypha"_n;
-            name           seeds_token_contract     = "token.seeds"_n;
-            name           voice_token_contract     = "trailservice"_n;             
+            // required configurations:
+            // names : telos_decide_contract, hypha_token_contract, seeds_token_contract, last_ballot_id
+            // ints  : voting_duration_sec
+            map<string, name>          names             ;
+            map<string, string>        strings           ;
+            map<string, asset>         assets            ;
+            map<string, time_point>    time_points       ;
+            map<string, uint64_t>      ints              ;
+            map<string, transaction>   trxs              ;
+            map<string, float>         floats            ;
         };
+
+        typedef singleton<"config"_n, Config> config_table;
 
         struct [[eosio::table, eosio::contract("hyphadao") ]] Period
         {
@@ -57,33 +67,24 @@ class Bank {
             indexed_by<"byassignment"_n, const_mem_fun<Payment, uint64_t, &Payment::by_assignment>>
         > payment_table;
 
-        typedef singleton<"bankconfig"_n, BankConfig> bankconfig_table;
-        typedef multi_index<"bankconfig"_n, BankConfig> bankconfig_table_placeholder;
-
         name                contract;
         period_table        period_t;
         payment_table       payment_t;
-        bankconfig_table    bankconfig_s;
+        config_table        config_s;
 
         Bank (const name& contract):
             contract (contract),
             payment_t (contract, contract.value),
             period_t (contract, contract.value),
-            bankconfig_s (contract, contract.value) {}
+            config_s (contract, contract.value) {}
 
        void reset () {
             require_auth (contract);
-            bankconfig_s.remove ();
             
             auto pay_itr = payment_t.begin();
             while (pay_itr != payment_t.end()) {
                 pay_itr = payment_t.erase (pay_itr);
             }
-        }
-
-        void reset_config () {
-            require_auth (contract);
-            bankconfig_s.remove ();
         }
 
         void remove_periods (const uint64_t& begin_period_id, 
@@ -105,42 +106,32 @@ class Bank {
                 per_itr = period_t.erase (per_itr);
             }
         }
-
-        void set_config  (const name& hypha_token_contract, 
-                            const name& seeds_token_contract,
-                            const name& trail_contract) {
-            require_auth (contract);
-
-            check (is_account(hypha_token_contract), "HYPHA token contract is not an account: " + hypha_token_contract.to_string());
-            check (is_account(seeds_token_contract), "HYPHA token contract is not an account: " + seeds_token_contract.to_string());
-
-            BankConfig bc = bankconfig_s.get_or_create (contract, BankConfig());
-            bc.hypha_token_contract = hypha_token_contract;
-            bc.seeds_token_contract = seeds_token_contract;
-            bc.voice_token_contract = trail_contract;
-            bankconfig_s.set (bc, contract);
-        }
-                                
+                          
         void makepayment (const uint64_t& period_id, const name& recipient, 
                                     const asset& quantity, const string& memo, 
                                     const uint64_t& assignment_id) {
             
-            BankConfig bc = bankconfig_s.get_or_create (contract, BankConfig());
+            config_table      config_s (contract, contract.value);
+   	        Config c = config_s.get_or_create (contract, Config());   
         
             if (quantity.symbol == common::S_HVOICE) {
                 action(
                     permission_level{contract, "active"_n},
-                    bc.voice_token_contract, "mint"_n,
+                    c.names.at("telos_decide_contract"), "mint"_n,
                     std::make_tuple(recipient, quantity, memo))
                 .send();
             } else if (quantity.symbol == common::S_SEEDS) {
-                action(
-                    permission_level{contract, "active"_n},
-                    bc.seeds_token_contract, "transfer"_n,
-                    std::make_tuple(contract, recipient, quantity, memo))
-                .send();
+
+                // need to add steps in here about the deferments         
+                // action(
+                //     permission_level{contract, "active"_n},
+                //     c.names.at("seeds_token_contract"), "transfer"_n,
+                //     std::make_tuple(contract, recipient, quantity, memo))
+                // .send();
+
             } else {
-                issuetoken (bc.hypha_token_contract, recipient, quantity, memo );
+                // need to add steps in here about the deferments         
+                issuetoken (c.names.at("hypha_token_contract"), recipient, quantity, memo );
             }
         
             payment_t.emplace (contract, [&](auto &p) {
@@ -190,9 +181,10 @@ class Bank {
 
         bool holds_hypha (const name& account) 
         {
-            BankConfig bc = bankconfig_s.get_or_create (contract, BankConfig());
+            config_table      config_s (contract, contract.value);
+   	        Config c = config_s.get_or_create (contract, Config());   
 
-            eosiotoken::accounts a_t (bc.hypha_token_contract, account.value);
+            eosiotoken::accounts a_t (c.names.at("hypha_token_contract"), account.value);
             auto a_itr = a_t.find (common::S_HYPHA.code().raw());
             if (a_itr == a_t.end()) {
                 return false;

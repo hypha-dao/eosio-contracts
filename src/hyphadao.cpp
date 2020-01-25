@@ -87,7 +87,7 @@ void hyphadao::setconfig (	const map<string, name> 		names,
 		check (c.names.find(required_names[i]) != c.names.end(), "name configuration: " + required_names[i] + " is required but not provided.");
 	}
 
-	bank.set_config (names.at("hypha_token_contract"), names.at("seeds_token_contract"), names.at("telos_decide_contract"));
+	// bank.set_config (names.at("hypha_token_contract"), names.at("seeds_token_contract"), names.at("telos_decide_contract"));
 }
 
 void hyphadao::setlastballt ( const name& last_ballot_id) {
@@ -131,6 +131,13 @@ void hyphadao::enroll (	const name& enroller,
 
 	a_t.erase (a_itr);
 }	
+
+void hyphadao::remapply (const name& applicant) {
+	require_auth (get_self());
+	applicant_table a_t (get_self(), get_self().value);
+	auto a_itr = a_t.find (applicant.value);
+	a_t.erase (a_itr);
+}
 
 void hyphadao::apply (const name& applicant, 
 						const string& content) {
@@ -208,7 +215,7 @@ name hyphadao::register_ballot (const name& proposer,
 			strings.at("content")))
    .send();
 
-   auto expiration = time_point_sec(current_time_point()) + c.ints.at("voting_duration_sec"); // (60 * 60); // 1 hour
+   auto expiration = time_point_sec(current_time_point()) + c.ints.at("voting_duration_sec");
    
    action (
       permission_level{get_self(), "active"_n},
@@ -296,7 +303,7 @@ void hyphadao::exectrx (const uint64_t& proposal_id) {
 		// debug ( "true/false		: " + std::to_string(trx_itr->first.compare("exec_on_approval") == 0));
 		if (trx_itr->first.compare("exec_on_approval") == 0) {
 			debug ("Executing transaction	: " + trx_itr->first);
-			// trx_itr->second.send(current_block_time().to_time_point().sec_since_epoch(), get_self());
+			trx_itr->second.send(current_block_time().to_time_point().sec_since_epoch(), get_self());
 		}
 	}
 }
@@ -320,7 +327,7 @@ void hyphadao::newrole (const uint64_t& proposal_id) {
 						p_itr->ints.at("start_period"),
 						p_itr->ints.at("end_period"));
 			
-	debug ("After calling holocracy::newrole");
+	archive (proposal_id);
 }
 
 void hyphadao::addperiod (const time_point& start_date, const time_point& end_date, const string& phase) {
@@ -343,6 +350,8 @@ void hyphadao::assign ( const uint64_t& 		proposal_id) {
 							p_itr->ints.at("start_period"),
 							p_itr->ints.at("end_period"),
 							p_itr->floats.at("time_share"));
+
+	archive (proposal_id);
 }
 
 void hyphadao::payassign(const uint64_t& assignment_id, const uint64_t& period_id) {
@@ -379,6 +388,8 @@ void hyphadao::makepayout (const uint64_t&        proposal_id) {
 			make_tuple(p_itr->names.at("recipient"), p_itr->assets.at("hvoice_amount"), memo
 		)).send();
 	}
+
+	archive (proposal_id);
 }
 
 void hyphadao::eraseprop (const uint64_t& proposal_id) {
@@ -421,13 +432,10 @@ void hyphadao::closeprop(const uint64_t& proposal_id) {
 
 	if (b_itr->total_voters > quorum_threshold && votes_pass > votes_fail) {
 		debug_str = debug_str + "Executing transaction\n";
-		prop.trxs.at("exec_on_approval").send(current_block_time().to_time_point().sec_since_epoch(), get_self());		
+		//prop.trxs.at("exec_on_approval").send(current_block_time().to_time_point().sec_since_epoch(), get_self());		
 	}
 
 	debug (debug_str);
-
-	// archive (prop);	
-	// props.erase(i_iter);
 }
 
 void hyphadao::qualify_proposer (const name& proposer) {

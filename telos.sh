@@ -26,3 +26,29 @@ cleos -u https://api.telos.kitchen push action trailservice mint '["dao.hypha", 
 cleos -u https://api.telos.kitchen push action dao.hypha apply '["hyphanewyork", "The Times 03/Jan/2009 Chancellor on the brink of second bailout for banks"]' -p hyphanewyork
 
 # propose a 1 HYPHA payout to test
+
+
+
+
+
+
+
+export HOST=https://test.telos.kitchen 
+
+cleos -u $HOST set contract dao.hypha hyphadao/
+cleos -u $HOST push action dao.hypha resetperiods '[]' -p dao.hypha
+cleos -u $HOST push action dao.hypha resetbankcfg '[]' -p dao.hypha
+
+# update table structures
+- add coeffecients to time periods
+- remove bankconfig table
+- add config table structure to bank class
+
+# set config
+node dao.js -f proposals/config.json -h $HOST --config
+node loadPhases.js
+
+
+# add inline actions to pay SEEDS to escrow
+- transfer
+- create # what is vesting period of each payment
