@@ -108,7 +108,7 @@ CONTRACT hyphadao : public contract {
                      const map<string, uint64_t>     ints,
                      const map<string, float>        floats,
                      const map<string, transaction>  trxs);
-      
+
       ACTION apply (const name&     applicant, const string& content);
 
       ACTION enroll (const name& enroller,
@@ -118,7 +118,12 @@ CONTRACT hyphadao : public contract {
       // Admin
       ACTION reset ();
       ACTION resetperiods();
-      ACTION eraseprop (const uint64_t&   proposal_id);
+      ACTION eraseprop (const name& scope,
+                        const uint64_t&   proposal_id);
+
+      ACTION updstrings (const name& scope, 
+                         const uint64_t& proposal_id, 
+                         const map<string, string> strings);
 
       ACTION setconfig (const map<string, name> 		  names,
                         const map<string, string>       strings,
@@ -197,6 +202,8 @@ CONTRACT hyphadao : public contract {
             p.proposer                    = p_itr_active->proposer;
             p.names                       = p_itr_active->names;
             p.assets                      = p_itr_active->assets;
+            p.strings                     = p_itr_active->strings;
+            p.floats                      = p_itr_active->floats;
             p.time_points                 = p_itr_active->time_points;
             p.ints                        = p_itr_active->ints;
             p.ints["prop_id_when_open"]   = p_itr_active->id;  // id of archived proposal may not match id open same proposal when opened because they use different scopes
@@ -205,6 +212,10 @@ CONTRACT hyphadao : public contract {
 
          p_t_active.erase (p_itr_active);
       }
+
+      asset adjust_asset (const asset& original_asset, const float& adjustment) {
+         return asset { static_cast<int64_t> (original_asset.amount * adjustment), original_asset.symbol };
+      }  
 };
 
 #endif

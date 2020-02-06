@@ -15,3 +15,5 @@ package-lock.json
 old_data
 perm_main.json
 readiness.txt
+**.DS_Store
+.DS_Store

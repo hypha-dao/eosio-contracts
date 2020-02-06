@@ -444,6 +444,10 @@
             "base": "",
             "fields": [
                 {
+                    "name": "scope",
+                    "type": "name"
+                },
+                {
                     "name": "proposal_id",
                     "type": "uint64"
                 }
@@ -788,6 +792,24 @@
                     "type": "varuint32"
                 }
             ]
+        },
+        {
+            "name": "updstrings",
+            "base": "",
+            "fields": [
+                {
+                    "name": "scope",
+                    "type": "name"
+                },
+                {
+                    "name": "proposal_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "strings",
+                    "type": "pair_string_string[]"
+                }
+            ]
         }
     ],
     "actions": [
@@ -890,6 +912,11 @@
             "name": "setlastballt",
             "type": "setlastballt",
             "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Set Last Ballt\nsummary: 'Set the last ballot id value'\nicon: http://dao-dev.hypha.earth/statics/app-logo-128x128.png#a71ba6431c13b623eccde41cd14f0f5e3ee694da7e3878407e74d8137bf89916\n---\n\n{{$action.authorization.[0].actor}} sets the last ballot id with the value: {{last_ballot_id}}."
+        },
+        {
+            "name": "updstrings",
+            "type": "updstrings",
+            "ricardian_contract": ""
         }
     ],
     "tables": [

@@ -105,3 +105,19 @@ docker create \
   -v </path/to/appdata/config>:/config \
   --restart unless-stopped \
   linuxserver/letsencrypt
+
+
+
+
+
+
+ 4
+  title: July Audit - Genesis Tracking Contributions - Voice Fix
+description: Correcting the previous request for voice. Mapping over the new rules for 2X for voice.
+content: Correcting the previous request for voice. Mapping over the new rules for 2X for voice. 
+
+
+2
+ title: July Audit - Genesis Contribution Tracking
+description: Claiming contributions to Hypha and SEEDS from August 2017 to July 2019
+content: For about 2 years I spent most of every day dreaming, writing, constructing and serving this monumentally intimidating vision of facilitating the creation of a Regenerative Financial System. I always knew in my heart that we would get to this point- although my brain certainly had its moments of doubt and depression. I’m so incredibly excited, honored and in love that it has come this far! I’m not looking for a disproportionate holding of tokens. My biggest reward is that this will exist. I also desire that the amazing souls who have been dedicating their lives to this vision get a good share of this movement. For this reason I’ve heavily reduced the claimed value of my time during this nearly 2 year period to 1/4 of what they would have been if using the same value tracking after this period. Thank you all so much for sharing this dream with me. So excited to see where this goes and what we can accomplish together! 

@@ -123,11 +123,25 @@ class Bank {
             } else if (quantity.symbol == common::S_SEEDS) {
 
                 // need to add steps in here about the deferments         
-                // action(
-                //     permission_level{contract, "active"_n},
-                //     c.names.at("seeds_token_contract"), "transfer"_n,
-                //     std::make_tuple(contract, recipient, quantity, memo))
-                // .send();
+                action(
+                    permission_level{contract, "active"_n},
+                    c.names.at("seeds_token_contract"), "transfer"_n,
+                    std::make_tuple(contract, c.names.at("seeds_escrow_contract"), quantity, memo))
+                .send();
+
+                action(
+                    permission_level{contract, "active"_n},
+                    c.names.at("seeds_escrow_contract"), "lock"_n,
+                    std::make_tuple("event"_n, 
+                                    contract,
+                                    recipient,
+                                    quantity,
+                                    "golive"_n,
+                                    contract,
+                                    time_point(current_time_point().time_since_epoch() + 
+                                                current_time_point().time_since_epoch()),  // long time from now
+                                    memo))
+                .send();
 
             } else {
                 // need to add steps in here about the deferments         
