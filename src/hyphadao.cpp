@@ -19,7 +19,6 @@ void hyphadao::removemember (const name& member) {
 }
 
 void hyphadao::reset () {
-	holocracy.reset ();
 	// bank.reset_config ();
 
 	proposal_table p_t (get_self(),get_self().value);
@@ -311,8 +310,8 @@ void hyphadao::exectrx (const uint64_t& proposal_id) {
 void hyphadao::newrole (const uint64_t& proposal_id) {
 
    	require_auth (get_self());
-	change_scope ("proposal"_n, id, "proparchive"_n, false);
-	change_scope ("proposal"_n, id, "role"_n, true);
+	change_scope ("proposal"_n, proposal_id, "proparchive"_n, false);
+	change_scope ("proposal"_n, proposal_id, "role"_n, true);
 }
 
 void hyphadao::addperiod (const time_point& start_date, const time_point& end_date, const string& phase) {
@@ -323,21 +322,21 @@ void hyphadao::assign ( const uint64_t& 		proposal_id) {
 
    	require_auth (get_self());
 
-	object_table o_t (get_self(), "proposal"_n.value);
-	auto o_itr = o_t.find(proposal_id);
-	check (o_itr != o_t.end(), "Scope: " + "proposal"_n.to_string() + "; Object ID: " + std::to_string(proposal_id) + " does not exist.");
+	object_table o_t_proposal (get_self(), "proposal"_n.value);
+	auto o_itr = o_t_proposal.find(proposal_id);
+	check (o_itr != o_t_proposal.end(), "Scope: " + "proposal"_n.to_string() + "; Object ID: " + std::to_string(proposal_id) + " does not exist.");
 
-	object_table o_t (get_self(), "assignment"_n.value);
-	auto sorted_by_assigned = assignment_t.get_index<"byowner"_n>();
+	object_table o_t_assignment (get_self(), "assignment"_n.value);
+	auto sorted_by_assigned = o_t_assignment.get_index<"byowner"_n>();
 	auto a_itr = sorted_by_assigned.begin();
 	while (a_itr != sorted_by_assigned.end()) {
-		check (! (a_itr->ints.at("role_id") == o_itr->ints.at("role_id") && a_itr->names.at("assigned_account") == o_itr->names.at("assigned_account"), 
+		check (! (a_itr->ints.at("role_id") == o_itr->ints.at("role_id") && a_itr->names.at("assigned_account") == o_itr->names.at("assigned_account")), 
 			"Assigned account already has this role. Assigned account: " + o_itr->names.at("assigned_account").to_string() + "; Role ID: " + std::to_string(o_itr->ints.at("role_id")));    
 		a_itr++;
 	}
 
-	change_scope ("proposal"_n, id, "proparchive"_n, false);
-	change_scope ("proposal"_n, id, "assignment"_n, true);
+	change_scope ("proposal"_n, proposal_id, "proparchive"_n, false);
+	change_scope ("proposal"_n, proposal_id, "assignment"_n, true);
 }
 
 void hyphadao::makepayout (const uint64_t&        proposal_id) {
@@ -371,7 +370,7 @@ void hyphadao::makepayout (const uint64_t&        proposal_id) {
 		)).send();
 	}
 
-	change_scope ("proposal"_n, id, "proparchive"_n, true);
+	change_scope ("proposal"_n, proposal_id, "proparchive"_n, true);
 }
 
 void hyphadao::eraseobj (	const name& scope, 
@@ -380,14 +379,14 @@ void hyphadao::eraseobj (	const name& scope,
 	object_table o_t (get_self(), scope.value);
 	auto o_itr = o_t.find(id);
 	check (o_itr != o_t.end(), "Scope: " + scope.to_string() + "; Object ID: " + std::to_string(id) + " does not exist.");
-	o_t.erase (i_iter);
+	o_t.erase (o_itr);
 }
 
 void hyphadao::closeprop(const uint64_t& proposal_id) {
 
 	object_table o_t (get_self(), "proposal"_n.value);
-	auto o_itr = o_t.find(id);
-	check (o_itr != o_t.end(), "Scope: " + scope.to_string() + "; Object ID: " + std::to_string(id) + " does not exist.");
+	auto o_itr = o_t.find(proposal_id);
+	check (o_itr != o_t.end(), "Scope: " + "proposal"_n.to_string() + "; Object ID: " + std::to_string(proposal_id) + " does not exist.");
 	auto prop = *o_itr;
 
 	config_table      config_s (get_self(), get_self().value);
@@ -436,15 +435,15 @@ void hyphadao::qualify_proposer (const name& proposer) {
 
 void hyphadao::payassign (const uint64_t& assignment_id, const uint64_t& period_id) {
 
-	object_table o_t_assignment (get_self(), "assignment"_n);
+	object_table o_t_assignment (get_self(), "assignment"_n.value);
 	auto a_itr = o_t_assignment.find (assignment_id);
 	check (a_itr != o_t_assignment.end(), "Cannot pay assignment. Assignment ID does not exist: " + std::to_string(assignment_id));
 
 	require_auth (a_itr->names.at("assigned_account"));
 
-	object_table o_t_role (get_self(), "role"_n);
+	object_table o_t_role (get_self(), "role"_n.value);
 	auto r_itr = o_t_role.find (a_itr->ints.at("role_id"));
-	check (r_itr != o_t_role.end(), "Cannot pay assignment. Role ID does not exist: " + std::to_string(a_itr->role_id));
+	check (r_itr != o_t_role.end(), "Cannot pay assignment. Role ID does not exist: " + std::to_string(a_itr->ints.at("role_id")));
 
 	// Check that the assignment has not been paid for this period yet
 	asspay_table asspay_t (get_self(), get_self().value);
@@ -482,16 +481,16 @@ void hyphadao::payassign (const uint64_t& assignment_id, const uint64_t& period_
 	float time_share_calc = a_itr->floats.at("time_share");
 
 	// pro-rate the payout if the assignment was created 
-	if (a_itr->time_points.at("created_date").sec_since_epoch() > p_itr->time_points.at("start_date").sec_since_epoch()) {
-		time_share_calc = time_share_calc * (float) ( (float) p_itr->time_points.at("end_date").sec_since_epoch() - a_itr->time_points.at("created_date").sec_since_epoch()) / 
-							( (float) p_itr->time_points.at("end_date").sec_since_epoch() - p_itr->time_points.at("start_date").sec_since_epoch());
+	if (a_itr->time_points.at("created_date").sec_since_epoch() > p_itr->start_date.sec_since_epoch()) {
+		time_share_calc = time_share_calc * (float) ( (float) p_itr->end_date.sec_since_epoch() - a_itr->time_points.at("created_date").sec_since_epoch()) / 
+							( (float) p_itr->end_date.sec_since_epoch() - p_itr->start_date.sec_since_epoch());
 	}
 
 	asset hypha_payment = adjust_asset(r_itr->assets.at("hypha_salary"), time_share_calc);
 	asset seeds_payment = adjust_asset(r_itr->assets.at("seeds_salary"), time_share_calc);
 	asset voice_payment = adjust_asset(r_itr->assets.at("voice_salary"), time_share_calc);
 
-	asspay_t.emplace (contract, [&](auto &a) {
+	asspay_t.emplace (get_self(), [&](auto &a) {
 		a.ass_payment_id        = asspay_t.available_primary_key();
 		a.assignment_id         = assignment_id;
 		a.recipient             = a_itr->names.at("assigned_account"),
@@ -506,11 +505,11 @@ void hyphadao::payassign (const uint64_t& assignment_id, const uint64_t& period_
 		"Payment for role " + std::to_string(a_itr->ints.at("role_id")) + "; Period ID: " + std::to_string(period_id),
 		assignment_id);
 
-	bank.makepayment (period_id, a_itr->assigned_account, seeds_payment, 
+	bank.makepayment (period_id, a_itr->names.at("assigned_account"), seeds_payment, 
 		"Payment for role " + std::to_string(a_itr->ints.at("role_id")) + "; Period ID: " + std::to_string(period_id),
 		assignment_id);
 
-	bank.makepayment (period_id, a_itr->assigned_account, voice_payment, 
+	bank.makepayment (period_id, a_itr->names.at("assigned_account"), voice_payment, 
 		"Payment for role " + std::to_string(a_itr->ints.at("role_id")) + "; Period ID: " + std::to_string(period_id),
 		assignment_id);
 }

@@ -222,7 +222,6 @@ CONTRACT hyphadao : public contract {
       // ***************************
       
    private:
-      Holocracy holocracy = Holocracy (get_self());
       Bank bank = Bank (get_self());
 
       void defcloseprop (const uint64_t& proposal_id);
@@ -252,13 +251,12 @@ CONTRACT hyphadao : public contract {
       void change_scope (const name& current_scope, const uint64_t& id, const name& new_scope, const bool& remove_old) {
 
          object_table o_t_current (get_self(), current_scope.value);
-	      auto o_itr_current = o_t_active.find(id);
+	      auto o_itr_current = o_t_current.find(id);
 	      check (o_itr_current != o_t_current.end(), "Scope: " + current_scope.to_string() + "; Object ID: " + std::to_string(id) + " does not exist.");
 
-         object_table o_t_new (get_self(), newscope.value);
+         object_table o_t_new (get_self(), new_scope.value);
 	      o_t_new.emplace (get_self(), [&](auto &o) {
             o.id                          = o_t_new.available_primary_key();
-            o.proposer                    = o_itr_current->proposer;
             o.names                       = o_itr_current->names;
             o.names["prior_scope"]        = current_scope;
             o.assets                      = o_itr_current->assets;
