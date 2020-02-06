@@ -7,8 +7,8 @@
 #include <eosio/multi_index.hpp>
 #include <eosio/transaction.hpp>
 
+#include "bank.hpp"
 #include "common.hpp"
-#include "holocracy.hpp"
 #include "trail.hpp"
 #include <cryptoutil.hpp>
 
@@ -57,6 +57,30 @@ CONTRACT hyphadao : public contract {
       };
       typedef multi_index<"applicants"_n, Applicant> applicant_table;
 
+      struct [[eosio::table, eosio::contract("hyphadao") ]] AssignmentPayout
+      {
+         uint64_t        ass_payment_id          ;
+         uint64_t        assignment_id           ;
+         name            recipient               ;
+         uint64_t        period_id               ;
+         vector<asset>   payments                ;
+         time_point      payment_date            ;
+
+         uint64_t        primary_key()           const { return ass_payment_id; }
+         uint64_t        by_assignment()         const { return assignment_id; }
+         uint64_t        by_period ()            const { return period_id; }
+         uint64_t        by_recipient()          const { return recipient.value; }
+      };
+
+      typedef multi_index<"asspayouts"_n, AssignmentPayout,
+         indexed_by<"byassignment"_n,
+               const_mem_fun<AssignmentPayout, uint64_t, &AssignmentPayout::by_assignment>>,
+         indexed_by<"byperiod"_n,
+               const_mem_fun<AssignmentPayout, uint64_t, &AssignmentPayout::by_period>>,
+         indexed_by<"byrecipient"_n,
+               const_mem_fun<AssignmentPayout, uint64_t, &AssignmentPayout::by_recipient>>
+      > asspay_table;
+
       // scope: proposal, proparchive, roles, assignments
       struct [[eosio::table, eosio::contract("hyphadao") ]] Object
       {
@@ -100,7 +124,7 @@ CONTRACT hyphadao : public contract {
 
       typedef multi_index<"debugs"_n, Debug> debug_table;
 
-     ACTION create ( const name&                     scope,
+      ACTION create ( const name&                    scope,
                      const map<string, name> 		  names,
                      const map<string, string>       strings,
                      const map<string, asset>        assets,

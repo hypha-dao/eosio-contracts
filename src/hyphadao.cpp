@@ -73,10 +73,10 @@ void hyphadao::setconfig (	const map<string, name> 		names,
 	c.names["last_ballot_id"] 	= last_ballot_id;
 
 	c.strings		= strings;
-	c.assets			= assets;
+	c.assets		= assets;
 	c.time_points	= time_points;
 	c.ints			= ints;
-	c.floats			= floats;
+	c.floats		= floats;
 	c.trxs			= trxs;
 
 	config_s.set (c, get_self());
@@ -86,8 +86,6 @@ void hyphadao::setconfig (	const map<string, name> 		names,
     for (int i{ 0 }; i < std::size(required_names); i++) {
 		check (c.names.find(required_names[i]) != c.names.end(), "name configuration: " + required_names[i] + " is required but not provided.");
 	}
-
-	// bank.set_config (names.at("hypha_token_contract"), names.at("seeds_token_contract"), names.at("telos_decide_contract"));
 }
 
 void hyphadao::setlastballt ( const name& last_ballot_id) {
@@ -324,12 +322,22 @@ void hyphadao::addperiod (const time_point& start_date, const time_point& end_da
 void hyphadao::assign ( const uint64_t& 		proposal_id) {
 
    	require_auth (get_self());
+
+	object_table o_t (get_self(), "proposal"_n.value);
+	auto o_itr = o_t.find(proposal_id);
+	check (o_itr != o_t.end(), "Scope: " + "proposal"_n.to_string() + "; Object ID: " + std::to_string(proposal_id) + " does not exist.");
+
+	object_table o_t (get_self(), "assignment"_n.value);
+	auto sorted_by_assigned = assignment_t.get_index<"byowner"_n>();
+	auto a_itr = sorted_by_assigned.begin();
+	while (a_itr != sorted_by_assigned.end()) {
+		check (! (a_itr->ints.at("role_id") == o_itr->ints.at("role_id") && a_itr->names.at("assigned_account") == o_itr->names.at("assigned_account"), 
+			"Assigned account already has this role. Assigned account: " + o_itr->names.at("assigned_account").to_string() + "; Role ID: " + std::to_string(o_itr->ints.at("role_id")));    
+		a_itr++;
+	}
+
 	change_scope ("proposal"_n, id, "proparchive"_n, false);
 	change_scope ("proposal"_n, id, "assignment"_n, true);
-}
-
-void hyphadao::payassign(const uint64_t& assignment_id, const uint64_t& period_id) {
-	holocracy.payassign (assignment_id, period_id);
 }
 
 void hyphadao::makepayout (const uint64_t&        proposal_id) {
@@ -424,4 +432,85 @@ void hyphadao::qualify_proposer (const name& proposer) {
 	// Should we require that users hold Hypha before they are allowed to propose?  Disabled for now.
 
 	// check (bank.holds_hypha (proposer), "Proposer: " + proposer.to_string() + " does not hold HYPHA.");
+}
+
+void hyphadao::payassign (const uint64_t& assignment_id, const uint64_t& period_id) {
+
+	object_table o_t_assignment (get_self(), "assignment"_n);
+	auto a_itr = o_t_assignment.find (assignment_id);
+	check (a_itr != o_t_assignment.end(), "Cannot pay assignment. Assignment ID does not exist: " + std::to_string(assignment_id));
+
+	require_auth (a_itr->names.at("assigned_account"));
+
+	object_table o_t_role (get_self(), "role"_n);
+	auto r_itr = o_t_role.find (a_itr->ints.at("role_id"));
+	check (r_itr != o_t_role.end(), "Cannot pay assignment. Role ID does not exist: " + std::to_string(a_itr->role_id));
+
+	// Check that the assignment has not been paid for this period yet
+	asspay_table asspay_t (get_self(), get_self().value);
+	auto period_index = asspay_t.get_index<"byperiod"_n>();
+	auto per_itr = period_index.find (period_id);
+	while (per_itr->period_id == period_id && per_itr != period_index.end()) {
+		check (per_itr->assignment_id != assignment_id, "Assignment ID has already been paid for this period. Period ID: " +
+			std::to_string(period_id) + "; Assignment ID: " + std::to_string(assignment_id));
+		per_itr++;
+	}
+
+	// Check that the period has elapsed
+	auto p_itr = bank.period_t.find (period_id);
+	check (p_itr != bank.period_t.end(), "Cannot make payment. Period ID not found: " + std::to_string(period_id));
+	check (p_itr->end_date.sec_since_epoch() < current_block_time().to_time_point().sec_since_epoch(), 
+		"Cannot make payment. Period ID " + std::to_string(period_id) + " has not closed yet.");
+
+	// debug ( "Assignment created date : " + a_itr->created_date.to_string() + "; Seconds    : " + std::to_string(a_itr->created_date.sec_since_epoch()));
+	// debug ( "Period end              : " + p_itr->end_date.to_string() + ";  Seconds: " + std::to_string(p_itr->end_date.sec_since_epoch()));
+
+	// debug ( "Assignment created date Seconds    : " + std::to_string(a_itr->created_date.sec_since_epoch()));
+	// debug ( "Period end Seconds : " + std::to_string(p_itr->end_date.sec_since_epoch()));
+
+	// check that the creation date of the assignment is before the end of the period
+	check (a_itr->time_points.at("created_date").sec_since_epoch() < p_itr->end_date.sec_since_epoch(), 
+		"Cannot make payment to assignment. Assignment was not approved before this period.");
+
+	// check that pay period is between (inclusive) the start and end period of the role and the assignment
+	check (a_itr->ints.at("start_period") <= period_id && a_itr->ints.at("end_period") >= period_id, "For assignment, period ID must be between " +
+		std::to_string(a_itr->ints.at("start_period")) + " and " + std::to_string(a_itr->ints.at("end_period")) + " (inclusive). You tried: " + std::to_string(period_id));
+
+	check (r_itr->ints.at("start_period") <= period_id && r_itr->ints.at("end_period") >= period_id, "For role, period ID must be between " +
+		std::to_string(r_itr->ints.at("start_period")) + " and " + std::to_string(r_itr->ints.at("end_period")) + " (inclusive). You tried: " + std::to_string(period_id));
+
+	float time_share_calc = a_itr->floats.at("time_share");
+
+	// pro-rate the payout if the assignment was created 
+	if (a_itr->time_points.at("created_date").sec_since_epoch() > p_itr->time_points.at("start_date").sec_since_epoch()) {
+		time_share_calc = time_share_calc * (float) ( (float) p_itr->time_points.at("end_date").sec_since_epoch() - a_itr->time_points.at("created_date").sec_since_epoch()) / 
+							( (float) p_itr->time_points.at("end_date").sec_since_epoch() - p_itr->time_points.at("start_date").sec_since_epoch());
+	}
+
+	asset hypha_payment = adjust_asset(r_itr->assets.at("hypha_salary"), time_share_calc);
+	asset seeds_payment = adjust_asset(r_itr->assets.at("seeds_salary"), time_share_calc);
+	asset voice_payment = adjust_asset(r_itr->assets.at("voice_salary"), time_share_calc);
+
+	asspay_t.emplace (contract, [&](auto &a) {
+		a.ass_payment_id        = asspay_t.available_primary_key();
+		a.assignment_id         = assignment_id;
+		a.recipient             = a_itr->names.at("assigned_account"),
+		a.period_id             = period_id;
+		a.payment_date          = current_block_time().to_time_point();
+		a.payments.push_back (hypha_payment);
+		a.payments.push_back (seeds_payment);
+		a.payments.push_back (voice_payment);
+	});
+
+	bank.makepayment (period_id, a_itr->names.at("assigned_account"), hypha_payment, 
+		"Payment for role " + std::to_string(a_itr->ints.at("role_id")) + "; Period ID: " + std::to_string(period_id),
+		assignment_id);
+
+	bank.makepayment (period_id, a_itr->assigned_account, seeds_payment, 
+		"Payment for role " + std::to_string(a_itr->ints.at("role_id")) + "; Period ID: " + std::to_string(period_id),
+		assignment_id);
+
+	bank.makepayment (period_id, a_itr->assigned_account, voice_payment, 
+		"Payment for role " + std::to_string(a_itr->ints.at("role_id")) + "; Period ID: " + std::to_string(period_id),
+		assignment_id);
 }
