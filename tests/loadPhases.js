@@ -9,7 +9,7 @@ const { TextEncoder, TextDecoder } = require("util");
 const defaultPrivateKey = process.env.PRIVATE_KEY; //"<insert key here>"; // bob
 const signatureProvider = new JsSignatureProvider([defaultPrivateKey]);
 
-const rpc = new JsonRpc("https://api.telos.kitchen", { fetch });
+const rpc = new JsonRpc("https://test.telos.kitchen", { fetch });
 
 const api = new Api({
   rpc,

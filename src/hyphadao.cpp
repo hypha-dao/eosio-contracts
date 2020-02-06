@@ -366,7 +366,7 @@ void hyphadao::makepayout (const uint64_t&        proposal_id) {
 	auto p_itr = p_t.find (proposal_id);
 	check (p_itr != p_t.end(), "Proposal ID: " + std::to_string(proposal_id) + " does not exist.");
 
-	string memo { "One time payout for Hypha DAO Contribution: " + std::to_string(proposal_id) };
+	string memo { "One time payout for Hypha Contribution. Proposal ID: " + std::to_string(proposal_id) };
 	debug (" HYPHA payout: " + p_itr->assets.at("hypha_amount").to_string());
 
 	if (p_itr->assets.at("hypha_amount").amount > 0) {
@@ -392,9 +392,23 @@ void hyphadao::makepayout (const uint64_t&        proposal_id) {
 	archive (proposal_id);
 }
 
-void hyphadao::eraseprop (const uint64_t& proposal_id) {
+void hyphadao::updstrings (const name& scope, 
+                         	const uint64_t& proposal_id, 
+                         	const map<string, string> strings) {
 	require_auth (get_self());
-	proposal_table props(get_self(), get_self().value);
+	proposal_table props(get_self(), scope.value);
+	auto i_iter = props.find(proposal_id);
+	check(i_iter != props.end(), "prop not found");
+
+	props.modify (i_iter, get_self(), [&](auto &p) {
+		p.strings = strings;
+	});
+}
+
+void hyphadao::eraseprop (const name& scope, 
+						  const uint64_t& proposal_id) {
+	require_auth (get_self());
+	proposal_table props(get_self(), scope.value);
 	auto i_iter = props.find(proposal_id);
 	check(i_iter != props.end(), "prop not found");
 	props.erase (i_iter);
@@ -414,26 +428,33 @@ void hyphadao::closeprop(const uint64_t& proposal_id) {
 	auto b_itr = b_t.find (prop.names.at("ballot_id").value);
 	check (b_itr != b_t.end(), "ballot_id: " + prop.names.at("ballot_id").to_string() + " not found.");
 
-	string debug_str = string ("Ballot ID read from prop for closing ballot: " + prop.names.at("ballot_id").to_string() + "\n");
+	trailservice::trail::treasuries_table t_t (c.names.at("telos_decide_contract"), c.names.at("telos_decide_contract").value);
+	auto t_itr = t_t.find (common::S_HVOICE.code().raw());
+	check (t_itr != t_t.end(), "Treasury: " + common::S_HVOICE.code().to_string() + " not found.");
+
+	asset quorum_threshold = adjust_asset(t_itr->supply, 0.20000000);
+	map<name, asset> votes = b_itr->options;
+	asset votes_pass = votes.at("pass"_n);
+	asset votes_fail = votes.at("fail"_n);
+
+	string debug_str = " Total Vote Weight: " + b_itr->total_raw_weight.to_string() + "\n";
+	debug_str = debug_str + " Total Supply: " + t_itr->supply.to_string() + "\n"; 
+	debug_str = debug_str + " Quorum Threshold: " + quorum_threshold.to_string() + "\n";	
+	debug_str = debug_str + " Votes Passing: " + votes_pass.to_string() + "\n";
+	debug_str = debug_str + " Votes Failing: " + votes_fail.to_string() + "\n";
+
+	if (b_itr->total_raw_weight >= quorum_threshold && 			// must meet quorum
+		adjust_asset(votes_pass, 0.2500000000) > votes_fail) {  // must have 80% of the vote power
+		debug_str = debug_str + "Executing transaction\n";
+		prop.trxs.at("exec_on_approval").send(current_block_time().to_time_point().sec_since_epoch(), get_self());		
+	}
+
+	debug_str = debug_str + string ("Ballot ID read from prop for closing ballot: " + prop.names.at("ballot_id").to_string() + "\n");
 	action (
 		permission_level{get_self(), "active"_n},
 		c.names.at("telos_decide_contract"), "closevoting"_n,
 		std::make_tuple(prop.names.at("ballot_id"), true))
 	.send();
-
-	uint32_t quorum_threshold = b_itr->total_voters / (5 - 1);
-	debug_str = debug_str + "Quorum threshold: " + std::to_string(quorum_threshold) + "\n";
-
-	map<name, asset> votes = b_itr->options;
-	asset votes_pass = votes.at("pass"_n);
-	asset votes_fail = votes.at("fail"_n);
-	debug_str = debug_str + "Votes passing: " + votes_pass.to_string() + "\n";
-	debug_str = debug_str + "Votes failing: " + votes_fail.to_string() + "\n";
-
-	if (b_itr->total_voters > quorum_threshold && votes_pass > votes_fail) {
-		debug_str = debug_str + "Executing transaction\n";
-		//prop.trxs.at("exec_on_approval").send(current_block_time().to_time_point().sec_since_epoch(), get_self());		
-	}
 
 	debug (debug_str);
 }

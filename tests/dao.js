@@ -122,8 +122,9 @@ async function loadOptions() {
     { name: "host", alias: "h", type: String, defaultValue: "https://test.telos.kitchen" },
     { name: "approve", alias: "a", type: Boolean, defaultValue: false },
     { name: "close", alias: "c", type: Boolean, defaultValue: false },
-    { name: "propose", alias: "p", type: Boolean, defaultValue: true },
-    { name: "config", type: Boolean, defaultValue: false }
+    { name: "propose", alias: "p", type: Boolean, defaultValue: false },
+    { name: "config", type: Boolean, defaultValue: false },
+    { name: "updstrings", type: Boolean, defaultValue: false}
     // see here to add new options:
     //   - https://github.com/75lb/command-line-args/blob/master/doc/option-definition.md
   ];
@@ -202,12 +203,25 @@ const main = async () => {
         const sleepDuration = (await getVotingPeriod(opts.host) * 1000) + 20000;
         await sleep (sleepDuration, "Waiting " + sleepDuration + " seconds while the ballot expiration expires...");
    
-        // close the proposal
+        // close the DAproposal
         await sendtrx(opts.host, DAO_CONTRACT, "closeprop", 
           proposal.data.names.find(o => o.key === 'proposer').value, 
           { "proposal_id":lastProposal.id });
       }
     }
+  } else if (opts.file && opts.updstrings) {
+
+      const update = JSON.parse(fs.readFileSync(opts.file.filename, 'utf8'));
+      console.log ("\nParsing the updating strings from : ", opts.file.filename);
+      console.log ("Scope: " + update.data.scope);
+      console.log ("Proposal ID : " + update.data.proposal_id);
+      console.log ("Strings     : " + update.data.strings);
+
+      await sendtrx(opts.host, "dao.hypha", "updstrings", "dao.hypha", 
+        { "scope":update.data.scope,
+          "proposal_id":update.data.proposal_id, 
+          "strings":update.data.strings });
+
   } else {
     console.log ("You must use the -f for the json file.");
   }  
