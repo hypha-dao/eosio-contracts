@@ -57,8 +57,8 @@ CONTRACT hyphadao : public contract {
       };
       typedef multi_index<"applicants"_n, Applicant> applicant_table;
 
-      // scope: proposal type (name)
-      struct [[eosio::table, eosio::contract("hyphadao") ]] Proposal
+      // scope: proposal, proparchive, roles, assignments
+      struct [[eosio::table, eosio::contract("hyphadao") ]] Object
       {
          uint64_t                   id                ;
          
@@ -73,23 +73,22 @@ CONTRACT hyphadao : public contract {
          uint64_t                   primary_key()     const { return id; }
 
          // indexes
-         name                       proposer          ; 
-         uint64_t                   by_proposer()     const { return proposer.value; }
+         uint64_t                   by_owner()        const { return names.at("owner").value; }
+         uint64_t                   by_type ()        const { return names.at("type").value; }
 
+         // timestamps
          time_point                 created_date    = current_time_point();
          time_point                 updated_date    = current_time_point();
          uint64_t    by_created () const { return created_date.sec_since_epoch(); }
          uint64_t    by_updated () const { return updated_date.sec_since_epoch(); }
-
-         uint64_t    by_type () const { return names.at("proposal_type").value; }
       };
 
-      typedef multi_index<"proposals"_n, Proposal,
-         indexed_by<"bycreated"_n, const_mem_fun<Proposal, uint64_t, &Proposal::by_created>>,
-         indexed_by<"byupdated"_n, const_mem_fun<Proposal, uint64_t, &Proposal::by_updated>>,
-         indexed_by<"byproposer"_n, const_mem_fun<Proposal, uint64_t, &Proposal::by_proposer>>,
-         indexed_by<"bytype"_n, const_mem_fun<Proposal, uint64_t, &Proposal::by_type>>
-      > proposal_table;
+      typedef multi_index<"objects"_n, Object,
+         indexed_by<"bycreated"_n, const_mem_fun<Object, uint64_t, &Object::by_created>>,
+         indexed_by<"byupdated"_n, const_mem_fun<Object, uint64_t, &Object::by_updated>>,
+         indexed_by<"byowner"_n, const_mem_fun<Object, uint64_t, &Object::by_owner>>,
+         indexed_by<"bytype"_n, const_mem_fun<Object, uint64_t, &Object::by_type>>
+      > object_table;
 
       struct [[eosio::table, eosio::contract("hyphadao") ]] Debug
       {
@@ -101,7 +100,8 @@ CONTRACT hyphadao : public contract {
 
       typedef multi_index<"debugs"_n, Debug> debug_table;
 
-     ACTION propose (const map<string, name> 		  names,
+     ACTION create ( const name&                     scope,
+                     const map<string, name> 		  names,
                      const map<string, string>       strings,
                      const map<string, asset>        assets,
                      const map<string, time_point>   time_points,
@@ -118,12 +118,8 @@ CONTRACT hyphadao : public contract {
       // Admin
       ACTION reset ();
       ACTION resetperiods();
-      ACTION eraseprop (const name& scope,
-                        const uint64_t&   proposal_id);
-
-      ACTION updstrings (const name& scope, 
-                         const uint64_t& proposal_id, 
-                         const map<string, string> strings);
+      ACTION eraseobj (const name& scope,
+                        const uint64_t&   id);
 
       ACTION setconfig (const map<string, name> 		  names,
                         const map<string, string>       strings,
@@ -161,6 +157,45 @@ CONTRACT hyphadao : public contract {
       // temporary hack (?) - keep a list of the members, although true membership is governed by token holdings
       ACTION removemember(const name& member_to_remove);
       ACTION addmember (const name& member);
+
+
+
+
+      //****************************
+       // scope: proposal type (name)
+      struct [[eosio::table, eosio::contract("hyphadao") ]] Proposal
+      {
+         uint64_t                   id                ;
+         
+         // core maps
+         map<string, name>          names             ;
+         map<string, string>        strings           ;
+         map<string, asset>         assets            ;
+         map<string, time_point>    time_points       ;
+         map<string, uint64_t>      ints              ;
+         map<string, transaction>   trxs              ;
+         map<string, float>         floats            ;
+         uint64_t                   primary_key()     const { return id; }
+
+         // indexes
+         name                       proposer          ; 
+         uint64_t                   by_proposer()     const { return proposer.value; }
+
+         time_point                 created_date    = current_time_point();
+         time_point                 updated_date    = current_time_point();
+         uint64_t    by_created () const { return created_date.sec_since_epoch(); }
+         uint64_t    by_updated () const { return updated_date.sec_since_epoch(); }
+
+         uint64_t    by_type () const { return names.at("proposal_type").value; }
+      };
+
+      typedef multi_index<"proposals"_n, Proposal,
+         indexed_by<"bycreated"_n, const_mem_fun<Proposal, uint64_t, &Proposal::by_created>>,
+         indexed_by<"byupdated"_n, const_mem_fun<Proposal, uint64_t, &Proposal::by_updated>>,
+         indexed_by<"byproposer"_n, const_mem_fun<Proposal, uint64_t, &Proposal::by_proposer>>,
+         indexed_by<"bytype"_n, const_mem_fun<Proposal, uint64_t, &Proposal::by_type>>
+      > proposal_table;
+      // ***************************
       
    private:
       Holocracy holocracy = Holocracy (get_self());
@@ -190,27 +225,30 @@ CONTRACT hyphadao : public contract {
          });
       }
 
-      void archive (const uint64_t& proposal_id) {
+      void change_scope (const name& current_scope, const uint64_t& id, const name& new_scope, const bool& remove_old) {
 
-         proposal_table p_t_active (get_self(), get_self().value);
-	      auto p_itr_active = p_t_active.find(proposal_id);
-	      check(p_itr_active != p_t_active.end(), "Cannot archive proposal - proposal_id not found in active proposals: " + std::to_string(proposal_id));
+         object_table o_t_current (get_self(), current_scope.value);
+	      auto o_itr_current = o_t_active.find(id);
+	      check (o_itr_current != o_t_current.end(), "Scope: " + current_scope.to_string() + "; Object ID: " + std::to_string(id) + " does not exist.");
 
-         proposal_table p_t_archive (get_self(), "archive"_n.value);
-	      p_t_archive.emplace (get_self(), [&](auto &p) {
-            p.id                          = p_t_archive.available_primary_key();
-            p.proposer                    = p_itr_active->proposer;
-            p.names                       = p_itr_active->names;
-            p.assets                      = p_itr_active->assets;
-            p.strings                     = p_itr_active->strings;
-            p.floats                      = p_itr_active->floats;
-            p.time_points                 = p_itr_active->time_points;
-            p.ints                        = p_itr_active->ints;
-            p.ints["prop_id_when_open"]   = p_itr_active->id;  // id of archived proposal may not match id open same proposal when opened because they use different scopes
-            p.trxs                        = p_itr_active->trxs;
+         object_table o_t_new (get_self(), newscope.value);
+	      o_t_new.emplace (get_self(), [&](auto &o) {
+            o.id                          = o_t_new.available_primary_key();
+            o.proposer                    = o_itr_current->proposer;
+            o.names                       = o_itr_current->names;
+            o.names["prior_scope"]        = current_scope;
+            o.assets                      = o_itr_current->assets;
+            o.strings                     = o_itr_current->strings;
+            o.floats                      = o_itr_current->floats;
+            o.time_points                 = o_itr_current->time_points;
+            o.ints                        = o_itr_current->ints;
+            o.ints["prior_id"]            = o_itr_current->id;  
+            o.trxs                        = o_itr_current->trxs;
 	      });
 
-         p_t_active.erase (p_itr_active);
+         if (remove_old) {
+            o_t_current.erase (o_itr_current);
+         }
       }
 
       asset adjust_asset (const asset& original_asset, const float& adjustment) {
