@@ -472,6 +472,20 @@
             ]
         },
         {
+            "name": "migrateprops",
+            "base": "",
+            "fields": [
+                {
+                    "name": "from_scope",
+                    "type": "name"
+                },
+                {
+                    "name": "to_scope",
+                    "type": "name"
+                }
+            ]
+        },
+        {
             "name": "newrole",
             "base": "",
             "fields": [
@@ -613,6 +627,16 @@
             "fields": [
                 {
                     "name": "applicant",
+                    "type": "name"
+                }
+            ]
+        },
+        {
+            "name": "remoldprops",
+            "base": "",
+            "fields": [
+                {
+                    "name": "scope",
                     "type": "name"
                 }
             ]
@@ -801,6 +825,11 @@
             "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Make Pay Out\nsummary: 'Makes pay out'\nicon: http://dao-dev.hypha.earth/statics/app-logo-128x128.png#a71ba6431c13b623eccde41cd14f0f5e3ee694da7e3878407e74d8137bf89916\n---\n\n{{$action.authorization.[0].actor}} pays out the quantity stored in the proposal with the id: {{proposal_id}}."
         },
         {
+            "name": "migrateprops",
+            "type": "migrateprops",
+            "ricardian_contract": ""
+        },
+        {
             "name": "newrole",
             "type": "newrole",
             "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: New Role\nsummary: 'Adds a new role'\nicon: http://dao-dev.hypha.earth/statics/app-logo-128x128.png#a71ba6431c13b623eccde41cd14f0f5e3ee694da7e3878407e74d8137bf89916\n---\n\n{{$action.authorization.[0].actor}} adds a new role given the existing proposal with the id: {{proposal_id}}."
@@ -813,6 +842,11 @@
         {
             "name": "remapply",
             "type": "remapply",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "remoldprops",
+            "type": "remoldprops",
             "ricardian_contract": ""
         },
         {

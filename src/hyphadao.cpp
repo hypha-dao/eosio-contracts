@@ -38,6 +38,33 @@ void hyphadao::reset () {
 	// config_s.remove ();
 }
 
+void hyphadao::remoldprops (const name& scope) {
+	proposal_table p_t (get_self(), scope.value);
+	auto  p_itr = p_t.begin();
+	while (p_itr != p_t.end()) {
+		p_itr = p_t.erase (p_itr);
+	}
+}
+
+void hyphadao::migrateprops (const name& from_scope, const name& to_scope) {
+	proposal_table p_t (get_self(), from_scope.value);
+	auto  p_itr = p_t.begin();
+	while (p_itr != p_t.end()) {
+		object_table o_t (get_self(), to_scope.value);
+		o_t.emplace (get_self(), [&](auto &o) {
+			o.id                       	= o_t.available_primary_key();
+			o.names                    	= p_itr->names;
+			o.strings                  	= p_itr->strings;
+			o.assets                  	= p_itr->assets;
+			o.time_points              	= p_itr->time_points;
+			o.ints                     	= p_itr->ints;
+			o.floats                   	= p_itr->floats;
+			o.trxs                     	= p_itr->trxs;
+		});
+		p_itr++;
+	}
+}
+
 void hyphadao::remperiods (const uint64_t& begin_period_id, 
                            const uint64_t& end_period_id) {
     bank.remove_periods (begin_period_id, end_period_id);

@@ -144,6 +144,8 @@ CONTRACT hyphadao : public contract {
       ACTION resetperiods();
       ACTION eraseobj (const name& scope,
                         const uint64_t&   id);
+      ACTION migrateprops (const name& from_scope, const name& to_scope);
+      ACTION remoldprops (const name& scope);
 
       ACTION setconfig (const map<string, name> 		  names,
                         const map<string, string>       strings,
@@ -181,9 +183,6 @@ CONTRACT hyphadao : public contract {
       // temporary hack (?) - keep a list of the members, although true membership is governed by token holdings
       ACTION removemember(const name& member_to_remove);
       ACTION addmember (const name& member);
-
-
-
 
       //****************************
        // scope: proposal type (name)
