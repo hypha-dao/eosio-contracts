@@ -24,7 +24,7 @@
       "ints": [
           {
               "key":"voting_duration_sec",
-              "value":"604800"
+              "value":"60"
           }
       ],
       "floats": [],

@@ -26,56 +26,6 @@
             ]
         },
         {
-            "name": "Assignment",
-            "base": "",
-            "fields": [
-                {
-                    "name": "assignment_id",
-                    "type": "uint64"
-                },
-                {
-                    "name": "assigned_account",
-                    "type": "name"
-                },
-                {
-                    "name": "role_id",
-                    "type": "uint64"
-                },
-                {
-                    "name": "title",
-                    "type": "string"
-                },
-                {
-                    "name": "description",
-                    "type": "string"
-                },
-                {
-                    "name": "content",
-                    "type": "string"
-                },
-                {
-                    "name": "start_period",
-                    "type": "uint64"
-                },
-                {
-                    "name": "end_period",
-                    "type": "uint64"
-                },
-                {
-                    "name": "time_share",
-                    "type": "float32"
-                },
-                {
-                    "name": "created_date",
-                    "type": "time_point"
-                },
-                {
-                    "name": "updated_date",
-                    "type": "time_point"
-                }
-            ]
-        },
-        {
             "name": "AssignmentPayout",
             "base": "",
             "fields": [
@@ -164,6 +114,52 @@
                 {
                     "name": "member",
                     "type": "name"
+                }
+            ]
+        },
+        {
+            "name": "Object",
+            "base": "",
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "names",
+                    "type": "pair_string_name[]"
+                },
+                {
+                    "name": "strings",
+                    "type": "pair_string_string[]"
+                },
+                {
+                    "name": "assets",
+                    "type": "pair_string_asset[]"
+                },
+                {
+                    "name": "time_points",
+                    "type": "pair_string_time_point[]"
+                },
+                {
+                    "name": "ints",
+                    "type": "pair_string_uint64[]"
+                },
+                {
+                    "name": "trxs",
+                    "type": "pair_string_transaction[]"
+                },
+                {
+                    "name": "floats",
+                    "type": "pair_string_float32[]"
+                },
+                {
+                    "name": "created_date",
+                    "type": "time_point"
+                },
+                {
+                    "name": "updated_date",
+                    "type": "time_point"
                 }
             ]
         },
@@ -274,56 +270,6 @@
             ]
         },
         {
-            "name": "Role",
-            "base": "",
-            "fields": [
-                {
-                    "name": "role_id",
-                    "type": "uint64"
-                },
-                {
-                    "name": "title",
-                    "type": "string"
-                },
-                {
-                    "name": "description",
-                    "type": "string"
-                },
-                {
-                    "name": "content",
-                    "type": "string"
-                },
-                {
-                    "name": "hypha_salary",
-                    "type": "asset"
-                },
-                {
-                    "name": "seeds_salary",
-                    "type": "asset"
-                },
-                {
-                    "name": "voice_salary",
-                    "type": "asset"
-                },
-                {
-                    "name": "start_period",
-                    "type": "uint64"
-                },
-                {
-                    "name": "end_period",
-                    "type": "uint64"
-                },
-                {
-                    "name": "created_date",
-                    "type": "time_point"
-                },
-                {
-                    "name": "updated_date",
-                    "type": "time_point"
-                }
-            ]
-        },
-        {
             "name": "action",
             "base": "",
             "fields": [
@@ -422,6 +368,44 @@
             ]
         },
         {
+            "name": "create",
+            "base": "",
+            "fields": [
+                {
+                    "name": "scope",
+                    "type": "name"
+                },
+                {
+                    "name": "names",
+                    "type": "pair_string_name[]"
+                },
+                {
+                    "name": "strings",
+                    "type": "pair_string_string[]"
+                },
+                {
+                    "name": "assets",
+                    "type": "pair_string_asset[]"
+                },
+                {
+                    "name": "time_points",
+                    "type": "pair_string_time_point[]"
+                },
+                {
+                    "name": "ints",
+                    "type": "pair_string_uint64[]"
+                },
+                {
+                    "name": "floats",
+                    "type": "pair_string_float32[]"
+                },
+                {
+                    "name": "trxs",
+                    "type": "pair_string_transaction[]"
+                }
+            ]
+        },
+        {
             "name": "enroll",
             "base": "",
             "fields": [
@@ -440,7 +424,7 @@
             ]
         },
         {
-            "name": "eraseprop",
+            "name": "eraseobj",
             "base": "",
             "fields": [
                 {
@@ -448,7 +432,7 @@
                     "type": "name"
                 },
                 {
-                    "name": "proposal_id",
+                    "name": "id",
                     "type": "uint64"
                 }
             ]
@@ -624,40 +608,6 @@
             ]
         },
         {
-            "name": "propose",
-            "base": "",
-            "fields": [
-                {
-                    "name": "names",
-                    "type": "pair_string_name[]"
-                },
-                {
-                    "name": "strings",
-                    "type": "pair_string_string[]"
-                },
-                {
-                    "name": "assets",
-                    "type": "pair_string_asset[]"
-                },
-                {
-                    "name": "time_points",
-                    "type": "pair_string_time_point[]"
-                },
-                {
-                    "name": "ints",
-                    "type": "pair_string_uint64[]"
-                },
-                {
-                    "name": "floats",
-                    "type": "pair_string_float32[]"
-                },
-                {
-                    "name": "trxs",
-                    "type": "pair_string_transaction[]"
-                }
-            ]
-        },
-        {
             "name": "remapply",
             "base": "",
             "fields": [
@@ -792,24 +742,6 @@
                     "type": "varuint32"
                 }
             ]
-        },
-        {
-            "name": "updstrings",
-            "base": "",
-            "fields": [
-                {
-                    "name": "scope",
-                    "type": "name"
-                },
-                {
-                    "name": "proposal_id",
-                    "type": "uint64"
-                },
-                {
-                    "name": "strings",
-                    "type": "pair_string_string[]"
-                }
-            ]
         }
     ],
     "actions": [
@@ -844,14 +776,19 @@
             "ricardian_contract": ""
         },
         {
+            "name": "create",
+            "type": "create",
+            "ricardian_contract": ""
+        },
+        {
             "name": "enroll",
             "type": "enroll",
             "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Enroll \nsummary: 'Enroll an applicant'\nicon: http://dao-dev.hypha.earth/statics/app-logo-128x128.png#a71ba6431c13b623eccde41cd14f0f5e3ee694da7e3878407e74d8137bf89916\n---\n\n{{$action.authorization.[0].actor}} enrolls the existing applicant {{applicant}} with the content {{content}} to Hypha DAO."
         },
         {
-            "name": "eraseprop",
-            "type": "eraseprop",
-            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Erase Proposal\nsummary: 'Erase a given proposal'\nicon: http://dao-dev.hypha.earth/statics/app-logo-128x128.png#a71ba6431c13b623eccde41cd14f0f5e3ee694da7e3878407e74d8137bf89916\n---\n\n{{$action.authorization.[0].actor}} erases the proposal with the given id: {{proposal_id}}."
+            "name": "eraseobj",
+            "type": "eraseobj",
+            "ricardian_contract": ""
         },
         {
             "name": "exectrx",
@@ -872,11 +809,6 @@
             "name": "payassign",
             "type": "payassign",
             "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Pay Assignment\nsummary: 'Pay the given assignment'\nicon: http://dao-dev.hypha.earth/statics/app-logo-128x128.png#a71ba6431c13b623eccde41cd14f0f5e3ee694da7e3878407e74d8137bf89916\n---\n\n{{$action.authorization.[0].actor}} pays the given assignment with the id: {{assignment_id}} in the period with the id: {{period_id}}."
-        },
-        {
-            "name": "propose",
-            "type": "propose",
-            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Propose\nsummary: 'Create a new proposal'\nicon: http://dao-dev.hypha.earth/statics/app-logo-128x128.png#a71ba6431c13b623eccde41cd14f0f5e3ee694da7e3878407e74d8137bf89916\n---\n\n{{$action.authorization.[0].actor}} creates a new proposal to Hypha DAO with the following attributes:\nnames: {{to_json names}}\nstrings: {{to_json strings}}\nassets: {{to_json assets}}\ntime_points: {{to_json time_points}}\nints: {{to_json ints}}\nfloats: {{to_json floats}}\ntransactions: {{to_json trxs}}"
         },
         {
             "name": "remapply",
@@ -912,24 +844,12 @@
             "name": "setlastballt",
             "type": "setlastballt",
             "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Set Last Ballt\nsummary: 'Set the last ballot id value'\nicon: http://dao-dev.hypha.earth/statics/app-logo-128x128.png#a71ba6431c13b623eccde41cd14f0f5e3ee694da7e3878407e74d8137bf89916\n---\n\n{{$action.authorization.[0].actor}} sets the last ballot id with the value: {{last_ballot_id}}."
-        },
-        {
-            "name": "updstrings",
-            "type": "updstrings",
-            "ricardian_contract": ""
         }
     ],
     "tables": [
         {
             "name": "applicants",
             "type": "Applicant",
-            "index_type": "i64",
-            "key_names": [],
-            "key_types": []
-        },
-        {
-            "name": "assignments",
-            "type": "Assignment",
             "index_type": "i64",
             "key_names": [],
             "key_types": []
@@ -963,6 +883,13 @@
             "key_types": []
         },
         {
+            "name": "objects",
+            "type": "Object",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
             "name": "payments",
             "type": "Payment",
             "index_type": "i64",
@@ -979,13 +906,6 @@
         {
             "name": "proposals",
             "type": "Proposal",
-            "index_type": "i64",
-            "key_names": [],
-            "key_types": []
-        },
-        {
-            "name": "roles",
-            "type": "Role",
             "index_type": "i64",
             "key_names": [],
             "key_types": []

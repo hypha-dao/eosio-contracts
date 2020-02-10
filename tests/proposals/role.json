@@ -1,12 +1,13 @@
 {
   "data": {
+    "scope": "proposal",
     "names": [
       {
         "key":"proposal_type",
-        "value":"roles"
+        "value":"role"
       },
       {
-        "key":"proposer",
+        "key":"owner",
         "value":"johnnyhypha1"
       },
       {

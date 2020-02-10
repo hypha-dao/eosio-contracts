@@ -41,7 +41,7 @@ cd hypha-dao-smart-contracts/tests
 git checkout migration
 yarn
 export PRIVATE_KEY=5HwnoWBuuRmNdcqwBzd1LABFRKnTk2RY2kUMYKkZfF8tKodubtK 
-node dao.js -f proposals/role.json -a -c && node dao.js -f proposals/assignment.json -a -c && node dao.js -f proposals/payout.json -a -c
+node dao.js -f proposals/role.json -a -c -p && node dao.js -f proposals/assignment.json -a -c -p && node dao.js -f proposals/payout.json -a -c -p
 
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++ 
 */
@@ -94,7 +94,8 @@ async function getLastCreatedProposal (host) {
   options.scope = DAO_CONTRACT; 
 
   options.json = true;
-  options.table = "proposals";
+  options.scope = "proposal";
+  options.table = "objects";
   options.index_position = 2; // index #2 is "bycreated"
   options.key_type = 'i64';
   options.reverse = true;
@@ -105,7 +106,7 @@ async function getLastCreatedProposal (host) {
     return result.rows[0];
   } 
   
-  console.log ("There are no proposals of type: ", proposalType);
+  console.log ("There are no proposals of type");
   return undefined;  
 }
 
@@ -161,11 +162,11 @@ const main = async () => {
     console.log ("\nParsing the proposal from : ", opts.file.filename);
     console.log ("-- title            : ", proposal.data.strings.find(o => o.key === 'title').value);
     console.log ("-- proposal_type    : ", proposal.data.names.find(o => o.key === 'proposal_type').value);
-    console.log ("-- proposer         : ", proposal.data.names.find(o => o.key === 'proposer').value);
+    console.log ("-- proposer         : ", proposal.data.names.find(o => o.key === 'owner').value);
 
     console.log ("\nSubmitting proposal : ", opts.file.filename);
-    await sendtrx(opts.host, DAO_CONTRACT, "propose", 
-      proposal.data.names.find(o => o.key === 'proposer').value, 
+    await sendtrx(opts.host, DAO_CONTRACT, "create", 
+      proposal.data.names.find(o => o.key === 'owner').value, 
       proposal.data);
 
     if (opts.approve || opts.close) {
@@ -182,13 +183,13 @@ const main = async () => {
   
         console.log ("\Approving the proposal");
         console.log ("-- calling trailservice::castvote with the following parms:");
-        console.log ("-- -- voter       : ", proposal.data.names.find(o => o.key === 'proposer').value);
+        console.log ("-- -- voter       : ", proposal.data.names.find(o => o.key === 'owner').value);
         console.log ("-- -- ballot_id   : ", lastProposal.names.find(o => o.key === 'ballot_id').value);
         console.log ("-- -- options     : ", options);
   
         await sendtrx(opts.host, "trailservice", "castvote", 
-          proposal.data.names.find(o => o.key === 'proposer').value, 
-          { "voter":proposal.data.names.find(o => o.key === 'proposer').value, 
+          proposal.data.names.find(o => o.key === 'owner').value, 
+          { "voter":proposal.data.names.find(o => o.key === 'owner').value, 
             "ballot_name":lastProposal.names.find(o => o.key === 'ballot_id').value, 
             "options":options });
       }
@@ -205,22 +206,22 @@ const main = async () => {
    
         // close the DAproposal
         await sendtrx(opts.host, DAO_CONTRACT, "closeprop", 
-          proposal.data.names.find(o => o.key === 'proposer').value, 
+          proposal.data.names.find(o => o.key === 'owner').value, 
           { "proposal_id":lastProposal.id });
       }
     }
-  } else if (opts.file && opts.updstrings) {
+  // } else if (opts.file && opts.updstrings) {
 
-      const update = JSON.parse(fs.readFileSync(opts.file.filename, 'utf8'));
-      console.log ("\nParsing the updating strings from : ", opts.file.filename);
-      console.log ("Scope: " + update.data.scope);
-      console.log ("Proposal ID : " + update.data.proposal_id);
-      console.log ("Strings     : " + update.data.strings);
+  //     const update = JSON.parse(fs.readFileSync(opts.file.filename, 'utf8'));
+  //     console.log ("\nParsing the updating strings from : ", opts.file.filename);
+  //     console.log ("Scope: " + update.data.scope);
+  //     console.log ("Proposal ID : " + update.data.proposal_id);
+  //     console.log ("Strings     : " + update.data.strings);
 
-      await sendtrx(opts.host, "dao.hypha", "updstrings", "dao.hypha", 
-        { "scope":update.data.scope,
-          "proposal_id":update.data.proposal_id, 
-          "strings":update.data.strings });
+  //     await sendtrx(opts.host, "dao.hypha", "updstrings", "dao.hypha", 
+  //       { "scope":update.data.scope,
+  //         "proposal_id":update.data.proposal_id, 
+  //         "strings":update.data.strings });
 
   } else {
     console.log ("You must use the -f for the json file.");

@@ -19,7 +19,6 @@ void hyphadao::removemember (const name& member) {
 }
 
 void hyphadao::reset () {
-	holocracy.reset ();
 	// bank.reset_config ();
 
 	proposal_table p_t (get_self(),get_self().value);
@@ -73,10 +72,10 @@ void hyphadao::setconfig (	const map<string, name> 		names,
 	c.names["last_ballot_id"] 	= last_ballot_id;
 
 	c.strings		= strings;
-	c.assets			= assets;
+	c.assets		= assets;
 	c.time_points	= time_points;
 	c.ints			= ints;
-	c.floats			= floats;
+	c.floats		= floats;
 	c.trxs			= trxs;
 
 	config_s.set (c, get_self());
@@ -86,8 +85,6 @@ void hyphadao::setconfig (	const map<string, name> 		names,
     for (int i{ 0 }; i < std::size(required_names); i++) {
 		check (c.names.find(required_names[i]) != c.names.end(), "name configuration: " + required_names[i] + " is required but not provided.");
 	}
-
-	// bank.set_config (names.at("hypha_token_contract"), names.at("seeds_token_contract"), names.at("telos_decide_contract"));
 }
 
 void hyphadao::setlastballt ( const name& last_ballot_id) {
@@ -226,7 +223,8 @@ name hyphadao::register_ballot (const name& proposer,
 	return new_ballot_id;
 }
 
-void hyphadao::propose (const map<string, name> 		names,
+void hyphadao::create (const name&						scope,
+						const map<string, name> 		names,
 						const map<string, string>       strings,
 						const map<string, asset>        assets,
 						const map<string, time_point>   time_points,
@@ -234,42 +232,41 @@ void hyphadao::propose (const map<string, name> 		names,
 						const map<string, float>        floats,
 						const map<string, transaction>  trxs)
 {
-	const name proposer = names.at("proposer");
+	const name owner = names.at("owner");
 
-	require_auth (proposer);
-	qualify_proposer (proposer);
+	require_auth (owner);
+	qualify_proposer (owner);
 
-	proposal_table p_t (get_self(), get_self().value);
-	p_t.emplace (get_self(), [&](auto &p) {
-		p.id                       	= p_t.available_primary_key();
-		p.proposer					= proposer;
+	object_table o_t (get_self(), scope.value);
+	o_t.emplace (get_self(), [&](auto &o) {
+		o.id                       	= o_t.available_primary_key();
+		o.names                    	= names;
+		o.strings                  	= strings;
+		o.assets                  	= assets;
+		o.time_points              	= time_points;
+		o.ints                     	= ints;
+		o.floats                   	= floats;
+		o.trxs                     	= trxs;
 
-		p.names                    	= names;
+		if (scope == "proposal"_n) {
+			o.names["ballot_id"]		= register_ballot (owner, strings);
 
-		/* default trx_action_account to hyphadaomain */
-		if (names.find("trx_action_contract") == names.end()) {
-			p.names["trx_action_contract"] = get_self();
-		}
+			/* default trx_action_account to hyphadaomain */
+			if (names.find("trx_action_contract") == names.end()) {
+				o.names["trx_action_contract"] = get_self();
+			}
 
-		p.names["ballot_id"]		= register_ballot (proposer, strings);
-
-		p.strings                  	= strings;
-		p.assets                  	= assets;
-		p.time_points              	= time_points;
-		p.ints                     	= ints;
-		p.floats                   	= floats;
-		p.trxs                     	= trxs;
-
-		if (names.find("trx_action_name") != names.end()) {
-			// this transaction executes if the proposal passes
-			transaction trx (time_point_sec(current_time_point())+ (60 * 60 * 24 * 35));
-			trx.actions.emplace_back(
-				permission_level{get_self(), "active"_n}, 
-				p.names.at("trx_action_contract"), p.names.at("trx_action_name"), 
-				std::make_tuple(p.id));
-			trx.delay_sec = 0;
-			p.trxs["exec_on_approval"]      = trx;      
-		}		
+			if (names.find("trx_action_name") != names.end()) {
+				// this transaction executes if the proposal passes
+				transaction trx (time_point_sec(current_time_point())+ (60 * 60 * 24 * 35));
+				trx.actions.emplace_back(
+					permission_level{get_self(), "active"_n}, 
+					o.names.at("trx_action_contract"), o.names.at("trx_action_name"), 
+					std::make_tuple(o.id));
+				trx.delay_sec = 0;
+				o.trxs["exec_on_approval"]      = trx;      
+			}	
+		} // else if (scope == "role"_n) { role logic/business rules }		
 	});      
 }
 
@@ -308,26 +305,13 @@ void hyphadao::exectrx (const uint64_t& proposal_id) {
 	}
 }
 
+// void hyphadao::approved (const name& scope, const uint64_t& id) {}
+
 void hyphadao::newrole (const uint64_t& proposal_id) {
 
    	require_auth (get_self());
-
-	proposal_table p_t (get_self(), get_self().value);
-	auto p_itr = p_t.find (proposal_id);
-	check (p_itr != p_t.end(), "Proposal ID: " + std::to_string(proposal_id) + " does not exist.");
-
-	debug ("Creating Role::Title: " + p_itr->strings.at("title"));
-
-	holocracy.newrole (p_itr->strings.at("title"),
-						p_itr->strings.at("description"),
-						p_itr->strings.at("content"),
-						p_itr->assets.at("hypha_amount"),
-						p_itr->assets.at("seeds_amount"),
-						p_itr->assets.at("hvoice_amount"),
-						p_itr->ints.at("start_period"),
-						p_itr->ints.at("end_period"));
-			
-	archive (proposal_id);
+	change_scope ("proposal"_n, proposal_id, "proparchive"_n, false);
+	change_scope ("proposal"_n, proposal_id, "role"_n, true);
 }
 
 void hyphadao::addperiod (const time_point& start_date, const time_point& end_date, const string& phase) {
@@ -338,88 +322,72 @@ void hyphadao::assign ( const uint64_t& 		proposal_id) {
 
    	require_auth (get_self());
 
-	proposal_table p_t (get_self(), get_self().value);
-	auto p_itr = p_t.find (proposal_id);
-	check (p_itr != p_t.end(), "Proposal ID: " + std::to_string(proposal_id) + " does not exist.");
+	object_table o_t_proposal (get_self(), "proposal"_n.value);
+	auto o_itr = o_t_proposal.find(proposal_id);
+	check (o_itr != o_t_proposal.end(), "Scope: " + "proposal"_n.to_string() + "; Object ID: " + std::to_string(proposal_id) + " does not exist.");
 
-	holocracy.newassign (	p_itr->names.at("assigned_account"),
-							p_itr->ints.at("role_id"),
-							p_itr->strings.at("title"),
-							p_itr->strings.at("description"),
-							p_itr->strings.at("content"),
-							p_itr->ints.at("start_period"),
-							p_itr->ints.at("end_period"),
-							p_itr->floats.at("time_share"));
+	object_table o_t_assignment (get_self(), "assignment"_n.value);
+	auto sorted_by_assigned = o_t_assignment.get_index<"byowner"_n>();
+	auto a_itr = sorted_by_assigned.begin();
+	while (a_itr != sorted_by_assigned.end()) {
+		check (! (a_itr->ints.at("role_id") == o_itr->ints.at("role_id") && a_itr->names.at("assigned_account") == o_itr->names.at("assigned_account")), 
+			"Assigned account already has this role. Assigned account: " + o_itr->names.at("assigned_account").to_string() + "; Role ID: " + std::to_string(o_itr->ints.at("role_id")));    
+		a_itr++;
+	}
 
-	archive (proposal_id);
-}
-
-void hyphadao::payassign(const uint64_t& assignment_id, const uint64_t& period_id) {
-	holocracy.payassign (assignment_id, period_id);
+	change_scope ("proposal"_n, proposal_id, "proparchive"_n, false);
+	change_scope ("proposal"_n, proposal_id, "assignment"_n, true);
 }
 
 void hyphadao::makepayout (const uint64_t&        proposal_id) {
 
 	require_auth (get_self());
 
-	proposal_table p_t (get_self(), get_self().value);
-	auto p_itr = p_t.find (proposal_id);
-	check (p_itr != p_t.end(), "Proposal ID: " + std::to_string(proposal_id) + " does not exist.");
+	object_table o_t (get_self(), "proposal"_n.value);
+	auto o_itr = o_t.find(proposal_id);
+	check (o_itr != o_t.end(), "Scope: " + "proposal"_n.to_string() + "; Object ID: " + std::to_string(proposal_id) + " does not exist.");
 
 	string memo { "One time payout for Hypha Contribution. Proposal ID: " + std::to_string(proposal_id) };
-	debug (" HYPHA payout: " + p_itr->assets.at("hypha_amount").to_string());
+	debug (" HYPHA payout: " + o_itr->assets.at("hypha_amount").to_string());
 
-	if (p_itr->assets.at("hypha_amount").amount > 0) {
-		debug ("Making a payment to : " + p_itr->names.at("recipient").to_string());
-		bank.makepayment (-1, p_itr->names.at("recipient"), p_itr->assets.at("hypha_amount"), memo, common::NO_ASSIGNMENT);
+	if (o_itr->assets.at("hypha_amount").amount > 0) {
+		debug ("Making a payment to : " + o_itr->names.at("recipient").to_string());
+		bank.makepayment (-1, o_itr->names.at("recipient"), o_itr->assets.at("hypha_amount"), memo, common::NO_ASSIGNMENT);
 	}
 
-	if (p_itr->assets.at("seeds_amount").amount > 0) {
-		bank.makepayment (-1, p_itr->names.at("recipient"), p_itr->assets.at("seeds_amount"), memo, common::NO_ASSIGNMENT);
+	if (o_itr->assets.at("seeds_amount").amount > 0) {
+		bank.makepayment (-1, o_itr->names.at("recipient"), o_itr->assets.at("seeds_amount"), memo, common::NO_ASSIGNMENT);
 	}
 	
-	if (p_itr->assets.at("hvoice_amount").amount > 0) {
+	if (o_itr->assets.at("hvoice_amount").amount > 0) {
 		config_table      config_s (get_self(), get_self().value);
    		Config c = config_s.get_or_create (get_self(), Config());  
 
 		action(	
 			permission_level{get_self(), "active"_n}, 
 			c.names.at("telos_decide_contract"), "mint"_n, 
-			make_tuple(p_itr->names.at("recipient"), p_itr->assets.at("hvoice_amount"), memo
+			make_tuple(o_itr->names.at("recipient"), o_itr->assets.at("hvoice_amount"), memo
 		)).send();
 	}
 
-	archive (proposal_id);
+	change_scope ("proposal"_n, proposal_id, "proparchive"_n, true);
 }
 
-void hyphadao::updstrings (const name& scope, 
-                         	const uint64_t& proposal_id, 
-                         	const map<string, string> strings) {
+void hyphadao::eraseobj (	const name& scope, 
+						  	const uint64_t& id) {
 	require_auth (get_self());
-	proposal_table props(get_self(), scope.value);
-	auto i_iter = props.find(proposal_id);
-	check(i_iter != props.end(), "prop not found");
-
-	props.modify (i_iter, get_self(), [&](auto &p) {
-		p.strings = strings;
-	});
-}
-
-void hyphadao::eraseprop (const name& scope, 
-						  const uint64_t& proposal_id) {
-	require_auth (get_self());
-	proposal_table props(get_self(), scope.value);
-	auto i_iter = props.find(proposal_id);
-	check(i_iter != props.end(), "prop not found");
-	props.erase (i_iter);
+	object_table o_t (get_self(), scope.value);
+	auto o_itr = o_t.find(id);
+	check (o_itr != o_t.end(), "Scope: " + scope.to_string() + "; Object ID: " + std::to_string(id) + " does not exist.");
+	o_t.erase (o_itr);
 }
 
 void hyphadao::closeprop(const uint64_t& proposal_id) {
 
-	proposal_table props(get_self(), get_self().value);
-	auto i_iter = props.find(proposal_id);
-	check(i_iter != props.end(), "prop not found");
-	auto prop = *i_iter;
+	object_table o_t (get_self(), "proposal"_n.value);
+	auto o_itr = o_t.find(proposal_id);
+	check (o_itr != o_t.end(), "Scope: " + "proposal"_n.to_string() + "; Object ID: " + std::to_string(proposal_id) + " does not exist.");
+	auto prop = *o_itr;
 
 	config_table      config_s (get_self(), get_self().value);
    	Config c = config_s.get_or_create (get_self(), Config());  
@@ -463,4 +431,85 @@ void hyphadao::qualify_proposer (const name& proposer) {
 	// Should we require that users hold Hypha before they are allowed to propose?  Disabled for now.
 
 	// check (bank.holds_hypha (proposer), "Proposer: " + proposer.to_string() + " does not hold HYPHA.");
+}
+
+void hyphadao::payassign (const uint64_t& assignment_id, const uint64_t& period_id) {
+
+	object_table o_t_assignment (get_self(), "assignment"_n.value);
+	auto a_itr = o_t_assignment.find (assignment_id);
+	check (a_itr != o_t_assignment.end(), "Cannot pay assignment. Assignment ID does not exist: " + std::to_string(assignment_id));
+
+	require_auth (a_itr->names.at("assigned_account"));
+
+	object_table o_t_role (get_self(), "role"_n.value);
+	auto r_itr = o_t_role.find (a_itr->ints.at("role_id"));
+	check (r_itr != o_t_role.end(), "Cannot pay assignment. Role ID does not exist: " + std::to_string(a_itr->ints.at("role_id")));
+
+	// Check that the assignment has not been paid for this period yet
+	asspay_table asspay_t (get_self(), get_self().value);
+	auto period_index = asspay_t.get_index<"byperiod"_n>();
+	auto per_itr = period_index.find (period_id);
+	while (per_itr->period_id == period_id && per_itr != period_index.end()) {
+		check (per_itr->assignment_id != assignment_id, "Assignment ID has already been paid for this period. Period ID: " +
+			std::to_string(period_id) + "; Assignment ID: " + std::to_string(assignment_id));
+		per_itr++;
+	}
+
+	// Check that the period has elapsed
+	auto p_itr = bank.period_t.find (period_id);
+	check (p_itr != bank.period_t.end(), "Cannot make payment. Period ID not found: " + std::to_string(period_id));
+	check (p_itr->end_date.sec_since_epoch() < current_block_time().to_time_point().sec_since_epoch(), 
+		"Cannot make payment. Period ID " + std::to_string(period_id) + " has not closed yet.");
+
+	// debug ( "Assignment created date : " + a_itr->created_date.to_string() + "; Seconds    : " + std::to_string(a_itr->created_date.sec_since_epoch()));
+	// debug ( "Period end              : " + p_itr->end_date.to_string() + ";  Seconds: " + std::to_string(p_itr->end_date.sec_since_epoch()));
+
+	// debug ( "Assignment created date Seconds    : " + std::to_string(a_itr->created_date.sec_since_epoch()));
+	// debug ( "Period end Seconds : " + std::to_string(p_itr->end_date.sec_since_epoch()));
+
+	// check that the creation date of the assignment is before the end of the period
+	check (a_itr->time_points.at("created_date").sec_since_epoch() < p_itr->end_date.sec_since_epoch(), 
+		"Cannot make payment to assignment. Assignment was not approved before this period.");
+
+	// check that pay period is between (inclusive) the start and end period of the role and the assignment
+	check (a_itr->ints.at("start_period") <= period_id && a_itr->ints.at("end_period") >= period_id, "For assignment, period ID must be between " +
+		std::to_string(a_itr->ints.at("start_period")) + " and " + std::to_string(a_itr->ints.at("end_period")) + " (inclusive). You tried: " + std::to_string(period_id));
+
+	check (r_itr->ints.at("start_period") <= period_id && r_itr->ints.at("end_period") >= period_id, "For role, period ID must be between " +
+		std::to_string(r_itr->ints.at("start_period")) + " and " + std::to_string(r_itr->ints.at("end_period")) + " (inclusive). You tried: " + std::to_string(period_id));
+
+	float time_share_calc = a_itr->floats.at("time_share");
+
+	// pro-rate the payout if the assignment was created 
+	if (a_itr->time_points.at("created_date").sec_since_epoch() > p_itr->start_date.sec_since_epoch()) {
+		time_share_calc = time_share_calc * (float) ( (float) p_itr->end_date.sec_since_epoch() - a_itr->time_points.at("created_date").sec_since_epoch()) / 
+							( (float) p_itr->end_date.sec_since_epoch() - p_itr->start_date.sec_since_epoch());
+	}
+
+	asset hypha_payment = adjust_asset(r_itr->assets.at("hypha_salary"), time_share_calc);
+	asset seeds_payment = adjust_asset(r_itr->assets.at("seeds_salary"), time_share_calc);
+	asset voice_payment = adjust_asset(r_itr->assets.at("voice_salary"), time_share_calc);
+
+	asspay_t.emplace (get_self(), [&](auto &a) {
+		a.ass_payment_id        = asspay_t.available_primary_key();
+		a.assignment_id         = assignment_id;
+		a.recipient             = a_itr->names.at("assigned_account"),
+		a.period_id             = period_id;
+		a.payment_date          = current_block_time().to_time_point();
+		a.payments.push_back (hypha_payment);
+		a.payments.push_back (seeds_payment);
+		a.payments.push_back (voice_payment);
+	});
+
+	bank.makepayment (period_id, a_itr->names.at("assigned_account"), hypha_payment, 
+		"Payment for role " + std::to_string(a_itr->ints.at("role_id")) + "; Period ID: " + std::to_string(period_id),
+		assignment_id);
+
+	bank.makepayment (period_id, a_itr->names.at("assigned_account"), seeds_payment, 
+		"Payment for role " + std::to_string(a_itr->ints.at("role_id")) + "; Period ID: " + std::to_string(period_id),
+		assignment_id);
+
+	bank.makepayment (period_id, a_itr->names.at("assigned_account"), voice_payment, 
+		"Payment for role " + std::to_string(a_itr->ints.at("role_id")) + "; Period ID: " + std::to_string(period_id),
+		assignment_id);
 }

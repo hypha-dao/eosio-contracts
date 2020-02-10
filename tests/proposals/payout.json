@@ -1,8 +1,9 @@
 {
   "data": {
+    "scope": "proposal",
     "names": [
       {
-        "key": "proposer",
+        "key": "owner",
         "value": "johnnyhypha1"
       },
       {
