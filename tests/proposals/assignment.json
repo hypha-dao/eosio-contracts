@@ -1,17 +1,18 @@
 {
   "data": {
+    "scope": "proposal",
     "names": [
       {
         "key": "assigned_account",
         "value": "johnnyhypha1"
       },
       {
-        "key":"proposer",
+        "key":"owner",
         "value":"johnnyhypha1"
       },
       {
         "key":"proposal_type",
-        "value":"assignments"
+        "value":"assignment"
       },
       {
         "key":"trx_action_name",
