@@ -46,6 +46,18 @@ void hyphadao::remoldprops (const name& scope) {
 	}
 }
 
+void hyphadao::togglepause () {
+	require_auth (get_self());
+	config_table      config_s (get_self(), get_self().value);
+   	Config c = config_s.get_or_create (get_self(), Config());   
+	if (c.ints.find ("paused") == c.ints.end() || c.ints.at("paused") == 0) {
+		c.ints["paused"]	= 1;
+	} else {
+		c.ints["paused"] 	= 0;
+	} 	
+	config_s.set (c, get_self());
+}
+
 void hyphadao::migrateprops (const name& from_scope, const name& to_scope) {
 	proposal_table p_t (get_self(), from_scope.value);
 	auto  p_itr = p_t.begin();
@@ -126,6 +138,8 @@ void hyphadao::enroll (	const name& enroller,
 						const name& applicant, 
 						const string& content) {
 
+	checkpause ();
+
 	// this action is linked to the hyphadaomain@enrollers permission
 	applicant_table a_t (get_self(), get_self().value);
 	auto a_itr = a_t.find (applicant.value);
@@ -166,6 +180,7 @@ void hyphadao::remapply (const name& applicant) {
 void hyphadao::apply (const name& applicant, 
 						const string& content) {
 
+	checkpause ();
 	require_auth (applicant);
 
 	member_table m_t (get_self(), get_self().value);
@@ -259,6 +274,7 @@ void hyphadao::create (const name&						scope,
 						const map<string, float>        floats,
 						const map<string, transaction>  trxs)
 {
+	checkpause ();
 	const name owner = names.at("owner");
 
 	require_auth (owner);
@@ -293,7 +309,21 @@ void hyphadao::create (const name&						scope,
 				trx.delay_sec = 0;
 				o.trxs["exec_on_approval"]      = trx;      
 			}	
-		} // else if (scope == "role"_n) { role logic/business rules }		
+
+			if (names.at("proposal_type") == "role"_n) { 
+				// role logic/business rules 
+				check (ints.at("fulltime_capacity") > 0, "fulltime_capacity must be greater than zero. You submitted: " + std::to_string(ints.at("fulltime_capacity")));
+				check (assets.at("annual_usd_salary").amount > 0, "annual_usd_salary must be greater than zero. You submitted: " + assets.at("annual_usd_salary").to_string());
+			} else if (names.at("proposal_type") == "assignment"_n) {
+				check (false, "Assignment proposals are not yet supported. Soon.");
+				object_table o_t_role (get_self(), "role"_n.value);
+				auto o_itr_role = o_t_role.find (ints.at("role_id"));
+				check (o_itr_role != o_t_role.end(), "Role ID: " + std::to_string(ints.at("role_id")) + " does not exist.");
+				check (o_itr_role->ints.at("consumed_capacity") + ints.at("timeshare") <= o_itr_role->ints.at("fulltime_capacity"), "Role ID: " + 
+					std::to_string (ints.at("role_id")) + " cannot support assignment. Full time capacity (x100) is " + std::to_string(o_itr_role->ints.at("fulltime_capacity")) + 
+					" and consumed capacity (x100) is " + std::to_string(o_itr_role->ints.at("consumed_capacity")) + "; proposal requests time share (x100) of: " + std::to_string(ints.at("timeshare")));
+			}
+		}
 	});      
 }
 
@@ -353,6 +383,13 @@ void hyphadao::assign ( const uint64_t& 		proposal_id) {
 	auto o_itr = o_t_proposal.find(proposal_id);
 	check (o_itr != o_t_proposal.end(), "Scope: " + "proposal"_n.to_string() + "; Object ID: " + std::to_string(proposal_id) + " does not exist.");
 
+	object_table o_t_role (get_self(), "role"_n.value);
+	auto o_itr_role = o_t_role.find (o_itr->ints.at("role_id"));
+	check (o_itr_role != o_t_role.end(), "Role ID: " + std::to_string(o_itr->ints.at("role_id")) + " does not exist.");
+	check (o_itr_role->ints.at("consumed_capacity") + o_itr->ints.at("timeshare") <= o_itr_role->ints.at("fulltime_capacity"), "Role ID: " + 
+		std::to_string (o_itr->ints.at("role_id")) + " cannot support assignment. Full time capacity (x100) is " + std::to_string(o_itr_role->ints.at("fulltime_capacity")) + 
+		" and consumed capacity (x100) is " + std::to_string(o_itr_role->ints.at("consumed_capacity")) + "; proposal requests time share (x100) of: " + std::to_string(o_itr->ints.at("timeshare")));
+
 	object_table o_t_assignment (get_self(), "assignment"_n.value);
 	auto sorted_by_assigned = o_t_assignment.get_index<"byowner"_n>();
 	auto a_itr = sorted_by_assigned.begin();
@@ -361,7 +398,7 @@ void hyphadao::assign ( const uint64_t& 		proposal_id) {
 			"Assigned account already has this role. Assigned account: " + o_itr->names.at("assigned_account").to_string() + "; Role ID: " + std::to_string(o_itr->ints.at("role_id")));    
 		a_itr++;
 	}
-
+	
 	change_scope ("proposal"_n, proposal_id, "proparchive"_n, false);
 	change_scope ("proposal"_n, proposal_id, "assignment"_n, true);
 }
@@ -410,6 +447,8 @@ void hyphadao::eraseobj (	const name& scope,
 }
 
 void hyphadao::closeprop(const uint64_t& proposal_id) {
+
+	checkpause ();
 
 	object_table o_t (get_self(), "proposal"_n.value);
 	auto o_itr = o_t.find(proposal_id);
@@ -462,6 +501,7 @@ void hyphadao::qualify_proposer (const name& proposer) {
 
 void hyphadao::payassign (const uint64_t& assignment_id, const uint64_t& period_id) {
 
+	checkpause ();
 	object_table o_t_assignment (get_self(), "assignment"_n.value);
 	auto a_itr = o_t_assignment.find (assignment_id);
 	check (a_itr != o_t_assignment.end(), "Cannot pay assignment. Assignment ID does not exist: " + std::to_string(assignment_id));
