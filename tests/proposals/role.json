@@ -31,27 +31,23 @@
     ],
     "assets": [
       {
-        "key": "hypha_amount",
-        "value": "11.00 HYPHA"
-      },
-      {
-        "key": "seeds_amount",
-        "value": "11.0000 SEEDS"
-      },
-      {
-        "key": "hvoice_amount",
-        "value": "11.00 HVOICE"
+        "key": "annual_usd_salary",
+        "value": "130000.00 USD"
       }
     ],
     "time_points": [],
     "ints": [
       {
         "key": "start_period",
-        "value": "250"
+        "value": 250
       },
       {
         "key": "end_period",
-        "value": "331"
+        "value": 331
+      },
+      {
+        "key": "fulltime_capacity",
+        "value": 100
       }
     ],
     "floats": [],

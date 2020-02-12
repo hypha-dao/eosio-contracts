@@ -20,30 +20,10 @@ void hyphadao::removemember (const name& member) {
 
 void hyphadao::reset () {
 	// bank.reset_config ();
-
-	proposal_table p_t (get_self(),get_self().value);
-	auto  p_itr = p_t.begin();
-	while (p_itr != p_t.end()) {
-		p_itr = p_t.erase (p_itr);
-	}
-
-	p_t = proposal_table (get_self(), "archive"_n.value);
-	p_itr = p_t.begin();
-	while (p_itr != p_t.end()) {
-		p_itr = p_t.erase (p_itr);
-	}
-
+	require_auth (get_self());
 	// config_table      config_s (get_self(), get_self().value);
    	// Config c = config_s.get_or_create (get_self(), Config()); 
 	// config_s.remove ();
-}
-
-void hyphadao::remoldprops (const name& scope) {
-	proposal_table p_t (get_self(), scope.value);
-	auto  p_itr = p_t.begin();
-	while (p_itr != p_t.end()) {
-		p_itr = p_t.erase (p_itr);
-	}
 }
 
 void hyphadao::togglepause () {
@@ -58,33 +38,83 @@ void hyphadao::togglepause () {
 	config_s.set (c, get_self());
 }
 
-void hyphadao::migrateprops (const name& from_scope, const name& to_scope) {
-	proposal_table p_t (get_self(), from_scope.value);
-	auto  p_itr = p_t.begin();
-	while (p_itr != p_t.end()) {
-		object_table o_t (get_self(), to_scope.value);
-		o_t.emplace (get_self(), [&](auto &o) {
-			o.id                       	= o_t.available_primary_key();
-			o.names                    	= p_itr->names;
-			o.strings                  	= p_itr->strings;
-			o.assets                  	= p_itr->assets;
-			o.time_points              	= p_itr->time_points;
-			o.ints                     	= p_itr->ints;
-			o.floats                   	= p_itr->floats;
-			o.trxs                     	= p_itr->trxs;
-		});
-		p_itr++;
-	}
-}
-
 void hyphadao::remperiods (const uint64_t& begin_period_id, 
                            const uint64_t& end_period_id) {
+	require_auth (get_self());
     bank.remove_periods (begin_period_id, end_period_id);
 }
 
 void hyphadao::resetperiods () {
+	require_auth (get_self());
 	bank.reset_periods();
 }
+
+void hyphadao::addowner (const name& scope) {
+	require_auth (get_self());
+	object_table o_t (get_self(), scope.value);
+	auto o_itr = o_t.begin();
+	while (o_itr != o_t.end()) {
+		o_t.modify (o_itr, get_self(), [&](auto &o) {
+			o.names["owner"] = o_itr->names.at("proposer");
+		});
+		o_itr++;
+	}
+}
+
+void hyphadao::erasebackups (const name& scope) {
+	check ( is_paused(), "Contract must be paused to call this action.");	
+
+	backup_object_table o_t_backup (get_self(), scope.value);
+	auto o_itr = o_t_backup.begin();
+	while (o_itr != o_t_backup.end()) {
+		o_itr = o_t_backup.erase (o_itr);
+	}
+}
+
+void hyphadao::backupobjs (const name& scope) {
+	check ( is_paused(), "Contract must be paused to call this action.");	
+
+	object_table o_t (get_self(), scope.value);
+	backup_object_table o_t_backup (get_self(), scope.value);
+
+	auto o_itr = o_t.begin();	
+	while (o_itr != o_t.end()) {
+		o_t_backup.emplace (get_self(), [&](auto &o) {
+			o.id                          = o_itr->id;
+			o.names                       = o_itr->names;
+			o.assets                      = o_itr->assets;
+			o.strings                     = o_itr->strings;
+			o.floats                      = o_itr->floats;
+			o.time_points                 = o_itr->time_points;
+			o.ints                        = o_itr->ints;
+			o.trxs                        = o_itr->trxs;
+		});
+		o_itr++;
+	}	
+}
+
+void hyphadao::restoreobjs (const name& scope) {
+	check ( is_paused(), "Contract must be paused to call this action.");	
+
+	object_table o_t (get_self(), scope.value);
+	backup_object_table o_t_backup (get_self(), scope.value);
+
+	auto o_itr_backup = o_t_backup.begin();	
+	while (o_itr_backup != o_t_backup.end()) {
+		o_t.emplace (get_self(), [&](auto &o) {
+			o.id                          = o_itr_backup->id;
+			o.names                       = o_itr_backup->names;
+			o.assets                      = o_itr_backup->assets;
+			o.strings                     = o_itr_backup->strings;
+			o.floats                      = o_itr_backup->floats;
+			o.time_points                 = o_itr_backup->time_points;
+			o.ints                        = o_itr_backup->ints;
+			o.trxs                        = o_itr_backup->trxs;
+		});
+		o_itr_backup++;
+	}	
+}
+
 
 void hyphadao::setconfig (	const map<string, name> 		names,
 							const map<string, string>       strings,
@@ -138,7 +168,7 @@ void hyphadao::enroll (	const name& enroller,
 						const name& applicant, 
 						const string& content) {
 
-	checkpause ();
+	check ( !is_paused(), "Contract is paused for maintenance. Please try again later.");	
 
 	// this action is linked to the hyphadaomain@enrollers permission
 	applicant_table a_t (get_self(), get_self().value);
@@ -180,7 +210,7 @@ void hyphadao::remapply (const name& applicant) {
 void hyphadao::apply (const name& applicant, 
 						const string& content) {
 
-	checkpause ();
+	check ( !is_paused(), "Contract is paused for maintenance. Please try again later.");	
 	require_auth (applicant);
 
 	member_table m_t (get_self(), get_self().value);
@@ -274,7 +304,7 @@ void hyphadao::create (const name&						scope,
 						const map<string, float>        floats,
 						const map<string, transaction>  trxs)
 {
-	checkpause ();
+	check ( !is_paused(), "Contract is paused for maintenance. Please try again later.");	
 	const name owner = names.at("owner");
 
 	require_auth (owner);
@@ -316,6 +346,12 @@ void hyphadao::create (const name&						scope,
 				check (assets.at("annual_usd_salary").amount > 0, "annual_usd_salary must be greater than zero. You submitted: " + assets.at("annual_usd_salary").to_string());
 			} else if (names.at("proposal_type") == "assignment"_n) {
 				check (false, "Assignment proposals are not yet supported. Soon.");
+				check (ints.find("role_id") != ints.end(), "Role ID is required when proposal_type is assignment.");
+				check (ints.find("timeshare_x100") != ints.end(), "timeshare_x100 is a required field for assignment proposals.");
+				check (ints.at("timeshare_x100") > 0 && ints.at("timeshare_x100") < 100, "timeshare_100x must be greater than zero and less than or equal to 100.");
+				check (ints.find("start_period") != ints.end(), "start_period is a required field for assignment proposals.");
+				check (ints.find("end_period") != ints.end(), "end_period is a required field for assignment proposals.");
+
 				object_table o_t_role (get_self(), "role"_n.value);
 				auto o_itr_role = o_t_role.find (ints.at("role_id"));
 				check (o_itr_role != o_t_role.end(), "Role ID: " + std::to_string(ints.at("role_id")) + " does not exist.");
@@ -328,6 +364,7 @@ void hyphadao::create (const name&						scope,
 }
 
 void hyphadao::clrdebugs (const uint64_t& starting_id, const uint64_t& batch_size) {
+	check (has_auth ("hyphanewyork"_n) || has_auth(get_self()), "Requires higher permission.");
 	debug_table d_t (get_self(), get_self().value);
 	auto d_itr = d_t.find (starting_id);
 
@@ -346,20 +383,20 @@ void hyphadao::clrdebugs (const uint64_t& starting_id, const uint64_t& batch_siz
 void hyphadao::exectrx (const uint64_t& proposal_id) {
 	require_auth (get_self());
 
-	proposal_table p_t (get_self(), get_self().value);
-	auto p_itr = p_t.find (proposal_id);
-	check (p_itr != p_t.end(), "Proposal ID: " + std::to_string(proposal_id) + " does not exist.");
-	check (p_itr->trxs.size() > 1, "There are not transactions to execute. Trx map size: " + std::to_string(p_itr->trxs.size()) + "; Proposal ID: " + std::to_string(proposal_id));
+	// proposal_table p_t (get_self(), get_self().value);
+	// auto p_itr = p_t.find (proposal_id);
+	// check (p_itr != p_t.end(), "Proposal ID: " + std::to_string(proposal_id) + " does not exist.");
+	// check (p_itr->trxs.size() > 1, "There are not transactions to execute. Trx map size: " + std::to_string(p_itr->trxs.size()) + "; Proposal ID: " + std::to_string(proposal_id));
 
-	for (auto trx_itr = p_itr->trxs.begin(); trx_itr != p_itr->trxs.end(); ++trx_itr) {
-		// skip the transaction named "exec_on_approval" because that is the one currently executing 
-		// debug ( "trx_itr->first	: " + trx_itr->first);
-		// debug ( "true/false		: " + std::to_string(trx_itr->first.compare("exec_on_approval") == 0));
-		if (trx_itr->first.compare("exec_on_approval") == 0) {
-			debug ("Executing transaction	: " + trx_itr->first);
-			trx_itr->second.send(current_block_time().to_time_point().sec_since_epoch(), get_self());
-		}
-	}
+	// for (auto trx_itr = p_itr->trxs.begin(); trx_itr != p_itr->trxs.end(); ++trx_itr) {
+	// 	// skip the transaction named "exec_on_approval" because that is the one currently executing 
+	// 	// debug ( "trx_itr->first	: " + trx_itr->first);
+	// 	// debug ( "true/false		: " + std::to_string(trx_itr->first.compare("exec_on_approval") == 0));
+	// 	if (trx_itr->first.compare("exec_on_approval") == 0) {
+	// 		debug ("Executing transaction	: " + trx_itr->first);
+	// 		trx_itr->second.send(current_block_time().to_time_point().sec_since_epoch(), get_self());
+	// 	}
+	// }
 }
 
 // void hyphadao::approved (const name& scope, const uint64_t& id) {}
@@ -372,6 +409,7 @@ void hyphadao::newrole (const uint64_t& proposal_id) {
 }
 
 void hyphadao::addperiod (const time_point& start_date, const time_point& end_date, const string& phase) {
+	require_auth (get_self());
 	bank.addperiod (start_date, end_date, phase);
 }
 
@@ -383,22 +421,33 @@ void hyphadao::assign ( const uint64_t& 		proposal_id) {
 	auto o_itr = o_t_proposal.find(proposal_id);
 	check (o_itr != o_t_proposal.end(), "Scope: " + "proposal"_n.to_string() + "; Object ID: " + std::to_string(proposal_id) + " does not exist.");
 
+	// Ensure that the owner of this proposer doesn't already have this assignment
+	object_table o_t_assignment (get_self(), "assignment"_n.value);
+	auto sorted_by_owner = o_t_assignment.get_index<"byowner"_n>();
+	auto a_itr = sorted_by_owner.find(o_itr->names.at("owner").value);
+
+	while (a_itr != sorted_by_owner.end() && a_itr->names.at("owner") == o_itr->names.at("owner")) {
+		check (! (a_itr->ints.at("role_id") == o_itr->ints.at("role_id") && a_itr->names.at("owner") == o_itr->names.at("owner")), 
+			"Proposal owner already has this role. Owner: " + o_itr->names.at("owner").to_string() + "; Role ID: " + std::to_string(o_itr->ints.at("role_id")));    
+		a_itr++;
+	}
+
+	// Ensure that this proposal would not push the role over it's approved full time capacity
 	object_table o_t_role (get_self(), "role"_n.value);
 	auto o_itr_role = o_t_role.find (o_itr->ints.at("role_id"));
 	check (o_itr_role != o_t_role.end(), "Role ID: " + std::to_string(o_itr->ints.at("role_id")) + " does not exist.");
-	check (o_itr_role->ints.at("consumed_capacity") + o_itr->ints.at("timeshare") <= o_itr_role->ints.at("fulltime_capacity"), "Role ID: " + 
-		std::to_string (o_itr->ints.at("role_id")) + " cannot support assignment. Full time capacity (x100) is " + std::to_string(o_itr_role->ints.at("fulltime_capacity")) + 
-		" and consumed capacity (x100) is " + std::to_string(o_itr_role->ints.at("consumed_capacity")) + "; proposal requests time share (x100) of: " + std::to_string(o_itr->ints.at("timeshare")));
 
-	object_table o_t_assignment (get_self(), "assignment"_n.value);
-	auto sorted_by_assigned = o_t_assignment.get_index<"byowner"_n>();
-	auto a_itr = sorted_by_assigned.begin();
-	while (a_itr != sorted_by_assigned.end()) {
-		check (! (a_itr->ints.at("role_id") == o_itr->ints.at("role_id") && a_itr->names.at("assigned_account") == o_itr->names.at("assigned_account")), 
-			"Assigned account already has this role. Assigned account: " + o_itr->names.at("assigned_account").to_string() + "; Role ID: " + std::to_string(o_itr->ints.at("role_id")));    
-		a_itr++;
-	}
-	
+	// auto sorted_by_role = o_t_assignment.get_index<"byfk"_n>();
+	// auto a_itr_by_role = sorted_by_role.find(o_itr->ints.at("fk"));
+	// int consumed_capacity = 0;
+	// while (a_itr_by_role != sorted_by_role.end() && a_itr_by_role->ints.at("fk") == o_itr->ints.at("fk")) {
+	// 	consumed_capacity += a_itr_by_role->ints.at("timeshare_x100");
+	// }
+
+	// check (consumed_capacity + o_itr->ints.at("timeshare_x100") <= o_itr_role->ints.at("fulltime_capacity_x100"), "Role ID: " + 
+	// 	std::to_string (o_itr->ints.at("fk")) + " cannot support assignment. Full time capacity (x100) is " + std::to_string(o_itr_role->ints.at("fulltime_capacity_x100")) + 
+	// 	" and consumed capacity (x100) is " + std::to_string(consumed_capacity) + "; proposal requests time share (x100) of: " + std::to_string(o_itr->ints.at("timeshare_x100")));
+
 	change_scope ("proposal"_n, proposal_id, "proparchive"_n, false);
 	change_scope ("proposal"_n, proposal_id, "assignment"_n, true);
 }
@@ -448,7 +497,7 @@ void hyphadao::eraseobj (	const name& scope,
 
 void hyphadao::closeprop(const uint64_t& proposal_id) {
 
-	checkpause ();
+	check ( !is_paused(), "Contract is paused for maintenance. Please try again later.");	
 
 	object_table o_t (get_self(), "proposal"_n.value);
 	auto o_itr = o_t.find(proposal_id);
@@ -501,7 +550,8 @@ void hyphadao::qualify_proposer (const name& proposer) {
 
 void hyphadao::payassign (const uint64_t& assignment_id, const uint64_t& period_id) {
 
-	checkpause ();
+	check ( !is_paused(), "Contract is paused for maintenance. Please try again later.");	
+
 	object_table o_t_assignment (get_self(), "assignment"_n.value);
 	auto a_itr = o_t_assignment.find (assignment_id);
 	check (a_itr != o_t_assignment.end(), "Cannot pay assignment. Assignment ID does not exist: " + std::to_string(assignment_id));

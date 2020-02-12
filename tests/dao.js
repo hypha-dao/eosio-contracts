@@ -42,7 +42,7 @@ git checkout migration
 yarn
 export PRIVATE_KEY=5HwnoWBuuRmNdcqwBzd1LABFRKnTk2RY2kUMYKkZfF8tKodubtK 
 node dao.js -f proposals/role.json -a -c -p && node dao.js -f proposals/assignment.json -a -c -p && node dao.js -f proposals/payout.json -a -c -p
-
+node dao.js -f proposals/config.json --config -h https://test.telos.kitchen
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++ 
 */
 

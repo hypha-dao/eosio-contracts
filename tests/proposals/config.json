@@ -1,33 +1,49 @@
 {
-    "data": {
-      "names": [
-        {
-          "key": "hypha_token_contract",
-          "value": "token.hypha"
-        },
-        {
-          "key": "seeds_token_contract",
-          "value": "token.seeds"
-        },
-        {
-          "key": "telos_decide_contract",
-          "value": "trailservice"
-        },
-        {
-          "key": "seeds_escrow_contract",
-          "value": "escrow.seeds"
-        }
-      ],
-      "strings": [],
-      "assets": [],
-      "time_points": [],
-      "ints": [
-          {
-              "key":"voting_duration_sec",
-              "value":"60"
-          }
-      ],
-      "floats": [],
-      "trxs": []
-    }
+  "data": {
+    "names": [
+      {
+        "key": "hypha_token_contract",
+        "value": "token.hypha"
+      },
+      {
+        "key": "seeds_token_contract",
+        "value": "token.seeds"
+      },
+      {
+        "key": "telos_decide_contract",
+        "value": "trailservice"
+      },
+      {
+        "key": "seeds_escrow_contract",
+        "value": "escrow.seeds"
+      }
+    ],
+    "strings": [],
+    "assets": [],
+    "time_points": [],
+    "ints": [
+      {
+        "key": "voting_duration_sec",
+        "value": "1800"
+      },
+      {
+        "key": "seeds_deferral_factor_x100",
+        "value": 130
+      },
+      {
+        "key": "hypha_deferral_factor_x100",
+        "value": 60
+      },
+      {
+        "key": "seeds_usd_valuation_x100",
+        "value": 1
+      },
+      {
+        "key": "paused",
+        "value": 0
+      }
+    ],
+    "floats": [],
+    "trxs": []
   }
+}

@@ -82,6 +82,42 @@ CONTRACT hyphadao : public contract {
       > asspay_table;
 
       // scope: proposal, proparchive, roles, assignments
+      struct [[eosio::table, eosio::contract("hyphadao") ]] BUObject
+      {
+         uint64_t                   id                ;
+         
+         // core maps
+         map<string, name>          names             ;
+         map<string, string>        strings           ;
+         map<string, asset>         assets            ;
+         map<string, time_point>    time_points       ;
+         map<string, uint64_t>      ints              ;
+         map<string, transaction>   trxs              ;
+         map<string, float>         floats            ;
+         uint64_t                   primary_key()     const { return id; }
+
+         // indexes
+         uint64_t                   by_owner()        const { return names.at("owner").value; }
+         uint64_t                   by_type ()        const { return names.at("type").value; }
+       
+
+         // timestamps
+         time_point                 created_date    = current_time_point();
+         time_point                 updated_date    = current_time_point();
+         uint64_t    by_created () const { return created_date.sec_since_epoch(); }
+         uint64_t    by_updated () const { return updated_date.sec_since_epoch(); }
+      };
+
+      typedef multi_index<"backupobjs"_n, BUObject,
+         indexed_by<"bycreated"_n, const_mem_fun<BUObject, uint64_t, &BUObject::by_created>>,
+         indexed_by<"byupdated"_n, const_mem_fun<BUObject, uint64_t, &BUObject::by_updated>>,
+         indexed_by<"byowner"_n, const_mem_fun<BUObject, uint64_t, &BUObject::by_owner>>,
+         indexed_by<"bytype"_n, const_mem_fun<BUObject, uint64_t, &BUObject::by_type>>
+         
+      > backup_object_table;
+
+
+      // scope: proposal, proparchive, roles, assignments
       struct [[eosio::table, eosio::contract("hyphadao") ]] Object
       {
          uint64_t                   id                ;
@@ -99,7 +135,9 @@ CONTRACT hyphadao : public contract {
          // indexes
          uint64_t                   by_owner()        const { return names.at("owner").value; }
          uint64_t                   by_type ()        const { return names.at("type").value; }
-
+         // DEPLOY
+         //uint64_t                   by_fk()           const { return ints.at("fk"); }
+       
          // timestamps
          time_point                 created_date    = current_time_point();
          time_point                 updated_date    = current_time_point();
@@ -112,7 +150,11 @@ CONTRACT hyphadao : public contract {
          indexed_by<"byupdated"_n, const_mem_fun<Object, uint64_t, &Object::by_updated>>,
          indexed_by<"byowner"_n, const_mem_fun<Object, uint64_t, &Object::by_owner>>,
          indexed_by<"bytype"_n, const_mem_fun<Object, uint64_t, &Object::by_type>>
+         // DEPLOY
+         //,indexed_by<"byfk"_n, const_mem_fun<Object, uint64_t, &Object::by_fk>>
       > object_table;
+
+
 
       struct [[eosio::table, eosio::contract("hyphadao") ]] Debug
       {
@@ -144,9 +186,12 @@ CONTRACT hyphadao : public contract {
       ACTION resetperiods();
       ACTION eraseobj (const name& scope,
                         const uint64_t&   id);
-      ACTION migrateprops (const name& from_scope, const name& to_scope);
-      ACTION remoldprops (const name& scope);
       ACTION togglepause ();
+      ACTION addowner (const name& scope);
+      ACTION backupobjs (const name& scope);
+      ACTION erasebackups (const name& scope);
+      ACTION restoreobjs (const name& scope);
+
 
       ACTION setconfig (const map<string, name> 		  names,
                         const map<string, string>       strings,
@@ -241,13 +286,13 @@ CONTRACT hyphadao : public contract {
          return asset { static_cast<int64_t> (original_asset.amount * adjustment), original_asset.symbol };
       }  
 
-      void checkpause () {
+      bool is_paused () {
          config_table      config_s (get_self(), get_self().value);
    	   Config c = config_s.get_or_create (get_self(), Config());   
          check (c.ints.find ("paused") != c.ints.end(), "Contract does not have a pause configuration. Assuming it is paused. Please contact administrator.");
          
          uint64_t paused = c.ints.at("paused");
-         check (paused == 0, "Contract is paused for maintenance. Please try again later.");
+         return paused == 1;
       }
 };
 
