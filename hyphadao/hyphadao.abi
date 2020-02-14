@@ -220,56 +220,6 @@
             ]
         },
         {
-            "name": "Proposal",
-            "base": "",
-            "fields": [
-                {
-                    "name": "id",
-                    "type": "uint64"
-                },
-                {
-                    "name": "names",
-                    "type": "pair_string_name[]"
-                },
-                {
-                    "name": "strings",
-                    "type": "pair_string_string[]"
-                },
-                {
-                    "name": "assets",
-                    "type": "pair_string_asset[]"
-                },
-                {
-                    "name": "time_points",
-                    "type": "pair_string_time_point[]"
-                },
-                {
-                    "name": "ints",
-                    "type": "pair_string_uint64[]"
-                },
-                {
-                    "name": "trxs",
-                    "type": "pair_string_transaction[]"
-                },
-                {
-                    "name": "floats",
-                    "type": "pair_string_float32[]"
-                },
-                {
-                    "name": "proposer",
-                    "type": "name"
-                },
-                {
-                    "name": "created_date",
-                    "type": "time_point"
-                },
-                {
-                    "name": "updated_date",
-                    "type": "time_point"
-                }
-            ]
-        },
-        {
             "name": "action",
             "base": "",
             "fields": [
@@ -297,6 +247,16 @@
             "fields": [
                 {
                     "name": "member",
+                    "type": "name"
+                }
+            ]
+        },
+        {
+            "name": "addowner",
+            "base": "",
+            "fields": [
+                {
+                    "name": "scope",
                     "type": "name"
                 }
             ]
@@ -472,20 +432,6 @@
             ]
         },
         {
-            "name": "migrateprops",
-            "base": "",
-            "fields": [
-                {
-                    "name": "from_scope",
-                    "type": "name"
-                },
-                {
-                    "name": "to_scope",
-                    "type": "name"
-                }
-            ]
-        },
-        {
             "name": "newrole",
             "base": "",
             "fields": [
@@ -632,16 +578,6 @@
             ]
         },
         {
-            "name": "remoldprops",
-            "base": "",
-            "fields": [
-                {
-                    "name": "scope",
-                    "type": "name"
-                }
-            ]
-        },
-        {
             "name": "removemember",
             "base": "",
             "fields": [
@@ -720,6 +656,11 @@
             ]
         },
         {
+            "name": "togglepause",
+            "base": "",
+            "fields": []
+        },
+        {
             "name": "transaction",
             "base": "transaction_header",
             "fields": [
@@ -772,27 +713,32 @@
         {
             "name": "addmember",
             "type": "addmember",
-            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Add Member\nsummary: 'Add a new member'\nicon: http://dao-dev.hypha.earth/statics/app-logo-128x128.png#a71ba6431c13b623eccde41cd14f0f5e3ee694da7e3878407e74d8137bf89916\n---\n\n{{$action.authorization.[0].actor}} adds {{member}} as a New Member."
+            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Add Member\nsummary: 'Add a new member'\nicon: http://dho.hypha.earth/statics/app-logo-128x128.png#a71ba6431c13b623eccde41cd14f0f5e3ee694da7e3878407e74d8137bf89916\n---\n\n{{$action.authorization.[0].actor}} adds {{member}} as a New Member."
+        },
+        {
+            "name": "addowner",
+            "type": "addowner",
+            "ricardian_contract": ""
         },
         {
             "name": "addperiod",
             "type": "addperiod",
-            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Add Period\nsummary: 'Add a new period'\nicon: http://dao-dev.hypha.earth/statics/app-logo-128x128.png#a71ba6431c13b623eccde41cd14f0f5e3ee694da7e3878407e74d8137bf89916\n---\n\n{{$action.authorization.[0].actor}} add a new period with the start date: {{start_date}} and the end date: {{end_date}} with the phase: {{phase}}."
+            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Add Period\nsummary: 'Add a new period'\nicon: http://dho.hypha.earth/statics/app-logo-128x128.png#a71ba6431c13b623eccde41cd14f0f5e3ee694da7e3878407e74d8137bf89916\n---\n\n{{$action.authorization.[0].actor}} add a new period with the start date: {{start_date}} and the end date: {{end_date}} with the phase: {{phase}}."
         },
         {
             "name": "apply",
             "type": "apply",
-            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Apply\nsummary: 'Make or modify an application'\nicon: http://dao-dev.hypha.earth/statics/app-logo-128x128.png#a71ba6431c13b623eccde41cd14f0f5e3ee694da7e3878407e74d8137bf89916\n---\n\n{{$action.authorization.[0].actor}} makes a new application or modifies an existing one with the content: {{content}}."
+            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Apply\nsummary: 'Make or modify an application'\nicon: http://dho.hypha.earth/statics/app-logo-128x128.png#a71ba6431c13b623eccde41cd14f0f5e3ee694da7e3878407e74d8137bf89916\n---\n\n{{$action.authorization.[0].actor}} makes a new application or modifies an existing one with the content: {{content}}."
         },
         {
             "name": "assign",
             "type": "assign",
-            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Assign\nsummary: 'Adds a new assignment'\nicon: http://dao-dev.hypha.earth/statics/app-logo-128x128.png#a71ba6431c13b623eccde41cd14f0f5e3ee694da7e3878407e74d8137bf89916\n---\n\n{{$action.authorization.[0].actor}} adds a new assignment given the existing proposal with the id: {{proposal_id}}."
+            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Assign\nsummary: 'Adds a new assignment'\nicon: http://dho.hypha.earth/statics/app-logo-128x128.png#a71ba6431c13b623eccde41cd14f0f5e3ee694da7e3878407e74d8137bf89916\n---\n\n{{$action.authorization.[0].actor}} adds a new assignment given the existing proposal with the id: {{proposal_id}}."
         },
         {
             "name": "closeprop",
             "type": "closeprop",
-            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Close Proposal\nsummary: 'Close a given proposal'\nicon: http://dao-dev.hypha.earth/statics/app-logo-128x128.png#a71ba6431c13b623eccde41cd14f0f5e3ee694da7e3878407e74d8137bf89916\n---\n\n{{$action.authorization.[0].actor}} erases the given proposal with the id: {{proposal_id}}."
+            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Close Proposal\nsummary: 'Close a given proposal'\nicon: http://dho.hypha.earth/statics/app-logo-128x128.png#a71ba6431c13b623eccde41cd14f0f5e3ee694da7e3878407e74d8137bf89916\n---\n\n{{$action.authorization.[0].actor}} erases the given proposal with the id: {{proposal_id}}."
         },
         {
             "name": "clrdebugs",
@@ -802,12 +748,12 @@
         {
             "name": "create",
             "type": "create",
-            "ricardian_contract": ""
+            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Create\nsummary: 'Create a new object'\nicon: http://dho.hypha.earth/statics/app-logo-128x128.png#a71ba6431c13b623eccde41cd14f0f5e3ee694da7e3878407e74d8137bf89916\n---\n\n{{$action.authorization.[0].actor}} creates a new object within the Hypha DHO with the following attributes:\nscope: {{scope}}\nnames: {{to_json names}}\nstrings: {{to_json strings}}\nassets: {{to_json assets}}\ntime_points: {{to_json time_points}}\nints: {{to_json ints}}\nfloats: {{to_json floats}}\ntransactions: {{to_json trxs}}"
         },
         {
             "name": "enroll",
             "type": "enroll",
-            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Enroll \nsummary: 'Enroll an applicant'\nicon: http://dao-dev.hypha.earth/statics/app-logo-128x128.png#a71ba6431c13b623eccde41cd14f0f5e3ee694da7e3878407e74d8137bf89916\n---\n\n{{$action.authorization.[0].actor}} enrolls the existing applicant {{applicant}} with the content {{content}} to Hypha DAO."
+            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Enroll \nsummary: 'Enroll an applicant'\nicon: http://dho.hypha.earth/statics/app-logo-128x128.png#a71ba6431c13b623eccde41cd14f0f5e3ee694da7e3878407e74d8137bf89916\n---\n\n{{$action.authorization.[0].actor}} enrolls the existing applicant {{applicant}} with the content {{content}} to Hypha DAO."
         },
         {
             "name": "eraseobj",
@@ -817,27 +763,22 @@
         {
             "name": "exectrx",
             "type": "exectrx",
-            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Execute Transaction\nsummary: 'Execute pending transactions'\nicon: http://dao-dev.hypha.earth/statics/app-logo-128x128.png#a71ba6431c13b623eccde41cd14f0f5e3ee694da7e3878407e74d8137bf89916\n---\n\n{{$action.authorization.[0].actor}} executes all the pending transactions in the proposal with the id: {{proposal_id}}."
+            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Execute Transaction\nsummary: 'Execute pending transactions'\nicon: http://dho.hypha.earth/statics/app-logo-128x128.png#a71ba6431c13b623eccde41cd14f0f5e3ee694da7e3878407e74d8137bf89916\n---\n\n{{$action.authorization.[0].actor}} executes all the pending transactions in the proposal with the id: {{proposal_id}}."
         },
         {
             "name": "makepayout",
             "type": "makepayout",
-            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Make Pay Out\nsummary: 'Makes pay out'\nicon: http://dao-dev.hypha.earth/statics/app-logo-128x128.png#a71ba6431c13b623eccde41cd14f0f5e3ee694da7e3878407e74d8137bf89916\n---\n\n{{$action.authorization.[0].actor}} pays out the quantity stored in the proposal with the id: {{proposal_id}}."
-        },
-        {
-            "name": "migrateprops",
-            "type": "migrateprops",
-            "ricardian_contract": ""
+            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Make Pay Out\nsummary: 'Makes pay out'\nicon: http://dho.hypha.earth/statics/app-logo-128x128.png#a71ba6431c13b623eccde41cd14f0f5e3ee694da7e3878407e74d8137bf89916\n---\n\n{{$action.authorization.[0].actor}} pays out the quantity stored in the proposal with the id: {{proposal_id}}."
         },
         {
             "name": "newrole",
             "type": "newrole",
-            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: New Role\nsummary: 'Adds a new role'\nicon: http://dao-dev.hypha.earth/statics/app-logo-128x128.png#a71ba6431c13b623eccde41cd14f0f5e3ee694da7e3878407e74d8137bf89916\n---\n\n{{$action.authorization.[0].actor}} adds a new role given the existing proposal with the id: {{proposal_id}}."
+            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: New Role\nsummary: 'Adds a new role'\nicon: http://dho.hypha.earth/statics/app-logo-128x128.png#a71ba6431c13b623eccde41cd14f0f5e3ee694da7e3878407e74d8137bf89916\n---\n\n{{$action.authorization.[0].actor}} adds a new role given the existing proposal with the id: {{proposal_id}}."
         },
         {
             "name": "payassign",
             "type": "payassign",
-            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Pay Assignment\nsummary: 'Pay the given assignment'\nicon: http://dao-dev.hypha.earth/statics/app-logo-128x128.png#a71ba6431c13b623eccde41cd14f0f5e3ee694da7e3878407e74d8137bf89916\n---\n\n{{$action.authorization.[0].actor}} pays the given assignment with the id: {{assignment_id}} in the period with the id: {{period_id}}."
+            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Pay Assignment\nsummary: 'Pay the given assignment'\nicon: http://dho.hypha.earth/statics/app-logo-128x128.png#a71ba6431c13b623eccde41cd14f0f5e3ee694da7e3878407e74d8137bf89916\n---\n\n{{$action.authorization.[0].actor}} pays the given assignment with the id: {{assignment_id}} in the period with the id: {{period_id}}."
         },
         {
             "name": "remapply",
@@ -845,39 +786,39 @@
             "ricardian_contract": ""
         },
         {
-            "name": "remoldprops",
-            "type": "remoldprops",
-            "ricardian_contract": ""
-        },
-        {
             "name": "removemember",
             "type": "removemember",
-            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Remove Member\nsummary: 'Remove a member'\nicon: http://dao-dev.hypha.earth/statics/app-logo-128x128.png#a71ba6431c13b623eccde41cd14f0f5e3ee694da7e3878407e74d8137bf89916\n---\n\n{{$action.authorization.[0].actor}} removes {{member_to_remove}} as a Member."
+            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Remove Member\nsummary: 'Remove a member'\nicon: http://dho.hypha.earth/statics/app-logo-128x128.png#a71ba6431c13b623eccde41cd14f0f5e3ee694da7e3878407e74d8137bf89916\n---\n\n{{$action.authorization.[0].actor}} removes {{member_to_remove}} as a Member."
         },
         {
             "name": "remperiods",
             "type": "remperiods",
-            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Remove Periods\nsummary: 'Remove a given range of periods'\nicon: http://dao-dev.hypha.earth/statics/app-logo-128x128.png#a71ba6431c13b623eccde41cd14f0f5e3ee694da7e3878407e74d8137bf89916\n---\n\n{{$action.authorization.[0].actor}} removes periods from begin period: {{begin_period_id}} and end period: {{end_period_id}}."
+            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Remove Periods\nsummary: 'Remove a given range of periods'\nicon: http://dho.hypha.earth/statics/app-logo-128x128.png#a71ba6431c13b623eccde41cd14f0f5e3ee694da7e3878407e74d8137bf89916\n---\n\n{{$action.authorization.[0].actor}} removes periods from begin period: {{begin_period_id}} and end period: {{end_period_id}}."
         },
         {
             "name": "reset",
             "type": "reset",
-            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Reset\nsummary: 'Reset all tables within this contract'\nicon: http://dao-dev.hypha.earth/statics/app-logo-128x128.png#a71ba6431c13b623eccde41cd14f0f5e3ee694da7e3878407e74d8137bf89916\n---\n\n{{$action.authorization.[0].actor}} resets all the tables within this contract."
+            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Reset\nsummary: 'Reset all tables within this contract'\nicon: http://dho.hypha.earth/statics/app-logo-128x128.png#a71ba6431c13b623eccde41cd14f0f5e3ee694da7e3878407e74d8137bf89916\n---\n\n{{$action.authorization.[0].actor}} resets all the tables within this contract."
         },
         {
             "name": "resetperiods",
             "type": "resetperiods",
-            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Reset Periods\nsummary: 'Reset all the periods within this contract'\nicon: http://dao-dev.hypha.earth/statics/app-logo-128x128.png#a71ba6431c13b623eccde41cd14f0f5e3ee694da7e3878407e74d8137bf89916\n---\n\n{{$action.authorization.[0].actor}} resets all the periods within this contract."
+            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Reset Periods\nsummary: 'Reset all the periods within this contract'\nicon: http://dho.hypha.earth/statics/app-logo-128x128.png#a71ba6431c13b623eccde41cd14f0f5e3ee694da7e3878407e74d8137bf89916\n---\n\n{{$action.authorization.[0].actor}} resets all the periods within this contract."
         },
         {
             "name": "setconfig",
             "type": "setconfig",
-            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Set Configuration\nsummary: 'Set a trail contract'\nicon: http://dao-dev.hypha.earth/statics/app-logo-128x128.png#a71ba6431c13b623eccde41cd14f0f5e3ee694da7e3878407e74d8137bf89916\n---\n\n{{$action.authorization.[0].actor}} creates or modifies the trail contract {{trail_contract}} with the hypha token contract {{hypha_token_contract}}."
+            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Set Configuration\nsummary: 'Set a trail contract'\nicon: http://dho.hypha.earth/statics/app-logo-128x128.png#a71ba6431c13b623eccde41cd14f0f5e3ee694da7e3878407e74d8137bf89916\n---\n\n{{$action.authorization.[0].actor}} creates or modifies the trail contract {{trail_contract}} with the hypha token contract {{hypha_token_contract}}."
         },
         {
             "name": "setlastballt",
             "type": "setlastballt",
-            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Set Last Ballt\nsummary: 'Set the last ballot id value'\nicon: http://dao-dev.hypha.earth/statics/app-logo-128x128.png#a71ba6431c13b623eccde41cd14f0f5e3ee694da7e3878407e74d8137bf89916\n---\n\n{{$action.authorization.[0].actor}} sets the last ballot id with the value: {{last_ballot_id}}."
+            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Set Last Ballt\nsummary: 'Set the last ballot id value'\nicon: http://dho.hypha.earth/statics/app-logo-128x128.png#a71ba6431c13b623eccde41cd14f0f5e3ee694da7e3878407e74d8137bf89916\n---\n\n{{$action.authorization.[0].actor}} sets the last ballot id with the value: {{last_ballot_id}}."
+        },
+        {
+            "name": "togglepause",
+            "type": "togglepause",
+            "ricardian_contract": ""
         }
     ],
     "tables": [
@@ -936,19 +877,12 @@
             "index_type": "i64",
             "key_names": [],
             "key_types": []
-        },
-        {
-            "name": "proposals",
-            "type": "Proposal",
-            "index_type": "i64",
-            "key_names": [],
-            "key_types": []
         }
     ],
     "ricardian_clauses": [
         {
             "id": "Intent",
-            "body": "The intention of the authors and invoker of this smart contract is to ..."
+            "body": "The intention of the authors and invoker of this smart contract is to interact with the Hypha DHO."
         },
         {
             "id": "Term",

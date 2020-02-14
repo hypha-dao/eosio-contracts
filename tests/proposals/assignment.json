@@ -47,14 +47,13 @@
       {
         "key": "role_id",
         "value": "0"
-      }
-    ],
-    "floats": [
+      },
       {
-        "key": "time_share",
-        "value": "1.000000000000"
+        "key": "time_share_x100",
+        "value": "100"
       }
     ],
+    "floats": [],
     "trxs": []
   }
 }

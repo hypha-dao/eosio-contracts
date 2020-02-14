@@ -46,8 +46,16 @@
         "value": 331
       },
       {
-        "key": "fulltime_capacity",
-        "value": 100
+        "key": "fulltime_capacity_x100",
+        "value": 120
+      },
+      {
+        "key": "min_time_share_x100",
+        "value": 50
+      },
+      {
+        "key": "min_deferred_x100",
+        "value": 50
       }
     ],
     "floats": [],

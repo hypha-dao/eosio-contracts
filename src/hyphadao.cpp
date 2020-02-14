@@ -61,59 +61,59 @@ void hyphadao::addowner (const name& scope) {
 	}
 }
 
-void hyphadao::erasebackups (const name& scope) {
-	check ( is_paused(), "Contract must be paused to call this action.");	
+// void hyphadao::erasebackups (const name& scope) {
+// 	check ( is_paused(), "Contract must be paused to call this action.");	
 
-	backup_object_table o_t_backup (get_self(), scope.value);
-	auto o_itr = o_t_backup.begin();
-	while (o_itr != o_t_backup.end()) {
-		o_itr = o_t_backup.erase (o_itr);
-	}
-}
+// 	backup_object_table o_t_backup (get_self(), scope.value);
+// 	auto o_itr = o_t_backup.begin();
+// 	while (o_itr != o_t_backup.end()) {
+// 		o_itr = o_t_backup.erase (o_itr);
+// 	}
+// }
 
-void hyphadao::backupobjs (const name& scope) {
-	check ( is_paused(), "Contract must be paused to call this action.");	
+// void hyphadao::backupobjs (const name& scope) {
+// 	check ( is_paused(), "Contract must be paused to call this action.");	
 
-	object_table o_t (get_self(), scope.value);
-	backup_object_table o_t_backup (get_self(), scope.value);
+// 	object_table o_t (get_self(), scope.value);
+// 	backup_object_table o_t_backup (get_self(), scope.value);
 
-	auto o_itr = o_t.begin();	
-	while (o_itr != o_t.end()) {
-		o_t_backup.emplace (get_self(), [&](auto &o) {
-			o.id                          = o_itr->id;
-			o.names                       = o_itr->names;
-			o.assets                      = o_itr->assets;
-			o.strings                     = o_itr->strings;
-			o.floats                      = o_itr->floats;
-			o.time_points                 = o_itr->time_points;
-			o.ints                        = o_itr->ints;
-			o.trxs                        = o_itr->trxs;
-		});
-		o_itr++;
-	}	
-}
+// 	auto o_itr = o_t.begin();	
+// 	while (o_itr != o_t.end()) {
+// 		o_t_backup.emplace (get_self(), [&](auto &o) {
+// 			o.id                          = o_itr->id;
+// 			o.names                       = o_itr->names;
+// 			o.assets                      = o_itr->assets;
+// 			o.strings                     = o_itr->strings;
+// 			o.floats                      = o_itr->floats;
+// 			o.time_points                 = o_itr->time_points;
+// 			o.ints                        = o_itr->ints;
+// 			o.trxs                        = o_itr->trxs;
+// 		});
+// 		o_itr = o_t.erase (o_itr);
+// 	}	
+// }
 
-void hyphadao::restoreobjs (const name& scope) {
-	check ( is_paused(), "Contract must be paused to call this action.");	
+// void hyphadao::restoreobjs (const name& scope) {
+// 	check ( is_paused(), "Contract must be paused to call this action.");	
 
-	object_table o_t (get_self(), scope.value);
-	backup_object_table o_t_backup (get_self(), scope.value);
+// 	object_table o_t (get_self(), scope.value);
+// 	backup_object_table o_t_backup (get_self(), scope.value);
 
-	auto o_itr_backup = o_t_backup.begin();	
-	while (o_itr_backup != o_t_backup.end()) {
-		o_t.emplace (get_self(), [&](auto &o) {
-			o.id                          = o_itr_backup->id;
-			o.names                       = o_itr_backup->names;
-			o.assets                      = o_itr_backup->assets;
-			o.strings                     = o_itr_backup->strings;
-			o.floats                      = o_itr_backup->floats;
-			o.time_points                 = o_itr_backup->time_points;
-			o.ints                        = o_itr_backup->ints;
-			o.trxs                        = o_itr_backup->trxs;
-		});
-		o_itr_backup++;
-	}	
-}
+// 	auto o_itr_backup = o_t_backup.begin();	
+// 	while (o_itr_backup != o_t_backup.end()) {
+// 		o_t.emplace (get_self(), [&](auto &o) {
+// 			o.id                          = o_itr_backup->id;
+// 			o.names                       = o_itr_backup->names;
+// 			o.assets                      = o_itr_backup->assets;
+// 			o.strings                     = o_itr_backup->strings;
+// 			o.floats                      = o_itr_backup->floats;
+// 			o.time_points                 = o_itr_backup->time_points;
+// 			o.ints                        = o_itr_backup->ints;
+// 			o.trxs                        = o_itr_backup->trxs;
+// 		});
+// 		o_itr_backup++;
+// 	}	
+// }
 
 
 void hyphadao::setconfig (	const map<string, name> 		names,
@@ -342,22 +342,24 @@ void hyphadao::create (const name&						scope,
 
 			if (names.at("proposal_type") == "role"_n) { 
 				// role logic/business rules 
-				check (ints.at("fulltime_capacity") > 0, "fulltime_capacity must be greater than zero. You submitted: " + std::to_string(ints.at("fulltime_capacity")));
+				check (ints.at("fulltime_capacity_x100") > 0, "fulltime_capacity_x100 must be greater than zero. You submitted: " + std::to_string(ints.at("fulltime_capacity_x100")));
 				check (assets.at("annual_usd_salary").amount > 0, "annual_usd_salary must be greater than zero. You submitted: " + assets.at("annual_usd_salary").to_string());
 			} else if (names.at("proposal_type") == "assignment"_n) {
 				check (false, "Assignment proposals are not yet supported. Soon.");
 				check (ints.find("role_id") != ints.end(), "Role ID is required when proposal_type is assignment.");
-				check (ints.find("timeshare_x100") != ints.end(), "timeshare_x100 is a required field for assignment proposals.");
-				check (ints.at("timeshare_x100") > 0 && ints.at("timeshare_x100") < 100, "timeshare_100x must be greater than zero and less than or equal to 100.");
+				check (ints.find("time_share_x100") != ints.end(), "time_share_x100 is a required field for assignment proposals.");
+				check (ints.at("time_share_x100") > 0 && ints.at("time_share_x100") < 100, "time_share_x100 must be greater than zero and less than or equal to 100.");
 				check (ints.find("start_period") != ints.end(), "start_period is a required field for assignment proposals.");
 				check (ints.find("end_period") != ints.end(), "end_period is a required field for assignment proposals.");
 
-				object_table o_t_role (get_self(), "role"_n.value);
-				auto o_itr_role = o_t_role.find (ints.at("role_id"));
-				check (o_itr_role != o_t_role.end(), "Role ID: " + std::to_string(ints.at("role_id")) + " does not exist.");
-				check (o_itr_role->ints.at("consumed_capacity") + ints.at("timeshare") <= o_itr_role->ints.at("fulltime_capacity"), "Role ID: " + 
-					std::to_string (ints.at("role_id")) + " cannot support assignment. Full time capacity (x100) is " + std::to_string(o_itr_role->ints.at("fulltime_capacity")) + 
-					" and consumed capacity (x100) is " + std::to_string(o_itr_role->ints.at("consumed_capacity")) + "; proposal requests time share (x100) of: " + std::to_string(ints.at("timeshare")));
+				o.ints["fk"]	= ints.at("role_id");
+
+				// object_table o_t_role (get_self(), "role"_n.value);
+				// auto o_itr_role = o_t_role.find (ints.at("role_id"));
+				// check (o_itr_role != o_t_role.end(), "Role ID: " + std::to_string(ints.at("role_id")) + " does not exist.");
+				// check (o_itr_role->ints.at("consumed_capacity") + ints.at("time_share_x100") <= o_itr_role->ints.at("fulltime_capacity"), "Role ID: " + 
+				// 	std::to_string (ints.at("role_id")) + " cannot support assignment. Full time capacity (x100) is " + std::to_string(o_itr_role->ints.at("fulltime_capacity")) + 
+				// 	" and consumed capacity (x100) is " + std::to_string(o_itr_role->ints.at("consumed_capacity")) + "; proposal requests time share (x100) of: " + std::to_string(ints.at("time_share")));
 			}
 		}
 	});      
@@ -441,12 +443,12 @@ void hyphadao::assign ( const uint64_t& 		proposal_id) {
 	// auto a_itr_by_role = sorted_by_role.find(o_itr->ints.at("fk"));
 	// int consumed_capacity = 0;
 	// while (a_itr_by_role != sorted_by_role.end() && a_itr_by_role->ints.at("fk") == o_itr->ints.at("fk")) {
-	// 	consumed_capacity += a_itr_by_role->ints.at("timeshare_x100");
+	// 	consumed_capacity += a_itr_by_role->ints.at("time_share_x100");
 	// }
 
-	// check (consumed_capacity + o_itr->ints.at("timeshare_x100") <= o_itr_role->ints.at("fulltime_capacity_x100"), "Role ID: " + 
+	// check (consumed_capacity + o_itr->ints.at("time_share_x100") <= o_itr_role->ints.at("fulltime_capacity_x100"), "Role ID: " + 
 	// 	std::to_string (o_itr->ints.at("fk")) + " cannot support assignment. Full time capacity (x100) is " + std::to_string(o_itr_role->ints.at("fulltime_capacity_x100")) + 
-	// 	" and consumed capacity (x100) is " + std::to_string(consumed_capacity) + "; proposal requests time share (x100) of: " + std::to_string(o_itr->ints.at("timeshare_x100")));
+	// 	" and consumed capacity (x100) is " + std::to_string(consumed_capacity) + "; proposal requests time share (x100) of: " + std::to_string(o_itr->ints.at("time_share_x100")));
 
 	change_scope ("proposal"_n, proposal_id, "proparchive"_n, false);
 	change_scope ("proposal"_n, proposal_id, "assignment"_n, true);
@@ -461,27 +463,30 @@ void hyphadao::makepayout (const uint64_t&        proposal_id) {
 	check (o_itr != o_t.end(), "Scope: " + "proposal"_n.to_string() + "; Object ID: " + std::to_string(proposal_id) + " does not exist.");
 
 	string memo { "One time payout for Hypha Contribution. Proposal ID: " + std::to_string(proposal_id) };
-	debug (" HYPHA payout: " + o_itr->assets.at("hypha_amount").to_string());
+	// debug (" HYPHA payout: " + o_itr->assets.at("hypha_amount").to_string());
 
 	if (o_itr->assets.at("hypha_amount").amount > 0) {
-		debug ("Making a payment to : " + o_itr->names.at("recipient").to_string());
-		bank.makepayment (-1, o_itr->names.at("recipient"), o_itr->assets.at("hypha_amount"), memo, common::NO_ASSIGNMENT);
+		// debug ("Making a payment to : " + o_itr->names.at("recipient").to_string());
+		bank.makepayment (-1, o_itr->names.at("recipient"), o_itr->assets.at("hypha_amount"), memo, common::NO_ASSIGNMENT, 1);
 	}
 
 	if (o_itr->assets.at("seeds_amount").amount > 0) {
-		bank.makepayment (-1, o_itr->names.at("recipient"), o_itr->assets.at("seeds_amount"), memo, common::NO_ASSIGNMENT);
+		bank.makepayment (-1, o_itr->names.at("recipient"), o_itr->assets.at("seeds_amount"), memo, common::NO_ASSIGNMENT, o_itr->ints.at("bypass_escrow"));
 	}
 	
 	if (o_itr->assets.at("hvoice_amount").amount > 0) {
-		config_table      config_s (get_self(), get_self().value);
-   		Config c = config_s.get_or_create (get_self(), Config());  
-
-		action(	
-			permission_level{get_self(), "active"_n}, 
-			c.names.at("telos_decide_contract"), "mint"_n, 
-			make_tuple(o_itr->names.at("recipient"), o_itr->assets.at("hvoice_amount"), memo
-		)).send();
+		bank.makepayment (-1, o_itr->names.at("recipient"), o_itr->assets.at("hvoice_amount"), memo, common::NO_ASSIGNMENT, o_itr->ints.at("bypass_escrow"));
 	}
+
+	// 	config_table      config_s (get_self(), get_self().value);
+   	// 	Config c = config_s.get_or_create (get_self(), Config());  
+
+	// 	action(	
+	// 		permission_level{get_self(), "active"_n}, 
+	// 		c.names.at("telos_decide_contract"), "mint"_n, 
+	// 		make_tuple(o_itr->names.at("recipient"), o_itr->assets.at("hvoice_amount"), memo
+	// 	)).send();
+	// }
 
 	change_scope ("proposal"_n, proposal_id, "proparchive"_n, true);
 }
@@ -620,13 +625,13 @@ void hyphadao::payassign (const uint64_t& assignment_id, const uint64_t& period_
 
 	bank.makepayment (period_id, a_itr->names.at("assigned_account"), hypha_payment, 
 		"Payment for role " + std::to_string(a_itr->ints.at("role_id")) + "; Period ID: " + std::to_string(period_id),
-		assignment_id);
+		assignment_id, a_itr->ints.at("bypass_escrow"));
 
 	bank.makepayment (period_id, a_itr->names.at("assigned_account"), seeds_payment, 
 		"Payment for role " + std::to_string(a_itr->ints.at("role_id")) + "; Period ID: " + std::to_string(period_id),
-		assignment_id);
+		assignment_id, a_itr->ints.at("bypass_escrow"));
 
 	bank.makepayment (period_id, a_itr->names.at("assigned_account"), voice_payment, 
 		"Payment for role " + std::to_string(a_itr->ints.at("role_id")) + "; Period ID: " + std::to_string(period_id),
-		assignment_id);
+		assignment_id, a_itr->ints.at("bypass_escrow"));
 }
