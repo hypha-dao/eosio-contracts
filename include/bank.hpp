@@ -107,10 +107,13 @@ class Bank {
             }
         }
                           
-        void makepayment (const uint64_t& period_id, const name& recipient, 
-                                    const asset& quantity, const string& memo, 
-                                    const uint64_t& assignment_id) {
-            
+        void makepayment (const uint64_t& period_id, 
+                            const name& recipient, 
+                            const asset& quantity, 
+                            const string& memo, 
+                            const uint64_t& assignment_id,
+                            const uint64_t& bypass_escrow) {
+    
             config_table      config_s (contract, contract.value);
    	        Config c = config_s.get_or_create (contract, Config());   
         
@@ -121,28 +124,35 @@ class Bank {
                     std::make_tuple(recipient, quantity, memo))
                 .send();
             } else if (quantity.symbol == common::S_SEEDS) {
+                
+                if (bypass_escrow == 0) {
+                    // need to add steps in here about the deferments         
+                    action(
+                        permission_level{contract, "active"_n},
+                        c.names.at("seeds_token_contract"), "transfer"_n,
+                        std::make_tuple(contract, c.names.at("seeds_escrow_contract"), quantity, memo))
+                    .send();
 
-                // need to add steps in here about the deferments         
-                action(
-                    permission_level{contract, "active"_n},
-                    c.names.at("seeds_token_contract"), "transfer"_n,
-                    std::make_tuple(contract, c.names.at("seeds_escrow_contract"), quantity, memo))
-                .send();
-
-                action(
-                    permission_level{contract, "active"_n},
-                    c.names.at("seeds_escrow_contract"), "lock"_n,
-                    std::make_tuple("event"_n, 
-                                    contract,
-                                    recipient,
-                                    quantity,
-                                    "golive"_n,
-                                    contract,
-                                    time_point(current_time_point().time_since_epoch() + 
-                                                current_time_point().time_since_epoch()),  // long time from now
-                                    memo))
-                .send();
-
+                    action(
+                        permission_level{contract, "active"_n},
+                        c.names.at("seeds_escrow_contract"), "lock"_n,
+                        std::make_tuple("event"_n, 
+                                        contract,
+                                        recipient,
+                                        quantity,
+                                        "golive"_n,
+                                        contract,
+                                        time_point(current_time_point().time_since_epoch() + 
+                                                    current_time_point().time_since_epoch()),  // long time from now
+                                        memo))
+                    .send();
+                } else {
+                    action(
+                        permission_level{contract, "active"_n},
+                        c.names.at("seeds_token_contract"), "transfer"_n,
+                        std::make_tuple(contract, recipient, quantity, memo))
+                    .send();
+                }
             } else {
                 // need to add steps in here about the deferments         
                 issuetoken (c.names.at("hypha_token_contract"), recipient, quantity, memo );

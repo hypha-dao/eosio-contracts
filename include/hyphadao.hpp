@@ -81,7 +81,43 @@ CONTRACT hyphadao : public contract {
                const_mem_fun<AssignmentPayout, uint64_t, &AssignmentPayout::by_recipient>>
       > asspay_table;
 
-      // scope: proposal, proparchive, roles, assignments
+      // // scope: proposal, proparchive, roles, assignments
+      // struct [[eosio::table, eosio::contract("hyphadao") ]] BUObject
+      // {
+      //    uint64_t                   id                ;
+         
+      //    // core maps
+      //    map<string, name>          names             ;
+      //    map<string, string>        strings           ;
+      //    map<string, asset>         assets            ;
+      //    map<string, time_point>    time_points       ;
+      //    map<string, uint64_t>      ints              ;
+      //    map<string, transaction>   trxs              ;
+      //    map<string, float>         floats            ;
+      //    uint64_t                   primary_key()     const { return id; }
+
+      //    // indexes
+      //    uint64_t                   by_owner()        const { return names.at("owner").value; }
+      //    uint64_t                   by_type ()        const { return names.at("type").value; }
+       
+
+      //    // timestamps
+      //    time_point                 created_date    = current_time_point();
+      //    time_point                 updated_date    = current_time_point();
+      //    uint64_t    by_created () const { return created_date.sec_since_epoch(); }
+      //    uint64_t    by_updated () const { return updated_date.sec_since_epoch(); }
+      // };
+
+      // typedef multi_index<"backupobjs"_n, BUObject,
+      //    indexed_by<"bycreated"_n, const_mem_fun<BUObject, uint64_t, &BUObject::by_created>>,
+      //    indexed_by<"byupdated"_n, const_mem_fun<BUObject, uint64_t, &BUObject::by_updated>>,
+      //    indexed_by<"byowner"_n, const_mem_fun<BUObject, uint64_t, &BUObject::by_owner>>,
+      //    indexed_by<"bytype"_n, const_mem_fun<BUObject, uint64_t, &BUObject::by_type>>
+         
+      // > backup_object_table;
+
+
+      // scope: proposal, proparchive, role, assignment
       struct [[eosio::table, eosio::contract("hyphadao") ]] Object
       {
          uint64_t                   id                ;
@@ -99,7 +135,8 @@ CONTRACT hyphadao : public contract {
          // indexes
          uint64_t                   by_owner()        const { return names.at("owner").value; }
          uint64_t                   by_type ()        const { return names.at("type").value; }
-
+         uint64_t                   by_fk()           const { return ints.at("fk"); }
+       
          // timestamps
          time_point                 created_date    = current_time_point();
          time_point                 updated_date    = current_time_point();
@@ -108,10 +145,11 @@ CONTRACT hyphadao : public contract {
       };
 
       typedef multi_index<"objects"_n, Object,
-         indexed_by<"bycreated"_n, const_mem_fun<Object, uint64_t, &Object::by_created>>,
-         indexed_by<"byupdated"_n, const_mem_fun<Object, uint64_t, &Object::by_updated>>,
-         indexed_by<"byowner"_n, const_mem_fun<Object, uint64_t, &Object::by_owner>>,
-         indexed_by<"bytype"_n, const_mem_fun<Object, uint64_t, &Object::by_type>>
+         indexed_by<"bycreated"_n, const_mem_fun<Object, uint64_t, &Object::by_created>>, // index 2
+         indexed_by<"byupdated"_n, const_mem_fun<Object, uint64_t, &Object::by_updated>>, // 3
+         indexed_by<"byowner"_n, const_mem_fun<Object, uint64_t, &Object::by_owner>>, // 4
+         indexed_by<"bytype"_n, const_mem_fun<Object, uint64_t, &Object::by_type>>, // 5
+         indexed_by<"byfk"_n, const_mem_fun<Object, uint64_t, &Object::by_fk>> // 6
       > object_table;
 
       struct [[eosio::table, eosio::contract("hyphadao") ]] Debug
@@ -142,8 +180,15 @@ CONTRACT hyphadao : public contract {
       // Admin
       ACTION reset ();
       ACTION resetperiods();
+      ACTION eraseobjs (const name& scope);
       ACTION eraseobj (const name& scope,
                         const uint64_t&   id);
+      ACTION togglepause ();
+      ACTION addowner (const name& scope);
+      ACTION updtrxs ();
+      // ACTION backupobjs (const name& scope);
+      // ACTION erasebackups (const name& scope);
+      // ACTION restoreobjs (const name& scope);
 
       ACTION setconfig (const map<string, name> 		  names,
                         const map<string, string>       strings,
@@ -181,45 +226,6 @@ CONTRACT hyphadao : public contract {
       // temporary hack (?) - keep a list of the members, although true membership is governed by token holdings
       ACTION removemember(const name& member_to_remove);
       ACTION addmember (const name& member);
-
-
-
-
-      //****************************
-       // scope: proposal type (name)
-      struct [[eosio::table, eosio::contract("hyphadao") ]] Proposal
-      {
-         uint64_t                   id                ;
-         
-         // core maps
-         map<string, name>          names             ;
-         map<string, string>        strings           ;
-         map<string, asset>         assets            ;
-         map<string, time_point>    time_points       ;
-         map<string, uint64_t>      ints              ;
-         map<string, transaction>   trxs              ;
-         map<string, float>         floats            ;
-         uint64_t                   primary_key()     const { return id; }
-
-         // indexes
-         name                       proposer          ; 
-         uint64_t                   by_proposer()     const { return proposer.value; }
-
-         time_point                 created_date    = current_time_point();
-         time_point                 updated_date    = current_time_point();
-         uint64_t    by_created () const { return created_date.sec_since_epoch(); }
-         uint64_t    by_updated () const { return updated_date.sec_since_epoch(); }
-
-         uint64_t    by_type () const { return names.at("proposal_type").value; }
-      };
-
-      typedef multi_index<"proposals"_n, Proposal,
-         indexed_by<"bycreated"_n, const_mem_fun<Proposal, uint64_t, &Proposal::by_created>>,
-         indexed_by<"byupdated"_n, const_mem_fun<Proposal, uint64_t, &Proposal::by_updated>>,
-         indexed_by<"byproposer"_n, const_mem_fun<Proposal, uint64_t, &Proposal::by_proposer>>,
-         indexed_by<"bytype"_n, const_mem_fun<Proposal, uint64_t, &Proposal::by_type>>
-      > proposal_table;
-      // ***************************
       
    private:
       Bank bank = Bank (get_self());
@@ -276,6 +282,15 @@ CONTRACT hyphadao : public contract {
       asset adjust_asset (const asset& original_asset, const float& adjustment) {
          return asset { static_cast<int64_t> (original_asset.amount * adjustment), original_asset.symbol };
       }  
+
+      bool is_paused () {
+         config_table      config_s (get_self(), get_self().value);
+   	   Config c = config_s.get_or_create (get_self(), Config());   
+         check (c.ints.find ("paused") != c.ints.end(), "Contract does not have a pause configuration. Assuming it is paused. Please contact administrator.");
+         
+         uint64_t paused = c.ints.at("paused");
+         return paused == 1;
+      }
 };
 
 #endif

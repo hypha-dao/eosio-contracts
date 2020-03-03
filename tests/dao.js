@@ -8,7 +8,7 @@ Here's an example of it being used.
 
 Parsing the proposal from :  ex_proposals/role.json
 -- title            :  Underwater Basketweaver
--- proposal_type    :  roles
+-- type             :  roles
 -- proposer         :  johnnyhypha1
 
 Submitting proposal :  ex_proposals/role.json
@@ -25,7 +25,7 @@ Transaction Successfull :  7071dd166dac2a3ba23a56f7125bedbfc5c8837777d34f1c59a28
 
 Closing the proposal (after the wait)
 -- calling dao.hypha::closeprop with the following parms:
--- -- proposal_type :  roles
+-- -- type :  roles
 -- -- proposal_id   :  0
 
 Please wait :  75000  ms ...  Waiting while the ballot expiration expires...
@@ -42,7 +42,7 @@ git checkout migration
 yarn
 export PRIVATE_KEY=5HwnoWBuuRmNdcqwBzd1LABFRKnTk2RY2kUMYKkZfF8tKodubtK 
 node dao.js -f proposals/role.json -a -c -p && node dao.js -f proposals/assignment.json -a -c -p && node dao.js -f proposals/payout.json -a -c -p
-
+node dao.js -f proposals/config.json --config -h https://test.telos.kitchen
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++ 
 */
 
@@ -161,7 +161,7 @@ const main = async () => {
     const proposal = JSON.parse(fs.readFileSync(opts.file.filename, 'utf8'));
     console.log ("\nParsing the proposal from : ", opts.file.filename);
     console.log ("-- title            : ", proposal.data.strings.find(o => o.key === 'title').value);
-    console.log ("-- proposal_type    : ", proposal.data.names.find(o => o.key === 'proposal_type').value);
+    console.log ("-- type    : ", proposal.data.names.find(o => o.key === 'type').value);
     console.log ("-- proposer         : ", proposal.data.names.find(o => o.key === 'owner').value);
 
     console.log ("\nSubmitting proposal : ", opts.file.filename);
