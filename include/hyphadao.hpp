@@ -117,7 +117,7 @@ CONTRACT hyphadao : public contract {
       // > backup_object_table;
 
 
-      // scope: proposal, proparchive, roles, assignments
+      // scope: proposal, proparchive, role, assignment
       struct [[eosio::table, eosio::contract("hyphadao") ]] Object
       {
          uint64_t                   id                ;
@@ -145,11 +145,11 @@ CONTRACT hyphadao : public contract {
       };
 
       typedef multi_index<"objects"_n, Object,
-         indexed_by<"bycreated"_n, const_mem_fun<Object, uint64_t, &Object::by_created>>,
-         indexed_by<"byupdated"_n, const_mem_fun<Object, uint64_t, &Object::by_updated>>,
-         indexed_by<"byowner"_n, const_mem_fun<Object, uint64_t, &Object::by_owner>>,
-         indexed_by<"bytype"_n, const_mem_fun<Object, uint64_t, &Object::by_type>>,
-         indexed_by<"byfk"_n, const_mem_fun<Object, uint64_t, &Object::by_fk>>
+         indexed_by<"bycreated"_n, const_mem_fun<Object, uint64_t, &Object::by_created>>, // index 2
+         indexed_by<"byupdated"_n, const_mem_fun<Object, uint64_t, &Object::by_updated>>, // 3
+         indexed_by<"byowner"_n, const_mem_fun<Object, uint64_t, &Object::by_owner>>, // 4
+         indexed_by<"bytype"_n, const_mem_fun<Object, uint64_t, &Object::by_type>>, // 5
+         indexed_by<"byfk"_n, const_mem_fun<Object, uint64_t, &Object::by_fk>> // 6
       > object_table;
 
       struct [[eosio::table, eosio::contract("hyphadao") ]] Debug
@@ -180,10 +180,12 @@ CONTRACT hyphadao : public contract {
       // Admin
       ACTION reset ();
       ACTION resetperiods();
+      ACTION eraseobjs (const name& scope);
       ACTION eraseobj (const name& scope,
                         const uint64_t&   id);
       ACTION togglepause ();
       ACTION addowner (const name& scope);
+      ACTION updtrxs ();
       // ACTION backupobjs (const name& scope);
       // ACTION erasebackups (const name& scope);
       // ACTION restoreobjs (const name& scope);

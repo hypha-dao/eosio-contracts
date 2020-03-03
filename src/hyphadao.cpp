@@ -26,6 +26,15 @@ void hyphadao::reset () {
 	// config_s.remove ();
 }
 
+void hyphadao::eraseobjs (const name& scope) {
+	require_auth (get_self());
+	object_table o_t (get_self(), scope.value);
+	auto o_itr = o_t.begin();
+	while (o_itr != o_t.end()) {
+		o_itr = o_t.erase (o_itr);
+	}
+}
+
 void hyphadao::togglepause () {
 	require_auth (get_self());
 	config_table      config_s (get_self(), get_self().value);
@@ -207,6 +216,26 @@ void hyphadao::remapply (const name& applicant) {
 	a_t.erase (a_itr);
 }
 
+void hyphadao::updtrxs () {
+	require_auth (get_self());
+
+	object_table o_t (get_self(), "proposal"_n.value);
+	auto o_itr = o_t.begin ();
+	while (o_itr != o_t.end()) {
+		transaction trx (time_point_sec(current_time_point())+ (60 * 60 * 24 * 35));
+		trx.actions.emplace_back(
+			permission_level{get_self(), "active"_n}, 
+			o_itr->names.at("trx_action_contract"), o_itr->names.at("trx_action_name"), 
+			std::make_tuple(o_itr->id));
+		trx.delay_sec = 0;
+
+		o_t.modify (o_itr, get_self(), [&](auto &o) {
+			o.trxs["exec_on_approval"]      = trx; 
+		});		
+		o_itr++;
+	}	
+}
+
 void hyphadao::apply (const name& applicant, 
 						const string& content) {
 
@@ -340,19 +369,19 @@ void hyphadao::create (const name&						scope,
 				o.trxs["exec_on_approval"]      = trx;      
 			}	
 
-			if (names.at("proposal_type") == "role"_n) { 
+			if (names.at("type") == "role"_n) { 
 				// role logic/business rules 
 				check (ints.at("fulltime_capacity_x100") > 0, "fulltime_capacity_x100 must be greater than zero. You submitted: " + std::to_string(ints.at("fulltime_capacity_x100")));
 				check (assets.at("annual_usd_salary").amount > 0, "annual_usd_salary must be greater than zero. You submitted: " + assets.at("annual_usd_salary").to_string());
-			} else if (names.at("proposal_type") == "assignment"_n) {
-				check (false, "Assignment proposals are not yet supported. Soon.");
-				check (ints.find("role_id") != ints.end(), "Role ID is required when proposal_type is assignment.");
-				check (ints.find("time_share_x100") != ints.end(), "time_share_x100 is a required field for assignment proposals.");
-				check (ints.at("time_share_x100") > 0 && ints.at("time_share_x100") < 100, "time_share_x100 must be greater than zero and less than or equal to 100.");
-				check (ints.find("start_period") != ints.end(), "start_period is a required field for assignment proposals.");
-				check (ints.find("end_period") != ints.end(), "end_period is a required field for assignment proposals.");
+			} // else if (names.at("type") == "assignment"_n) {
+				// check (false, "Assignment proposals are not yet supported. Soon.");
+				// check (ints.find("role_id") != ints.end(), "Role ID is required when type is assignment.");
+				// check (ints.find("time_share_x100") != ints.end(), "time_share_x100 is a required field for assignment proposals.");
+				// check (ints.at("time_share_x100") > 0 && ints.at("time_share_x100") < 100, "time_share_x100 must be greater than zero and less than or equal to 100.");
+				// check (ints.find("start_period") != ints.end(), "start_period is a required field for assignment proposals.");
+				// check (ints.find("end_period") != ints.end(), "end_period is a required field for assignment proposals.");
 
-				o.ints["fk"]	= ints.at("role_id");
+				// o.ints["fk"]	= ints.at("role_id");
 
 				// object_table o_t_role (get_self(), "role"_n.value);
 				// auto o_itr_role = o_t_role.find (ints.at("role_id"));
@@ -360,7 +389,7 @@ void hyphadao::create (const name&						scope,
 				// check (o_itr_role->ints.at("consumed_capacity") + ints.at("time_share_x100") <= o_itr_role->ints.at("fulltime_capacity"), "Role ID: " + 
 				// 	std::to_string (ints.at("role_id")) + " cannot support assignment. Full time capacity (x100) is " + std::to_string(o_itr_role->ints.at("fulltime_capacity")) + 
 				// 	" and consumed capacity (x100) is " + std::to_string(o_itr_role->ints.at("consumed_capacity")) + "; proposal requests time share (x100) of: " + std::to_string(ints.at("time_share")));
-			}
+			//}
 		}
 	});      
 }

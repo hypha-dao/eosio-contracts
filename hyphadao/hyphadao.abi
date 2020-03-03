@@ -398,6 +398,16 @@
             ]
         },
         {
+            "name": "eraseobjs",
+            "base": "",
+            "fields": [
+                {
+                    "name": "scope",
+                    "type": "name"
+                }
+            ]
+        },
+        {
             "name": "exectrx",
             "base": "",
             "fields": [
@@ -707,6 +717,11 @@
                     "type": "varuint32"
                 }
             ]
+        },
+        {
+            "name": "updtrxs",
+            "base": "",
+            "fields": []
         }
     ],
     "actions": [
@@ -758,6 +773,11 @@
         {
             "name": "eraseobj",
             "type": "eraseobj",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "eraseobjs",
+            "type": "eraseobjs",
             "ricardian_contract": ""
         },
         {
@@ -818,6 +838,11 @@
         {
             "name": "togglepause",
             "type": "togglepause",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "updtrxs",
+            "type": "updtrxs",
             "ricardian_contract": ""
         }
     ],

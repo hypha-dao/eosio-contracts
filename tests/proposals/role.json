@@ -3,7 +3,7 @@
     "scope": "proposal",
     "names": [
       {
-        "key":"proposal_type",
+        "key":"type",
         "value":"role"
       },
       {
