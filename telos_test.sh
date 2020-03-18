@@ -95,6 +95,7 @@ cleos -u https://test.telos.kitchen push action dao.hypha propose '{"proposer":"
 cleos -u https://test.telos.kitchen push action dao.hypha setconfig '["token.hypha", "trailservice"]' -p dao.hypha
 
 cleos -u https://test.telos.kitchen push action token.hypha create '["dao.hypha", "-1.00 HYPHA"]' -p token.hypha
+cleos -u https://test.telos.kitchen push action token.hypha create '["dao.hypha", "-1.00 HUSD"]' -p token.hypha
 
 
 

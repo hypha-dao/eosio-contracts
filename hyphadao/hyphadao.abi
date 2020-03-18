@@ -722,6 +722,11 @@
             "name": "updtrxs",
             "base": "",
             "fields": []
+        },
+        {
+            "name": "updtype",
+            "base": "",
+            "fields": []
         }
     ],
     "actions": [
@@ -843,6 +848,11 @@
         {
             "name": "updtrxs",
             "type": "updtrxs",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "updtype",
+            "type": "updtype",
             "ricardian_contract": ""
         }
     ],

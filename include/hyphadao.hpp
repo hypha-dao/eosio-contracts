@@ -162,6 +162,9 @@ CONTRACT hyphadao : public contract {
 
       typedef multi_index<"debugs"_n, Debug> debug_table;
 
+      const uint64_t       MICROSECONDS_PER_HOUR   = (uint64_t)60 * (uint64_t)60 * (uint64_t)1000000;
+      const uint64_t       MICROSECONDS_PER_YEAR   = MICROSECONDS_PER_HOUR * (uint64_t)24 * (uint64_t)365;
+
       ACTION create ( const name&                    scope,
                      const map<string, name> 		  names,
                      const map<string, string>       strings,
@@ -186,6 +189,7 @@ CONTRACT hyphadao : public contract {
       ACTION togglepause ();
       ACTION addowner (const name& scope);
       ACTION updtrxs ();
+      ACTION updtype ();
       // ACTION backupobjs (const name& scope);
       // ACTION erasebackups (const name& scope);
       // ACTION restoreobjs (const name& scope);

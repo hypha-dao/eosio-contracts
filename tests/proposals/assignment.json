@@ -11,7 +11,7 @@
         "value":"johnnyhypha1"
       },
       {
-        "key":"proposal_type",
+        "key":"type",
         "value":"assignment"
       },
       {
@@ -29,8 +29,8 @@
         "value": "Weave baskets at the bottom of the sea - Atlantic Ocean"
       },
       {
-        "key": "content",
-        "value": "We make *great* baskets. The unique seaweed of the caribbean makes strong baskets."
+        "key": "url",
+        "value": "null"
       }
     ],
     "assets": [],
@@ -38,11 +38,11 @@
     "ints": [
       {
         "key": "start_period",
-        "value": "250"
+        "value": "37"
       },
       {
         "key": "end_period",
-        "value": "331"
+        "value": "53"
       },
       {
         "key": "role_id",
@@ -50,7 +50,15 @@
       },
       {
         "key": "time_share_x100",
-        "value": "100"
+        "value": "10000"
+      },
+      {
+        "key":"deferred_x100",
+        "value": "7500"
+      },
+      {
+        "key": "instant_husd_perc_x100",
+        "value": "8000"
       }
     ],
     "floats": [],

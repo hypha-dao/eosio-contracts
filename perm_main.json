@@ -71,3 +71,5 @@ cleos -u https://api.telos.kitchen push action -sjd -x 86400 eosio.token transfe
 cleos -u https://api.telos.kitchen multisig proposetrx testtrx '[{"actor": "hyphanewyork", "permission": "active"},{"actor": "illumination", "permission": "active"},{"actor": "sevenflash42", "permission": "active"},{"actor": "tchoptelacc1", "permission": "active"},{"actor": "thealchemist", "permission": "active"}]' ./test_transfer.json hyphanewyork
 cleos -u https://api.telos.kitchen multisig approve hyphanewyork testtrx '{"actor": "hyphanewyork", "permission": "active"}' -p hyphanewyork
 cleos -u https://api.telos.kitchen multisig exec hyphanewyork testtrx 
+
+

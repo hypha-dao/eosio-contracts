@@ -126,7 +126,6 @@ class Bank {
             } else if (quantity.symbol == common::S_SEEDS) {
                 
                 if (bypass_escrow == 0) {
-                    // need to add steps in here about the deferments         
                     action(
                         permission_level{contract, "active"_n},
                         c.names.at("seeds_token_contract"), "transfer"_n,
@@ -153,10 +152,13 @@ class Bank {
                         std::make_tuple(contract, recipient, quantity, memo))
                     .send();
                 }
-            } else {
+            } else {   // handles HUSD and HYPHA
                 // need to add steps in here about the deferments         
                 issuetoken (c.names.at("hypha_token_contract"), recipient, quantity, memo );
-            }
+            } 
+            // else if (quantity.symbol == common::S_HUSD) {
+            //     issuetoken (c.names.at("hypha_token_contract"), recipient, quantity, memo);
+            // }
         
             payment_t.emplace (contract, [&](auto &p) {
                 p.payment_id    = payment_t.available_primary_key();
