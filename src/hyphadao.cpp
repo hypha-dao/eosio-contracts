@@ -432,24 +432,32 @@ void hyphadao::create (const name&						scope,
 				// 1. normalize annual salary to the time commitment of this proposal
 				// 2. multiply (1) by 0.02026 to calculate a single moon phase; avg. phase is 7.4 days, 49.36 phases per year
 				// 3. multiply (2) by HUSD percent requested on this assignment proposal
-				asset time_share_annualized = adjust_asset (o_itr_role->assets.at("annualized_usd_salary"), ints.at("time_share_x100") / 100);
+				asset time_share_annualized = adjust_asset (o_itr_role->assets.at("annual_usd_salary"), ints.at("time_share_x100") / 100);
 				asset phase_usd_salary = adjust_asset (time_share_annualized, common::PHASE_TO_YEAR_RATIO); 
-				asset phase_husd_salary = adjust_asset (phase_usd_salary, ints.at("instant_husd_perc_x100")); // how much HUSD will be paid out each phase?
-				o.assets["husd_salary_per_phase"] = phase_husd_salary;
 
-				// calculate HYPHA phase salary amount
-				float hypha_annual_to_phase_ratio = (c.ints.at("hypha_deferral_factor_x100") / 100) * (ints.at("deferred_x100") / 100); 
-				o.assets["hypha_salary_per_phase"] = adjust_asset (phase_usd_salary, hypha_annual_to_phase_ratio); 
+				NOTE:  need to take into account deferral here
+				asset phase_husd_salary = adjust_asset (phase_usd_salary, (float) ints.at("instant_husd_perc_x100") / (float) 100); // how much HUSD will be paid out each phase?
+				o.assets["husd_salary_per_phase"] = phase_husd_salary;
+				debug ("time_share_annualized	: " + time_share_annualized.to_string());
+				debug ("phase_usd_salary		: " + phase_usd_salary.to_string());
+				debug ("phase_husd_salary		: " + phase_husd_salary.to_string());
+
+				//calculate HYPHA phase salary amount
+				float hypha_annual_to_phase_ratio = (float) c.ints.at("hypha_deferral_factor_x100") / (float) 100 * 
+													(float) ints.at("deferred_x100") / (float) 100; 
+
+				debug ("hypha_annual_to_phase_ratio	: " + std::to_string(hypha_annual_to_phase_ratio));
+				o.assets["hypha_salary_per_phase"] = adjust_asset ( asset { phase_usd_salary.amount, common::S_HYPHA }, hypha_annual_to_phase_ratio); 
 
 				// calculate HVOICE phase salary amount, which is $1.00 USD == 1 HVOICE
-				o.assets["hvoice_salary_per_phase"] = asset (phase_usd_salary.amount, common::S_HVOICE);
+				o.assets["hvoice_salary_per_phase"] = asset { phase_usd_salary.amount, common::S_HVOICE };
 
 				// calculate instant SEEDS phase salary amount
 				// 1. calculate amount of seeds based on the configured seeds price
 				// 2. calculated deferred ratio as the deferral factor (1.3) * the deferred % of this assignment
 				// 3. calculated the seeds to go to escrow each phase
-				asset phase_seeds_salary = adjust_asset(phase_usd_salary, 0.01 * c.ints.at("seeds_usd_valuation_x100")); 
-				float seeds_deferred_ratio = (c.ints.at("seeds_deferral_factor_x100") / 100) * (ints.at("deferred_x100") / 100); 
+				asset phase_seeds_salary = adjust_asset( asset {phase_usd_salary.amount * 100, common::S_SEEDS }, 0.01 * c.ints.at("seeds_usd_valuation_x100")); 
+				float seeds_deferred_ratio = (float) c.ints.at("seeds_deferral_factor_x100") * (float) ints.at("deferred_x100"); 
 				asset seeds_escrow_phase_salary = adjust_asset(phase_seeds_salary, seeds_deferred_ratio); 
 				asset seeds_instant_phase_salary = adjust_asset(phase_seeds_salary, 1 - (ints.at("deferred_x100") / 100));
 

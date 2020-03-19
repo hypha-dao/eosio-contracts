@@ -50,15 +50,15 @@
       },
       {
         "key": "time_share_x100",
-        "value": "10000"
+        "value": "100"
       },
       {
         "key":"deferred_x100",
-        "value": "7500"
+        "value": "75"
       },
       {
         "key": "instant_husd_perc_x100",
-        "value": "8000"
+        "value": "80"
       }
     ],
     "floats": [],
