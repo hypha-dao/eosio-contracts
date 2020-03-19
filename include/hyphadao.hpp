@@ -286,6 +286,10 @@ CONTRACT hyphadao : public contract {
       asset adjust_asset (const asset& original_asset, const float& adjustment) {
          return asset { static_cast<int64_t> (original_asset.amount * adjustment), original_asset.symbol };
       }  
+      
+      float get_float (const std::map<string, uint64_t> ints, string key) {
+         return (float) ints.at(key) / (float) 100;
+      }
 
       bool is_paused () {
          config_table      config_s (get_self(), get_self().value);
