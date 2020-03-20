@@ -22,17 +22,17 @@
     "strings": [
       {
         "key": "title",
-        "value": "One time contribution title"
+        "value": "Test 1"
       },
       {
         "key": "description",
-        "value": "Testing Proposal Functionality"
-      },
+        "value": "Contribution Test"
+      }
     ],
     "assets": [
       {
         "key": "usd_amount",
-        "value": "0.01 HYPHA"
+        "value": "10000.00 USD"
       }
     ],
     "time_points": [
@@ -41,21 +41,23 @@
         "value": "2019-09-08T14:30:58.000"
       }
     ],
-      "ints": [{
+    "ints": [
+      {
         "key": "deferred_perc_x100",
-        "value": 45
-      },{
+        "value": 75
+      },
+      {
         "key": "end_period",
         "value": 59
-      },{
+      },
+      {
         "key": "instant_husd_perc_x100",
-        "value": 50
-      },{
+        "value": 80
+      },
+      {
         "key": "start_period",
         "value": 27
       }
-    ],
-
     ],
     "floats": [],
     "trxs": []

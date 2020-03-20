@@ -113,10 +113,14 @@ class Bank {
                             const string& memo, 
                             const uint64_t& assignment_id,
                             const uint64_t& bypass_escrow) {
+
+            if (quantity.amount == 0) {
+                return;
+            }
     
             config_table      config_s (contract, contract.value);
    	        Config c = config_s.get_or_create (contract, Config());   
-        
+
             if (quantity.symbol == common::S_HVOICE) {
                 action(
                     permission_level{contract, "active"_n},
@@ -156,10 +160,7 @@ class Bank {
                 // need to add steps in here about the deferments         
                 issuetoken (c.names.at("hypha_token_contract"), recipient, quantity, memo );
             } 
-            // else if (quantity.symbol == common::S_HUSD) {
-            //     issuetoken (c.names.at("hypha_token_contract"), recipient, quantity, memo);
-            // }
-        
+           
             payment_t.emplace (contract, [&](auto &p) {
                 p.payment_id    = payment_t.available_primary_key();
                 p.payment_date  = current_block_time().to_time_point();
