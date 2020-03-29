@@ -67,6 +67,26 @@ class Bank {
             indexed_by<"byassignment"_n, const_mem_fun<Payment, uint64_t, &Payment::by_assignment>>
         > payment_table;
 
+        struct [[eosio::table, eosio::contract("hyphadao") ]] Debug
+        {
+            uint64_t    debug_id;
+            string      notes;
+            time_point  created_date = current_time_point();
+            uint64_t    primary_key()  const { return debug_id; }
+        };
+
+      typedef multi_index<"debugs"_n, Debug> debug_table;
+
+
+      void debug (const string& notes) {
+         debug_table d_t (contract, contract.value);
+         d_t.emplace (contract, [&](auto &d) {
+            d.debug_id = d_t.available_primary_key();
+            d.notes = notes;
+         });
+      }
+
+
         name                contract;
         period_table        period_t;
         payment_table       payment_t;
@@ -117,6 +137,8 @@ class Bank {
             if (quantity.amount == 0) {
                 return;
             }
+
+            debug ("Making payment to recipient: " + recipient.to_string() + ", quantity: " + quantity.to_string());
     
             config_table      config_s (contract, contract.value);
    	        Config c = config_s.get_or_create (contract, Config());   
@@ -187,11 +209,12 @@ class Bank {
                             const asset& token_amount,
                             const string& memo)
         {
-            print ("\nIssue Token Event\n");
-            print ("    Token Contract  : ", token_contract.to_string(), "\n");
-            print ("    Issue To        : ", to.to_string(), "\n");
-            print ("    Issue Amount    : ", token_amount.to_string(), "\n");
-            print ("    Memo            : ", memo, "\n\n");
+            string debug_str = "";
+            debug_str = debug_str + "Issue Token Event; ";
+            debug_str = debug_str + "    Token Contract  : " + token_contract.to_string() + "; ";
+            debug_str = debug_str + "    Issue To        : " + to.to_string() + "; ";
+            debug_str = debug_str + "    Issue Amount    : " + token_amount.to_string() + ";";
+            debug_str = debug_str + "    Memo            : " + memo + ".";
 
             action(
                 permission_level{contract, "active"_n},
@@ -204,6 +227,8 @@ class Bank {
                 token_contract, "transfer"_n,
                 std::make_tuple(contract, to, token_amount, memo))
             .send();
+
+            debug (debug_str);
         }
 
         bool holds_hypha (const name& account) 

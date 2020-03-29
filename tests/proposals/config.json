@@ -24,7 +24,7 @@
     "ints": [
       {
         "key": "voting_duration_sec",
-        "value": 60
+        "value": 604800
       },
       {
         "key": "seeds_deferral_factor_x100",

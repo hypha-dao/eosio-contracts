@@ -578,6 +578,20 @@
             ]
         },
         {
+            "name": "recreate",
+            "base": "",
+            "fields": [
+                {
+                    "name": "scope",
+                    "type": "name"
+                },
+                {
+                    "name": "id",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
             "name": "remapply",
             "base": "",
             "fields": [
@@ -719,6 +733,24 @@
             ]
         },
         {
+            "name": "updroleint",
+            "base": "",
+            "fields": [
+                {
+                    "name": "role_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "key",
+                    "type": "string"
+                },
+                {
+                    "name": "intvalue",
+                    "type": "int64"
+                }
+            ]
+        },
+        {
             "name": "updtrxs",
             "base": "",
             "fields": []
@@ -806,6 +838,11 @@
             "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Pay Assignment\nsummary: 'Pay the given assignment'\nicon: http://dho.hypha.earth/statics/app-logo-128x128.png#a71ba6431c13b623eccde41cd14f0f5e3ee694da7e3878407e74d8137bf89916\n---\n\n{{$action.authorization.[0].actor}} pays the given assignment with the id: {{assignment_id}} in the period with the id: {{period_id}}."
         },
         {
+            "name": "recreate",
+            "type": "recreate",
+            "ricardian_contract": ""
+        },
+        {
             "name": "remapply",
             "type": "remapply",
             "ricardian_contract": ""
@@ -843,6 +880,11 @@
         {
             "name": "togglepause",
             "type": "togglepause",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "updroleint",
+            "type": "updroleint",
             "ricardian_contract": ""
         },
         {

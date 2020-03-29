@@ -1,0 +1,65 @@
+{
+    "data": {
+      "scope": "proposal",
+      "names": [
+        {
+          "key": "owner",
+          "value": "johnnyhypha1"
+        },
+        {
+          "key": "recipient",
+          "value": "johnnyhypha1"
+        },
+        {
+          "key": "type",
+          "value": "payout"
+        },
+        {
+          "key": "trx_action_name",
+          "value": "makepayout"
+        }
+      ],
+      "strings": [
+        {
+          "key": "title",
+          "value": "Test 4"
+        },
+        {
+          "key": "description",
+          "value": "Contribution Test"
+        }
+      ],
+      "assets": [
+        {
+          "key": "usd_amount",
+          "value": "7500.00 USD"
+        }
+      ],
+      "time_points": [
+        {
+          "key": "contribution_date",
+          "value": "2019-09-08T14:30:58.000"
+        }
+      ],
+      "ints": [
+        {
+          "key": "deferred_perc_x100",
+          "value": 20
+        },
+        {
+          "key": "end_period",
+          "value": 36
+        },
+        {
+          "key": "instant_husd_perc_x100",
+          "value": 80
+        },
+        {
+          "key": "start_period",
+          "value": 32
+        }
+      ],
+      "floats": [],
+      "trxs": []
+    }
+  }

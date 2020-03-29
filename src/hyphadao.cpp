@@ -70,6 +70,16 @@ void hyphadao::addowner (const name& scope) {
 	}
 }
 
+void hyphadao::updroleint (const uint64_t& role_id, const string& key, const int64_t& intvalue) {
+	object_table o_t (get_self(), "role"_n.value);
+	auto o_itr = o_t.find (role_id);
+	check (o_itr != o_t.end(), "Role ID not found: " + std::to_string(role_id));
+
+	o_t.modify(o_itr, get_self(), [&](auto &o) {
+		o.ints[key] = intvalue;
+	});
+}
+
 // void hyphadao::erasebackups (const name& scope) {
 // 	check ( is_paused(), "Contract must be paused to call this action.");	
 
@@ -287,7 +297,9 @@ void hyphadao::apply (const name& applicant,
 name hyphadao::register_ballot (const name& proposer, 
 								const map<string, string>& strings) 
 {
-	require_auth(proposer);
+	check (has_auth (proposer) || has_auth(get_self()), "Authentication failed. Must have authority from proposer: " +
+		proposer.to_string() + "@active or " + get_self().to_string() + "@active.");
+	
 	qualify_proposer(proposer);
 
 	config_table      config_s (get_self(), get_self().value);
@@ -346,6 +358,28 @@ name hyphadao::register_ballot (const name& proposer,
 	return new_ballot_id;
 }
 
+void hyphadao::recreate (const name& scope, const uint64_t& id) {
+	require_auth (get_self());
+	object_table o_t (get_self(), scope.value);
+	auto o_itr = o_t.find (id);
+	check (o_itr != o_t.end(), "Proposal not found. Scope: " + scope.to_string() + "; ID: " + std::to_string(id));
+
+	action (
+      permission_level{get_self(), "active"_n},	  
+      get_self(), "create"_n,
+      std::make_tuple(scope, o_itr->names,
+	  						 o_itr->strings,
+							 o_itr->assets,
+							 o_itr->time_points,
+							 o_itr->ints,
+							 o_itr->floats,
+							 o_itr->trxs))
+   .send();
+
+	// erase original object
+   	eraseobj (scope, id);
+}
+
 void hyphadao::create (const name&						scope,
 						const map<string, name> 		names,
 						const map<string, string>       strings,
@@ -358,7 +392,10 @@ void hyphadao::create (const name&						scope,
 	check ( !is_paused(), "Contract is paused for maintenance. Please try again later.");	
 	const name owner = names.at("owner");
 
-	require_auth (owner);
+	check (has_auth (owner) || has_auth(get_self()), "Authentication failed. Must have authority from owner: " +
+		owner.to_string() + "@active or " + get_self().to_string() + "@active.");
+
+	// require_auth (owner);
 	qualify_proposer (owner);
 
 	object_table o_t (get_self(), scope.value);
@@ -371,6 +408,11 @@ void hyphadao::create (const name&						scope,
 		o.ints                     	= ints;
 		o.floats                   	= floats;
 		o.trxs                     	= trxs;
+
+		config_table      config_s (get_self(), get_self().value);
+   		Config c = config_s.get_or_create (get_self(), Config()); 
+		o.strings["client_version"] = get_string(c.strings, "client_version");
+		o.strings["contract_version"] = get_string(c.strings, "contract_version");
 
 		if (scope == "proposal"_n) {
 			name proposal_type	= names.at("type");
@@ -398,9 +440,6 @@ void hyphadao::create (const name&						scope,
 				check (ints.at("fulltime_capacity_x100") > 0, "fulltime_capacity_x100 must be greater than zero. You submitted: " + std::to_string(ints.at("fulltime_capacity_x100")));
 				check (assets.at("annual_usd_salary").amount > 0, "annual_usd_salary must be greater than zero. You submitted: " + assets.at("annual_usd_salary").to_string());
 			} else if (proposal_type == "assignment"_n || proposal_type == "payout"_n)  {
-
-				config_table      config_s (get_self(), get_self().value);
-   				Config c = config_s.get_or_create (get_self(), Config()); 
 
 				string debug_str = "";
 				// global ratios
@@ -496,28 +535,40 @@ void hyphadao::create (const name&						scope,
 					o.assets["seeds_instant_salary_per_phase"] = seeds_instant_phase_salary;
 
 				} else if (proposal_type == "payout"_n) {
-					asset usd_amount = assets.at("usd_amount");
 
-					//calculate HYPHA amount
-					o.assets["hypha_amount"] = adjust_asset ( asset { usd_amount.amount, common::S_HYPHA }, hypha_ratio); 
-					o.assets["hvoice_amount"] = asset { usd_amount.amount * 2, common::S_HVOICE };
-					asset husd_amount = adjust_asset (usd_amount, (float) ((float)instant_husd_perc) * ((float) 1 - (float) deferred_perc) ); 
-					o.assets["husd_amount"] = husd_amount;
+					if (assets.find("usd_amount") != assets.end()) {
+						// using USD amount + configured parameters
+						asset usd_amount = assets.at("usd_amount");
 
-					asset seeds_equiv_amount = adjust_asset( asset { usd_amount.amount * 100, common::S_SEEDS }, (float) 1 / (float) seeds_price_usd); 
-					asset seeds_escrow_amount = adjust_asset(seeds_equiv_amount, seeds_escrow_ratio); 
-					asset seeds_instant_amount = adjust_asset(seeds_equiv_amount, (float) (1 - deferred_perc) * (float) (1 - instant_husd_perc));
-					debug_str = debug_str + "Payout: " + 
-					", usd_amount: " + usd_amount.to_string() + 
-					", hypha_amount: " + o.assets["hypha_amount"].to_string() + 
-					", hvoice_amount: " + o.assets["hvoice_amount"].to_string() +
-					", seeds_equiv_amount: " + seeds_equiv_amount.to_string() +
-					", seeds_escrow_amount: " + seeds_escrow_amount.to_string() + 
-					", seeds_instant_amount: " + seeds_instant_amount.to_string() + ". ";
+						//calculate HYPHA amount
+						o.assets["hypha_amount"] = adjust_asset ( asset { usd_amount.amount, common::S_HYPHA }, hypha_ratio); 
+						o.assets["hvoice_amount"] = asset { usd_amount.amount * 2, common::S_HVOICE };
+						asset husd_amount = adjust_asset ( asset {usd_amount.amount, common::S_HUSD }, 
+														(float) ((float)instant_husd_perc) * ((float) 1 - (float) deferred_perc) ); 
+						o.assets["husd_amount"] = husd_amount;
 
+						asset seeds_equiv_amount = adjust_asset( asset { usd_amount.amount * 100, common::S_SEEDS }, (float) 1 / (float) seeds_price_usd); 
+						asset seeds_escrow_amount = adjust_asset(seeds_equiv_amount, seeds_escrow_ratio); 
+						asset seeds_instant_amount = adjust_asset(seeds_equiv_amount, (float) (1 - deferred_perc) * (float) (1 - instant_husd_perc));
+						debug_str = debug_str + "Payout: " + 
+						", husd_amount: " + husd_amount.to_string() + 
+						", hypha_amount: " + o.assets["hypha_amount"].to_string() + 
+						", hvoice_amount: " + o.assets["hvoice_amount"].to_string() +
+						", seeds_equiv_amount: " + seeds_equiv_amount.to_string() +
+						", seeds_escrow_amount: " + seeds_escrow_amount.to_string() + 
+						", seeds_instant_amount: " + seeds_instant_amount.to_string() + ". ";
 
-					o.assets["seeds_escrow_amount"] = seeds_escrow_amount;
-					o.assets["seeds_instant_amount"] = seeds_instant_amount;
+						o.assets["seeds_escrow_amount"] = seeds_escrow_amount;
+						o.assets["seeds_instant_amount"] = seeds_instant_amount;
+					} else {
+						// Advanced mode - using the pre-calculated values
+						// translate seeds_amount (from prior version to escrow seeds)
+						o.assets = assets;
+						if (assets.find("seeds_amount") != assets.end()) {
+							o.assets["seeds_escrow_amount"] = assets.at("seeds_amount");
+							o.assets.erase (o.assets.find("seeds_amount"));
+						}
+					}					
 				}
 				debug (debug_str);
 			}
@@ -566,8 +617,8 @@ void hyphadao::exectrx (const uint64_t& proposal_id) {
 void hyphadao::newrole (const uint64_t& proposal_id) {
 
    	require_auth (get_self());
-	change_scope ("proposal"_n, proposal_id, "proparchive"_n, false);
-	change_scope ("proposal"_n, proposal_id, "role"_n, true);
+	//change_scope ("proposal"_n, proposal_id, "proparchive"_n, false);
+	change_scope ("proposal"_n, proposal_id, "role"_n, false);
 }
 
 void hyphadao::addperiod (const time_point& start_date, const time_point& end_date, const string& phase) {
@@ -610,8 +661,7 @@ void hyphadao::assign ( const uint64_t& 		proposal_id) {
 	// 	std::to_string (o_itr->ints.at("fk")) + " cannot support assignment. Full time capacity (x100) is " + std::to_string(o_itr_role->ints.at("fulltime_capacity_x100")) + 
 	// 	" and consumed capacity (x100) is " + std::to_string(consumed_capacity) + "; proposal requests time share (x100) of: " + std::to_string(o_itr->ints.at("time_share_x100")));
 
-	change_scope ("proposal"_n, proposal_id, "proparchive"_n, false);
-	change_scope ("proposal"_n, proposal_id, "assignment"_n, true);
+	change_scope ("proposal"_n, proposal_id, "assignment"_n, false);
 }
 
 void hyphadao::makepayout (const uint64_t&        proposal_id) {
@@ -628,7 +678,7 @@ void hyphadao::makepayout (const uint64_t&        proposal_id) {
 	bank.makepayment (-1, o_itr->names.at("recipient"), o_itr->assets.at("hvoice_amount"), memo, common::NO_ASSIGNMENT, 1);
 	bank.makepayment (-1, o_itr->names.at("recipient"), o_itr->assets.at("seeds_instant_amount"), memo, common::NO_ASSIGNMENT, 1);
 	bank.makepayment (-1, o_itr->names.at("recipient"), o_itr->assets.at("seeds_escrow_amount"), memo, common::NO_ASSIGNMENT, 0);
-	change_scope ("proposal"_n, proposal_id, "proparchive"_n, true);
+//	change_scope ("proposal"_n, proposal_id, "proparchive"_n, true);
 }
 
 void hyphadao::eraseobj (	const name& scope, 
@@ -671,9 +721,11 @@ void hyphadao::closeprop(const uint64_t& proposal_id) {
 	debug_str = debug_str + " Votes Passing: " + votes_pass.to_string() + "\n";
 	debug_str = debug_str + " Votes Failing: " + votes_fail.to_string() + "\n";
 
+	bool passed = false;
 	if (b_itr->total_raw_weight >= quorum_threshold && 			// must meet quorum
 		adjust_asset(votes_pass, 0.2500000000) > votes_fail) {  // must have 80% of the vote power
-		debug_str = debug_str + "Executing transaction\n";
+		debug_str = debug_str + "Proposal passed. Executing transaction. ";
+		passed = true;
 		prop.trxs.at("exec_on_approval").send(current_block_time().to_time_point().sec_since_epoch(), get_self());		
 	}
 
@@ -683,6 +735,12 @@ void hyphadao::closeprop(const uint64_t& proposal_id) {
 		c.names.at("telos_decide_contract"), "closevoting"_n,
 		std::make_tuple(prop.names.at("ballot_id"), true))
 	.send();
+
+	if (passed) {
+		change_scope ("proposal"_n, proposal_id, "proparchive"_n, true);
+	} else {
+		change_scope ("proposal"_n, proposal_id, "failedprops"_n, true);
+	}
 
 	debug (debug_str);
 }

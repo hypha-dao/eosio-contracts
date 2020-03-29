@@ -53,17 +53,36 @@ const { Api, JsonRpc } = require("eosjs");
 const { JsSignatureProvider } = require("eosjs/dist/eosjs-jssig");
 const fetch = require("node-fetch");
 const { TextEncoder, TextDecoder } = require("util");
-
-const defaultPrivateKey = process.env.PRIVATE_KEY;
 const DAO_CONTRACT = "dao.hypha";
-const signatureProvider = new JsSignatureProvider([defaultPrivateKey]);
 
-async function sendtrx (host, contract, action, authorizer, data) {
+async function sendtrx (prod, host, contract, action, authorizer, data) {
   const rpc = new JsonRpc(host, { fetch });
+  var defaultPrivateKey;
+  if (prod) { defaultPrivateKey = process.env.PRIVATE_KEY; }
+  else defaultPrivateKey = "5HwnoWBuuRmNdcqwBzd1LABFRKnTk2RY2kUMYKkZfF8tKodubtK";
+  const signatureProvider = new JsSignatureProvider([defaultPrivateKey]);
   const api = new Api({rpc, signatureProvider, textDecoder: new TextDecoder(), textEncoder: new TextEncoder()});
   const actions = [{account: contract,name: action,authorization: [{actor: authorizer, permission: "active"}],data: data}];
   const result = await api.transact({actions: actions}, {blocksBehind: 3, expireSeconds: 30});
   console.log("Transaction Successfull : ", result.transaction_id);
+}
+
+async function closeProposal (prod, host, proposal) {
+  try {
+    await sendtrx(prod, host, DAO_CONTRACT, "closeprop", DAO_CONTRACT,
+      { "proposal_id": proposal.id}
+    )
+  } catch (e) {
+    console.log ("------- BEGIN: Cannot close proposal ---------");
+    if (e.json) {
+      console.log (JSON.stringify (e.json.error.details[0].message))
+    } else {
+      console.log (JSON.stringify (e, null, 2))
+    }
+    await printProposal (proposal);
+    console.log ("------- END: Cannot close proposal ---------");
+    console.log ("\n\n\n")
+  }
 }
 
 async function getVotingPeriod (host) {
@@ -83,6 +102,49 @@ async function getVotingPeriod (host) {
   } else {
     console.log ("ERROR:: Configuration has not been set.");
   }
+}
+
+async function getProposals (host) {
+  let rpc;
+  let options = {};
+
+  rpc = new JsonRpc(host, { fetch });
+  options.code = DAO_CONTRACT;
+  options.json = true;
+  options.scope = "proposal";
+  options.table = "objects";
+  options.reverse = false;
+  options.limit = 100;
+  
+  const result = await rpc.get_table_rows(options);
+  if (result.rows.length > 0) {
+    return result.rows;
+  } 
+  
+  console.log ("There are no proposals of type");
+  return undefined;  
+}
+
+async function getProposal (host, proposal_id) {
+  let rpc;
+  let options = {};
+
+  rpc = new JsonRpc(host, { fetch });
+  options.code = DAO_CONTRACT;
+  options.json = true;
+  options.scope = "proposal";
+  options.table = "objects";
+  options.upper_bound = proposal_id;
+  options.lower_bound = proposal_id;
+  options.limit = 1;
+  
+  const result = await rpc.get_table_rows(options);
+  if (result.rows.length > 0) {
+    return result.rows[0];
+  } 
+  
+  console.log ("There are no proposal with id of: ", proposal_id);
+  return undefined;  
 }
 
 async function getLastCreatedProposal (host) {
@@ -123,9 +185,13 @@ async function loadOptions() {
     { name: "host", alias: "h", type: String, defaultValue: "https://test.telos.kitchen" },
     { name: "approve", alias: "a", type: Boolean, defaultValue: false },
     { name: "close", alias: "c", type: Boolean, defaultValue: false },
+    { name: "closepropid", type: String},
     { name: "propose", alias: "p", type: Boolean, defaultValue: false },
     { name: "config", type: Boolean, defaultValue: false },
-    { name: "updstrings", type: Boolean, defaultValue: false}
+    { name: "updstrings", type: Boolean, defaultValue: false},
+    { name: "closeall", type: Boolean, defaultValue: false},
+    { name: "print_proposal", alias: "x", type: String},
+    { name: "prod", type: Boolean, defaultValue: false}
     // see here to add new options:
     //   - https://github.com/75lb/command-line-args/blob/master/doc/option-definition.md
   ];
@@ -140,6 +206,34 @@ function sleep(ms, msg){
   })
 }
 
+async function getValue (map, key) {
+  try {
+    return map.find(o => o.key === key).value
+  }
+  catch (e) {
+    return "Not Found"
+  }
+}
+
+async function printProposal (p) {
+//  console.log (JSON.stringify(p, null, 2))
+  console.log("Proposer       : ", await getValue(p.names, 'proposer'))
+  console.log("Owner          : ", await getValue(p.names, 'owner'))
+  console.log("Title          : ", await getValue(p.strings, 'title'))
+  console.log("Proposal ID    : ", p.id)
+  console.log("Proposal Type  : ", await getValue(p.names, 'proposal_type'))
+  console.log("Type           : ", await getValue(p.names, 'type'))
+  console.log("Annual USD     : ", await getValue(p.assets, "annual_usd_salary"))
+  console.log("HYPHA Amount   : ", await getValue(p.assets, "hypha_amount"))
+  console.log("HVOICE Amount  : ", await getValue(p.assets, "hvoice_amount"))
+  console.log("SEEDS Amount   : ", await getValue(p.assets, "seeds_amount"))
+  console.log("Created Date   : ", p.created_date)
+  console.log("Description    : ", await getValue(p.strings, "description"))
+  console.log("Content        : \n", await getValue(p.strings, "content"))
+  console.log("")
+}
+
+
 const main = async () => {
   const opts = await loadOptions();
 
@@ -152,7 +246,7 @@ const main = async () => {
     console.log ("-- telos_decide_contract  : ", config.data.names.find(o => o.key === 'telos_decide_contract').value);
 
     console.log ("\nSubmitting configuration : ", opts.file.filename);
-    await sendtrx(opts.host, DAO_CONTRACT, "setconfig", DAO_CONTRACT, config.data);
+    await sendtrx(opts.prod, opts.host, DAO_CONTRACT, "setconfig", DAO_CONTRACT, config.data);
   }
 
   // proposing
@@ -165,7 +259,7 @@ const main = async () => {
     console.log ("-- proposer         : ", proposal.data.names.find(o => o.key === 'owner').value);
 
     console.log ("\nSubmitting proposal : ", opts.file.filename);
-    await sendtrx(opts.host, DAO_CONTRACT, "create", 
+    await sendtrx(opts.prod, opts.host, DAO_CONTRACT, "create", 
       proposal.data.names.find(o => o.key === 'owner').value, 
       proposal.data);
 
@@ -187,7 +281,7 @@ const main = async () => {
         console.log ("-- -- ballot_id   : ", lastProposal.names.find(o => o.key === 'ballot_id').value);
         console.log ("-- -- options     : ", options);
   
-        await sendtrx(opts.host, "trailservice", "castvote", 
+        await sendtrx(opts.prod, opts.host, "trailservice", "castvote", 
           proposal.data.names.find(o => o.key === 'owner').value, 
           { "voter":proposal.data.names.find(o => o.key === 'owner').value, 
             "ballot_name":lastProposal.names.find(o => o.key === 'ballot_id').value, 
@@ -205,26 +299,23 @@ const main = async () => {
         await sleep (sleepDuration, "Waiting " + sleepDuration + " seconds while the ballot expiration expires...");
    
         // close the DAproposal
-        await sendtrx(opts.host, DAO_CONTRACT, "closeprop", 
+        await sendtrx(opts.prod, opts.host, DAO_CONTRACT, "closeprop", 
           proposal.data.names.find(o => o.key === 'owner').value, 
           { "proposal_id":lastProposal.id });
       }
     }
-  // } else if (opts.file && opts.updstrings) {
+  } else if (opts.closeall) {
 
-  //     const update = JSON.parse(fs.readFileSync(opts.file.filename, 'utf8'));
-  //     console.log ("\nParsing the updating strings from : ", opts.file.filename);
-  //     console.log ("Scope: " + update.data.scope);
-  //     console.log ("Proposal ID : " + update.data.proposal_id);
-  //     console.log ("Strings     : " + update.data.strings);
-
-  //     await sendtrx(opts.host, "dao.hypha", "updstrings", "dao.hypha", 
-  //       { "scope":update.data.scope,
-  //         "proposal_id":update.data.proposal_id, 
-  //         "strings":update.data.strings });
-
+      let proposals = await getProposals(opts.host)
+      proposals.forEach (async function (proposal) {
+        await closeProposal (opts.prod, proposal);
+      });      
+  } else if (opts.closepropid) {
+    await closeProposal (opts.prod, opts.host, await getProposal (opts.host, opts.closepropid))
+  } else if (opts.print_proposal) {
+    await printProposal (await getProposal(opts.host, opts.print_proposal))
   } else {
-    console.log ("You must use the -f for the json file.");
+    console.log ("Command unsupported. You used: ", JSON.stringify(opts, null, 2));
   }  
 }
 

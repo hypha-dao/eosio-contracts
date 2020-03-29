@@ -190,6 +190,8 @@ CONTRACT hyphadao : public contract {
       ACTION addowner (const name& scope);
       ACTION updtrxs ();
       ACTION updtype ();
+      ACTION updroleint (const uint64_t& role_id, const string& key, const int64_t& intvalue) ;
+      ACTION recreate (const name& scope, const uint64_t& id);
       // ACTION backupobjs (const name& scope);
       // ACTION erasebackups (const name& scope);
       // ACTION restoreobjs (const name& scope);
@@ -279,6 +281,7 @@ CONTRACT hyphadao : public contract {
 	      });
 
          if (remove_old) {
+            debug ("Erasing object from : " + current_scope.to_string() + "; copying to : " + new_scope.to_string());
             o_t_current.erase (o_itr_current);
          }
       }
@@ -298,6 +301,14 @@ CONTRACT hyphadao : public contract {
          
          uint64_t paused = c.ints.at("paused");
          return paused == 1;
+      }
+
+      string get_string (const std::map<string, string> strings, string key) {
+         if (strings.find (key) != strings.end()) {
+            return strings.at(key);
+         } else {
+            return string {""};
+         }
       }
 };
 
