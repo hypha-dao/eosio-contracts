@@ -162,6 +162,9 @@ CONTRACT hyphadao : public contract {
 
       typedef multi_index<"debugs"_n, Debug> debug_table;
 
+      const uint64_t       MICROSECONDS_PER_HOUR   = (uint64_t)60 * (uint64_t)60 * (uint64_t)1000000;
+      const uint64_t       MICROSECONDS_PER_YEAR   = MICROSECONDS_PER_HOUR * (uint64_t)24 * (uint64_t)365;
+
       ACTION create ( const name&                    scope,
                      const map<string, name> 		  names,
                      const map<string, string>       strings,
@@ -186,6 +189,9 @@ CONTRACT hyphadao : public contract {
       ACTION togglepause ();
       ACTION addowner (const name& scope);
       ACTION updtrxs ();
+      ACTION updtype ();
+      ACTION updroleint (const uint64_t& role_id, const string& key, const int64_t& intvalue) ;
+      ACTION recreate (const name& scope, const uint64_t& id);
       // ACTION backupobjs (const name& scope);
       // ACTION erasebackups (const name& scope);
       // ACTION restoreobjs (const name& scope);
@@ -275,6 +281,7 @@ CONTRACT hyphadao : public contract {
 	      });
 
          if (remove_old) {
+            debug ("Erasing object from : " + current_scope.to_string() + "; copying to : " + new_scope.to_string());
             o_t_current.erase (o_itr_current);
          }
       }
@@ -282,6 +289,10 @@ CONTRACT hyphadao : public contract {
       asset adjust_asset (const asset& original_asset, const float& adjustment) {
          return asset { static_cast<int64_t> (original_asset.amount * adjustment), original_asset.symbol };
       }  
+      
+      float get_float (const std::map<string, uint64_t> ints, string key) {
+         return (float) ints.at(key) / (float) 100;
+      }
 
       bool is_paused () {
          config_table      config_s (get_self(), get_self().value);
@@ -290,6 +301,14 @@ CONTRACT hyphadao : public contract {
          
          uint64_t paused = c.ints.at("paused");
          return paused == 1;
+      }
+
+      string get_string (const std::map<string, string> strings, string key) {
+         if (strings.find (key) != strings.end()) {
+            return strings.at(key);
+         } else {
+            return string {""};
+         }
       }
 };
 

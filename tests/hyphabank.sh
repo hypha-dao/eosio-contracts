@@ -52,9 +52,12 @@ cleos -u https://eos.greymass.com push action eosio updateauth '{
 }' -p thehyphabank@owner
 
 
-cleos -u https://eos.greymass.com push action -sjd -x 86400 eosio.token transfer '["thehyphabank", "amazonjungle", "0.0001 EOS", "test trx"]' -p thehyphabank > test_transfer.json
-cleos -u https://eos.greymass.com multisig proposetrx testtrx '[{"actor": "amazonjungle", "permission": "active"},{"actor": "illum1nation", "permission": "active"},{"actor": "onealchemist", "permission": "active"},{"actor": "sevenflash42", "permission": "active"},{"actor": "tchopeosacc1", "permission": "active"}]' ./test_transfer.json amazonjungle
-cleos -u https://eos.greymass.com multisig approve amazonjungle testtrx '{"actor": "amazonjungle", "permission": "active"}' -p amazonjungle
-cleos -u https://eos.greymass.com multisig exec amazonjungle testtrx
+cleos -u https://eos.greymass.com push action -sjd -x 604800 eosio.token transfer '["thehyphabank", "vishalvishal", "651.0417 EOS", "vishal"]' -p thehyphabank > packed_transfer.json
+cleos -u https://eos.greymass.com multisig propose_trx vishal '[{"actor": "amazonjungle", "permission": "active"},{"actor": "illum1nation", "permission": "active"},{"actor": "onealchemist", "permission": "active"},{"actor": "sevenflash42", "permission": "active"},{"actor": "tchopeosacc1", "permission": "active"}]' ./packed_transfer.json amazonjungle
+cleos -u https://eos.greymass.com multisig approve amazonjungle vishal '{"actor": "amazonjungle", "permission": "active"}' -p amazonjungle
+cleos -u https://api.telos.kitchen multisig exec eosiodetroit bbanophone
+
+cleos -u https://api.telos.kitchen multisig approve eosiodetroit bbanophone  '{"actor": "teloskitchen", "permission": "active"}' -p teloskitchen
+
 
 tchopeosacc1

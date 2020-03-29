@@ -1,0 +1,23 @@
+{
+  "expiration": "2020-03-11T13:03:06",
+  "ref_block_num": 65110,
+  "ref_block_prefix": 397224871,
+  "max_net_usage_words": 0,
+  "max_cpu_usage_ms": 0,
+  "delay_sec": 0,
+  "context_free_actions": [],
+  "actions": [{
+      "account": "eosio.token",
+      "name": "transfer",
+      "authorization": [{
+          "actor": "thehyphabank",
+          "permission": "active"
+        }
+      ],
+      "data": "00a739a655df54cb104dc36e47d3b0db515763000000000004454f53000000000676697368616c"
+    }
+  ],
+  "transaction_extensions": [],
+  "signatures": [],
+  "context_free_data": []
+}

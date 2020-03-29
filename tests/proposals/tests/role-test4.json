@@ -1,0 +1,64 @@
+{
+  "data": {
+    "scope": "proposal",
+    "names": [
+      {
+        "key":"type",
+        "value":"role"
+      },
+      {
+        "key":"owner",
+        "value":"johnnyhypha1"
+      },
+      {
+        "key":"trx_action_name",
+        "value":"newrole"
+      }
+    ],
+    "strings": [
+      {
+        "key": "title",
+        "value": "Role Test 4"
+      },
+      {
+        "key": "description",
+        "value": "Weave baskets at the bottom of the sea"
+      },
+      {
+        "key": "content",
+        "value": "We make *great* baskets."
+      }
+    ],
+    "assets": [
+      {
+        "key": "annual_usd_salary",
+        "value": "175000.00 USD"
+      }
+    ],
+    "time_points": [],
+    "ints": [
+      {
+        "key": "start_period",
+        "value": 250
+      },
+      {
+        "key": "end_period",
+        "value": 331
+      },
+      {
+        "key": "fulltime_capacity_x100",
+        "value": 120
+      },
+      {
+        "key": "min_time_share_x100",
+        "value": 0
+      },
+      {
+        "key": "min_deferred_x100",
+        "value": 0
+      }
+    ],
+    "floats": [],
+    "trxs": []
+  }
+}

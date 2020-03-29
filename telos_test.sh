@@ -34,7 +34,7 @@ cleos -u https://test.telos.kitchen push action trailservice castvote '["haydenh
 cleos -u https://test.telos.kitchen push action dao.hypha closeprop '["roles", 0'
 
 cleos -u https://test.telos.kitchen push action dao.hypha proposerole '["johnnyhypha1", "Underwater Basketweaver", "Weave baskets at the bottom of the sea", "We make *great* baskets.", "11 HYPHA", "11.00000000 PRESEED", "11 HVOICE", 0, 10]' -p johnnyhypha1
-cleos -u https://test.telos.kitchen push action trailservice castvote '["haydenhypha1", "hypha1.....1d", ["pass"]]' -p haydenhypha1
+cleos -u https://test.telos.kitchen push action trailservice castvote '["johnnyhypha1", "hypha1.....oa", ["pass"]]' -p johnnyhypha1
 cleos -u https://test.telos.kitchen push action dao.hypha closeprop '["roles", 26]' -p haydenhypha1
 
 
@@ -95,6 +95,7 @@ cleos -u https://test.telos.kitchen push action dao.hypha propose '{"proposer":"
 cleos -u https://test.telos.kitchen push action dao.hypha setconfig '["token.hypha", "trailservice"]' -p dao.hypha
 
 cleos -u https://test.telos.kitchen push action token.hypha create '["dao.hypha", "-1.00 HYPHA"]' -p token.hypha
+cleos -u https://test.telos.kitchen push action token.hypha create '["dao.hypha", "-1.00 HUSD"]' -p token.hypha
 
 
 

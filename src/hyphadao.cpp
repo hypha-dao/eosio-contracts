@@ -70,6 +70,16 @@ void hyphadao::addowner (const name& scope) {
 	}
 }
 
+void hyphadao::updroleint (const uint64_t& role_id, const string& key, const int64_t& intvalue) {
+	object_table o_t (get_self(), "role"_n.value);
+	auto o_itr = o_t.find (role_id);
+	check (o_itr != o_t.end(), "Role ID not found: " + std::to_string(role_id));
+
+	o_t.modify(o_itr, get_self(), [&](auto &o) {
+		o.ints[key] = intvalue;
+	});
+}
+
 // void hyphadao::erasebackups (const name& scope) {
 // 	check ( is_paused(), "Contract must be paused to call this action.");	
 
@@ -236,6 +246,28 @@ void hyphadao::updtrxs () {
 	}	
 }
 
+void hyphadao::updtype () {
+	require_auth (get_self());
+
+	object_table o_t (get_self(), "proposal"_n.value);
+	auto o_itr = o_t.begin ();
+	while (o_itr != o_t.end()) {
+		o_t.modify (o_itr, get_self(), [&](auto &o) {
+			o.names["type"]      = "payout"_n; // o_itr->names.at("proposal_type"); 
+		});		
+		o_itr++;
+	}	
+
+	o_t = object_table(get_self(), "proparchive"_n.value);
+	o_itr = o_t.begin ();
+	while (o_itr != o_t.end()) {
+		o_t.modify (o_itr, get_self(), [&](auto &o) {
+			o.names["type"]      = "payout"_n; // o_itr->names.at("proposal_type"); 
+		});		
+		o_itr++;
+	}	
+}
+
 void hyphadao::apply (const name& applicant, 
 						const string& content) {
 
@@ -265,7 +297,9 @@ void hyphadao::apply (const name& applicant,
 name hyphadao::register_ballot (const name& proposer, 
 								const map<string, string>& strings) 
 {
-	require_auth(proposer);
+	check (has_auth (proposer) || has_auth(get_self()), "Authentication failed. Must have authority from proposer: " +
+		proposer.to_string() + "@active or " + get_self().to_string() + "@active.");
+	
 	qualify_proposer(proposer);
 
 	config_table      config_s (get_self(), get_self().value);
@@ -324,6 +358,28 @@ name hyphadao::register_ballot (const name& proposer,
 	return new_ballot_id;
 }
 
+void hyphadao::recreate (const name& scope, const uint64_t& id) {
+	require_auth (get_self());
+	object_table o_t (get_self(), scope.value);
+	auto o_itr = o_t.find (id);
+	check (o_itr != o_t.end(), "Proposal not found. Scope: " + scope.to_string() + "; ID: " + std::to_string(id));
+
+	action (
+      permission_level{get_self(), "active"_n},	  
+      get_self(), "create"_n,
+      std::make_tuple(scope, o_itr->names,
+	  						 o_itr->strings,
+							 o_itr->assets,
+							 o_itr->time_points,
+							 o_itr->ints,
+							 o_itr->floats,
+							 o_itr->trxs))
+   .send();
+
+	// erase original object
+   	eraseobj (scope, id);
+}
+
 void hyphadao::create (const name&						scope,
 						const map<string, name> 		names,
 						const map<string, string>       strings,
@@ -336,7 +392,10 @@ void hyphadao::create (const name&						scope,
 	check ( !is_paused(), "Contract is paused for maintenance. Please try again later.");	
 	const name owner = names.at("owner");
 
-	require_auth (owner);
+	check (has_auth (owner) || has_auth(get_self()), "Authentication failed. Must have authority from owner: " +
+		owner.to_string() + "@active or " + get_self().to_string() + "@active.");
+
+	// require_auth (owner);
 	qualify_proposer (owner);
 
 	object_table o_t (get_self(), scope.value);
@@ -350,7 +409,14 @@ void hyphadao::create (const name&						scope,
 		o.floats                   	= floats;
 		o.trxs                     	= trxs;
 
+		config_table      config_s (get_self(), get_self().value);
+   		Config c = config_s.get_or_create (get_self(), Config()); 
+		o.strings["client_version"] = get_string(c.strings, "client_version");
+		o.strings["contract_version"] = get_string(c.strings, "contract_version");
+
 		if (scope == "proposal"_n) {
+			name proposal_type	= names.at("type");
+
 			o.names["ballot_id"]		= register_ballot (owner, strings);
 
 			/* default trx_action_account to hyphadaomain */
@@ -369,27 +435,143 @@ void hyphadao::create (const name&						scope,
 				o.trxs["exec_on_approval"]      = trx;      
 			}	
 
-			if (names.at("type") == "role"_n) { 
+			if (proposal_type == "role"_n) { 
 				// role logic/business rules 
 				check (ints.at("fulltime_capacity_x100") > 0, "fulltime_capacity_x100 must be greater than zero. You submitted: " + std::to_string(ints.at("fulltime_capacity_x100")));
 				check (assets.at("annual_usd_salary").amount > 0, "annual_usd_salary must be greater than zero. You submitted: " + assets.at("annual_usd_salary").to_string());
-			} // else if (names.at("type") == "assignment"_n) {
-				// check (false, "Assignment proposals are not yet supported. Soon.");
-				// check (ints.find("role_id") != ints.end(), "Role ID is required when type is assignment.");
-				// check (ints.find("time_share_x100") != ints.end(), "time_share_x100 is a required field for assignment proposals.");
-				// check (ints.at("time_share_x100") > 0 && ints.at("time_share_x100") < 100, "time_share_x100 must be greater than zero and less than or equal to 100.");
-				// check (ints.find("start_period") != ints.end(), "start_period is a required field for assignment proposals.");
-				// check (ints.find("end_period") != ints.end(), "end_period is a required field for assignment proposals.");
+			} else if (proposal_type == "assignment"_n || proposal_type == "payout"_n)  {
 
-				// o.ints["fk"]	= ints.at("role_id");
+				string debug_str = "";
+				// global ratios
+				float seeds_price_usd = get_float(c.ints, "seeds_usd_valuation_x100");
+				float seeds_deferral_coeff = get_float(c.ints, "seeds_deferral_factor_x100");
+				float hypha_deferral_coeff = get_float(c.ints, "hypha_deferral_factor_x100");
+				debug_str = debug_str + "Globals: seeds_price_usd: " + std::to_string(seeds_price_usd) + ", seeds_deferral_coeff: " +
+					std::to_string(seeds_deferral_coeff) + ", hypha_deferral_coeff: " + std::to_string(hypha_deferral_coeff) + ". ";
 
-				// object_table o_t_role (get_self(), "role"_n.value);
-				// auto o_itr_role = o_t_role.find (ints.at("role_id"));
-				// check (o_itr_role != o_t_role.end(), "Role ID: " + std::to_string(ints.at("role_id")) + " does not exist.");
-				// check (o_itr_role->ints.at("consumed_capacity") + ints.at("time_share_x100") <= o_itr_role->ints.at("fulltime_capacity"), "Role ID: " + 
-				// 	std::to_string (ints.at("role_id")) + " cannot support assignment. Full time capacity (x100) is " + std::to_string(o_itr_role->ints.at("fulltime_capacity")) + 
-				// 	" and consumed capacity (x100) is " + std::to_string(o_itr_role->ints.at("consumed_capacity")) + "; proposal requests time share (x100) of: " + std::to_string(ints.at("time_share")));
-			//}
+				float deferred_perc = 1;
+				if (ints.find("deferred_x100") == ints.end()) {
+					deferred_perc = get_float(ints, "deferred_perc_x100");
+				} else {
+					deferred_perc = get_float(ints, "deferred_x100");
+				}
+				
+				float instant_husd_perc = get_float(ints, "instant_husd_perc_x100");
+				if (deferred_perc == 1) {
+					check (instant_husd_perc == 0, "HUSD percentage must be 0 if deferred percentage is 100%; Your proposal: deferred percentage is " + std::to_string(deferred_perc) + ", HUSD percentage is " + std::to_string(instant_husd_perc));
+				}
+
+				float hypha_ratio = (float) hypha_deferral_coeff * (float) deferred_perc; 
+				float seeds_escrow_ratio = seeds_deferral_coeff * deferred_perc * (1 - instant_husd_perc); 
+				debug_str = debug_str + "Assignment/Payout: " + 
+					", deferred_perc: " + std::to_string(deferred_perc) + 
+					", hypha_ratio: " + std::to_string(hypha_ratio) +
+					", seeds_escrow_ratio: " + std::to_string(seeds_escrow_ratio) +
+					", instant_husd_perc: " + std::to_string(instant_husd_perc) + ". ";
+
+				if (proposal_type == "assignment"_n) {
+					check (ints.find("role_id") != ints.end(), "Role ID is required when type is assignment.");
+					check (ints.find("time_share_x100") != ints.end(), "time_share_x100 is a required field for assignment proposals.");
+					check (ints.at("time_share_x100") > 0 && ints.at("time_share_x100") <= 10000, "time_share_x100 must be greater than zero and less than or equal to 100.");
+					check (ints.find("start_period") != ints.end(), "start_period is a required field for assignment proposals.");
+					check (ints.find("end_period") != ints.end(), "end_period is a required field for assignment proposals.");
+					o.ints["fk"]	= ints.at("role_id");
+
+					object_table o_t_role (get_self(), "role"_n.value);
+					auto o_itr_role = o_t_role.find (ints.at("role_id"));
+					check (o_itr_role != o_t_role.end(), "Role ID: " + std::to_string(ints.at("role_id")) + " does not exist.");
+
+					// role can support this additional assignment with capacity
+					// check (o_itr_role->ints.at("consumed_capacity_x100") + ints.at("time_share_x100") <= o_itr_role->ints.at("fulltime_capacity_x100"), "Role ID: " + 
+					// 	std::to_string (ints.at("role_id")) + " cannot support assignment. Full time capacity (x100) is " + std::to_string(o_itr_role->ints.at("fulltime_capacity_x100")) + 
+					// 	" and consumed capacity (x100) is " + std::to_string(o_itr_role->ints.at("consumed_capacity_x100")) + "; proposal requests time share (x100) of: " + std::to_string(ints.at("time_share_x100")));
+
+					// assignment proposal time_share is greater that or equal role minimum
+					check (ints.at("time_share_x100") >= o_itr_role->ints.at("min_time_share_x100"), "Role ID: " + 
+						std::to_string (ints.at("role_id")) + " has a minimum commitment % (x100) of " + std::to_string(o_itr_role->ints.at("min_time_share_x100")) +
+						"; proposal requests commitment % (x100) of: " + std::to_string(ints.at("time_share_x100")));
+
+					// assignment proposal deferred pay % is greater that or equal role minimum
+					check (ints.at("deferred_x100") >= o_itr_role->ints.at("min_deferred_x100"), "Role ID: " + 
+						std::to_string (ints.at("role_id")) + " has a minimum deferred pay % (x100) of " + std::to_string(o_itr_role->ints.at("min_deferred_x100")) +
+						"; proposal requests deferred % (x100) of: " + std::to_string(ints.at("deferred_x100")));
+
+					// assignment ratios
+					float time_share_perc = get_float(ints, "time_share_x100");
+
+					debug_str = debug_str + "Assignment: time_share_perc: " + std::to_string(time_share_perc) + ", deferred_perc: " +
+						std::to_string(deferred_perc) + ", instant_husd_perc: " + std::to_string(instant_husd_perc) + ". ";
+
+					// calculate HUSD salary amount
+					// 1. normalize annual salary to the time commitment of this proposal
+					// 2. multiply (1) by 0.02026 to calculate a single moon phase; avg. phase is 7.4 days, 49.36 phases per year
+					// 3. multiply (2) by HUSD percent requested on this assignment proposal
+					asset time_share_usd_annual = adjust_asset (o_itr_role->assets.at("annual_usd_salary"), time_share_perc);
+					asset phase_usd_equiv = adjust_asset (time_share_usd_annual, common::PHASE_TO_YEAR_RATIO); 
+					asset phase_husd_salary = adjust_asset (phase_usd_equiv, (float) instant_husd_perc * (float) time_share_perc * ((float) 1 - (float) deferred_perc)); 
+					o.assets["husd_salary_per_phase"] = phase_husd_salary;
+
+					debug_str = debug_str + "Calcs: time_share_usd_annual: " + time_share_usd_annual.to_string() + ", phase_usd_equiv: " + 
+						phase_usd_equiv.to_string() + ", phase_husd_salary: " + phase_husd_salary.to_string() + ". ";
+
+					//calculate HYPHA phase salary amount
+					// float hypha_ratio = (float) hypha_deferral_coeff * (float) deferred_perc; 
+					o.assets["hypha_salary_per_phase"] = adjust_asset ( asset { phase_usd_equiv.amount, common::S_HYPHA }, hypha_ratio); 
+
+					// calculate HVOICE phase salary amount, which is $1.00 USD == 1 HVOICE
+					o.assets["hvoice_salary_per_phase"] = asset { phase_usd_equiv.amount * 2, common::S_HVOICE };
+
+					// calculate instant SEEDS phase salary amount
+					// 1. calculate amount of seeds based on the configured seeds price
+					// 2. calculated deferred ratio as the deferral factor (1.3) * the deferred % of this assignment
+					// 3. calculated the seeds to go to escrow each phase
+					asset phase_seeds_equiv = adjust_asset( asset {phase_usd_equiv.amount * 100, common::S_SEEDS }, (float) 1 / (float) seeds_price_usd); 
+					asset seeds_escrow_phase_salary = adjust_asset(phase_seeds_equiv, seeds_escrow_ratio); 
+					asset seeds_instant_phase_salary = adjust_asset(phase_seeds_equiv, (float) (1 - deferred_perc) * (float) (1 - instant_husd_perc));
+					debug_str = debug_str + "Seeds calcs: phase_seeds_equiv: " + phase_seeds_equiv.to_string() + ", seeds_escrow_phase_salary: " + 
+						seeds_escrow_phase_salary.to_string() + ", seeds_instant_phase_salary: " + seeds_instant_phase_salary.to_string() + ". ";
+					
+					o.assets["seeds_escrow_salary_per_phase"] = seeds_escrow_phase_salary;
+					o.assets["seeds_instant_salary_per_phase"] = seeds_instant_phase_salary;
+
+				} else if (proposal_type == "payout"_n) {
+
+					if (assets.find("usd_amount") != assets.end()) {
+						// using USD amount + configured parameters
+						asset usd_amount = assets.at("usd_amount");
+
+						//calculate HYPHA amount
+						o.assets["hypha_amount"] = adjust_asset ( asset { usd_amount.amount, common::S_HYPHA }, hypha_ratio); 
+						o.assets["hvoice_amount"] = asset { usd_amount.amount * 2, common::S_HVOICE };
+						asset husd_amount = adjust_asset ( asset {usd_amount.amount, common::S_HUSD }, 
+														(float) ((float)instant_husd_perc) * ((float) 1 - (float) deferred_perc) ); 
+						o.assets["husd_amount"] = husd_amount;
+
+						asset seeds_equiv_amount = adjust_asset( asset { usd_amount.amount * 100, common::S_SEEDS }, (float) 1 / (float) seeds_price_usd); 
+						asset seeds_escrow_amount = adjust_asset(seeds_equiv_amount, seeds_escrow_ratio); 
+						asset seeds_instant_amount = adjust_asset(seeds_equiv_amount, (float) (1 - deferred_perc) * (float) (1 - instant_husd_perc));
+						debug_str = debug_str + "Payout: " + 
+						", husd_amount: " + husd_amount.to_string() + 
+						", hypha_amount: " + o.assets["hypha_amount"].to_string() + 
+						", hvoice_amount: " + o.assets["hvoice_amount"].to_string() +
+						", seeds_equiv_amount: " + seeds_equiv_amount.to_string() +
+						", seeds_escrow_amount: " + seeds_escrow_amount.to_string() + 
+						", seeds_instant_amount: " + seeds_instant_amount.to_string() + ". ";
+
+						o.assets["seeds_escrow_amount"] = seeds_escrow_amount;
+						o.assets["seeds_instant_amount"] = seeds_instant_amount;
+					} else {
+						// Advanced mode - using the pre-calculated values
+						// translate seeds_amount (from prior version to escrow seeds)
+						o.assets = assets;
+						if (assets.find("seeds_amount") != assets.end()) {
+							o.assets["seeds_escrow_amount"] = assets.at("seeds_amount");
+							o.assets.erase (o.assets.find("seeds_amount"));
+						}
+					}					
+				}
+				debug (debug_str);
+			}
 		}
 	});      
 }
@@ -435,8 +617,8 @@ void hyphadao::exectrx (const uint64_t& proposal_id) {
 void hyphadao::newrole (const uint64_t& proposal_id) {
 
    	require_auth (get_self());
-	change_scope ("proposal"_n, proposal_id, "proparchive"_n, false);
-	change_scope ("proposal"_n, proposal_id, "role"_n, true);
+	//change_scope ("proposal"_n, proposal_id, "proparchive"_n, false);
+	change_scope ("proposal"_n, proposal_id, "role"_n, false);
 }
 
 void hyphadao::addperiod (const time_point& start_date, const time_point& end_date, const string& phase) {
@@ -464,9 +646,9 @@ void hyphadao::assign ( const uint64_t& 		proposal_id) {
 	}
 
 	// Ensure that this proposal would not push the role over it's approved full time capacity
-	object_table o_t_role (get_self(), "role"_n.value);
-	auto o_itr_role = o_t_role.find (o_itr->ints.at("role_id"));
-	check (o_itr_role != o_t_role.end(), "Role ID: " + std::to_string(o_itr->ints.at("role_id")) + " does not exist.");
+	// object_table o_t_role (get_self(), "role"_n.value);
+	// auto o_itr_role = o_t_role.find (o_itr->ints.at("role_id"));
+	// check (o_itr_role != o_t_role.end(), "Role ID: " + std::to_string(o_itr->ints.at("role_id")) + " does not exist.");
 
 	// auto sorted_by_role = o_t_assignment.get_index<"byfk"_n>();
 	// auto a_itr_by_role = sorted_by_role.find(o_itr->ints.at("fk"));
@@ -479,8 +661,7 @@ void hyphadao::assign ( const uint64_t& 		proposal_id) {
 	// 	std::to_string (o_itr->ints.at("fk")) + " cannot support assignment. Full time capacity (x100) is " + std::to_string(o_itr_role->ints.at("fulltime_capacity_x100")) + 
 	// 	" and consumed capacity (x100) is " + std::to_string(consumed_capacity) + "; proposal requests time share (x100) of: " + std::to_string(o_itr->ints.at("time_share_x100")));
 
-	change_scope ("proposal"_n, proposal_id, "proparchive"_n, false);
-	change_scope ("proposal"_n, proposal_id, "assignment"_n, true);
+	change_scope ("proposal"_n, proposal_id, "assignment"_n, false);
 }
 
 void hyphadao::makepayout (const uint64_t&        proposal_id) {
@@ -492,32 +673,12 @@ void hyphadao::makepayout (const uint64_t&        proposal_id) {
 	check (o_itr != o_t.end(), "Scope: " + "proposal"_n.to_string() + "; Object ID: " + std::to_string(proposal_id) + " does not exist.");
 
 	string memo { "One time payout for Hypha Contribution. Proposal ID: " + std::to_string(proposal_id) };
-	// debug (" HYPHA payout: " + o_itr->assets.at("hypha_amount").to_string());
-
-	if (o_itr->assets.at("hypha_amount").amount > 0) {
-		// debug ("Making a payment to : " + o_itr->names.at("recipient").to_string());
-		bank.makepayment (-1, o_itr->names.at("recipient"), o_itr->assets.at("hypha_amount"), memo, common::NO_ASSIGNMENT, 1);
-	}
-
-	if (o_itr->assets.at("seeds_amount").amount > 0) {
-		bank.makepayment (-1, o_itr->names.at("recipient"), o_itr->assets.at("seeds_amount"), memo, common::NO_ASSIGNMENT, o_itr->ints.at("bypass_escrow"));
-	}
-	
-	if (o_itr->assets.at("hvoice_amount").amount > 0) {
-		bank.makepayment (-1, o_itr->names.at("recipient"), o_itr->assets.at("hvoice_amount"), memo, common::NO_ASSIGNMENT, o_itr->ints.at("bypass_escrow"));
-	}
-
-	// 	config_table      config_s (get_self(), get_self().value);
-   	// 	Config c = config_s.get_or_create (get_self(), Config());  
-
-	// 	action(	
-	// 		permission_level{get_self(), "active"_n}, 
-	// 		c.names.at("telos_decide_contract"), "mint"_n, 
-	// 		make_tuple(o_itr->names.at("recipient"), o_itr->assets.at("hvoice_amount"), memo
-	// 	)).send();
-	// }
-
-	change_scope ("proposal"_n, proposal_id, "proparchive"_n, true);
+	bank.makepayment (-1, o_itr->names.at("recipient"), o_itr->assets.at("hypha_amount"), memo, common::NO_ASSIGNMENT, 1);
+	bank.makepayment (-1, o_itr->names.at("recipient"), o_itr->assets.at("husd_amount"), memo, common::NO_ASSIGNMENT, 1);
+	bank.makepayment (-1, o_itr->names.at("recipient"), o_itr->assets.at("hvoice_amount"), memo, common::NO_ASSIGNMENT, 1);
+	bank.makepayment (-1, o_itr->names.at("recipient"), o_itr->assets.at("seeds_instant_amount"), memo, common::NO_ASSIGNMENT, 1);
+	bank.makepayment (-1, o_itr->names.at("recipient"), o_itr->assets.at("seeds_escrow_amount"), memo, common::NO_ASSIGNMENT, 0);
+//	change_scope ("proposal"_n, proposal_id, "proparchive"_n, true);
 }
 
 void hyphadao::eraseobj (	const name& scope, 
@@ -560,9 +721,11 @@ void hyphadao::closeprop(const uint64_t& proposal_id) {
 	debug_str = debug_str + " Votes Passing: " + votes_pass.to_string() + "\n";
 	debug_str = debug_str + " Votes Failing: " + votes_fail.to_string() + "\n";
 
+	bool passed = false;
 	if (b_itr->total_raw_weight >= quorum_threshold && 			// must meet quorum
 		adjust_asset(votes_pass, 0.2500000000) > votes_fail) {  // must have 80% of the vote power
-		debug_str = debug_str + "Executing transaction\n";
+		debug_str = debug_str + "Proposal passed. Executing transaction. ";
+		passed = true;
 		prop.trxs.at("exec_on_approval").send(current_block_time().to_time_point().sec_since_epoch(), get_self());		
 	}
 
@@ -572,6 +735,12 @@ void hyphadao::closeprop(const uint64_t& proposal_id) {
 		c.names.at("telos_decide_contract"), "closevoting"_n,
 		std::make_tuple(prop.names.at("ballot_id"), true))
 	.send();
+
+	if (passed) {
+		change_scope ("proposal"_n, proposal_id, "proparchive"_n, true);
+	} else {
+		change_scope ("proposal"_n, proposal_id, "failedprops"_n, true);
+	}
 
 	debug (debug_str);
 }
@@ -629,17 +798,19 @@ void hyphadao::payassign (const uint64_t& assignment_id, const uint64_t& period_
 	check (r_itr->ints.at("start_period") <= period_id && r_itr->ints.at("end_period") >= period_id, "For role, period ID must be between " +
 		std::to_string(r_itr->ints.at("start_period")) + " and " + std::to_string(r_itr->ints.at("end_period")) + " (inclusive). You tried: " + std::to_string(period_id));
 
-	float time_share_calc = a_itr->floats.at("time_share");
+	float first_phase_ratio_calc = 1;  // pro-rate based on elapsed % of the first phase
 
 	// pro-rate the payout if the assignment was created 
 	if (a_itr->time_points.at("created_date").sec_since_epoch() > p_itr->start_date.sec_since_epoch()) {
-		time_share_calc = time_share_calc * (float) ( (float) p_itr->end_date.sec_since_epoch() - a_itr->time_points.at("created_date").sec_since_epoch()) / 
+		first_phase_ratio_calc = (float) ( (float) p_itr->end_date.sec_since_epoch() - a_itr->time_points.at("created_date").sec_since_epoch()) / 
 							( (float) p_itr->end_date.sec_since_epoch() - p_itr->start_date.sec_since_epoch());
 	}
 
-	asset hypha_payment = adjust_asset(r_itr->assets.at("hypha_salary"), time_share_calc);
-	asset seeds_payment = adjust_asset(r_itr->assets.at("seeds_salary"), time_share_calc);
-	asset voice_payment = adjust_asset(r_itr->assets.at("voice_salary"), time_share_calc);
+	asset hypha_payment = adjust_asset(a_itr->assets.at("hypha_salary_per_phase"), first_phase_ratio_calc);
+	asset deferred_seeds_payment = adjust_asset(a_itr->assets.at("seeds_escrow_salary_per_phase"), first_phase_ratio_calc);
+	asset instant_seeds_payment = adjust_asset(a_itr->assets.at("seeds_instant_salary_per_phase"), first_phase_ratio_calc);
+	asset husd_payment = adjust_asset(a_itr->assets.at("husd_salary_per_phase"), first_phase_ratio_calc);
+	asset voice_payment = adjust_asset(r_itr->assets.at("hvoice_salary_per_phase"), first_phase_ratio_calc);
 
 	asspay_t.emplace (get_self(), [&](auto &a) {
 		a.ass_payment_id        = asspay_t.available_primary_key();
@@ -648,19 +819,18 @@ void hyphadao::payassign (const uint64_t& assignment_id, const uint64_t& period_
 		a.period_id             = period_id;
 		a.payment_date          = current_block_time().to_time_point();
 		a.payments.push_back (hypha_payment);
-		a.payments.push_back (seeds_payment);
+		a.payments.push_back (deferred_seeds_payment);
+		a.payments.push_back (instant_seeds_payment);
 		a.payments.push_back (voice_payment);
+		a.payments.push_back (husd_payment);
 	});
 
-	bank.makepayment (period_id, a_itr->names.at("assigned_account"), hypha_payment, 
-		"Payment for role " + std::to_string(a_itr->ints.at("role_id")) + "; Period ID: " + std::to_string(period_id),
-		assignment_id, a_itr->ints.at("bypass_escrow"));
+	string memo = "Payment for role " + std::to_string(a_itr->ints.at("role_id")) + "; Assignment ID: " 
+		+ std::to_string(assignment_id) + "; Period ID: " + std::to_string(period_id);
 
-	bank.makepayment (period_id, a_itr->names.at("assigned_account"), seeds_payment, 
-		"Payment for role " + std::to_string(a_itr->ints.at("role_id")) + "; Period ID: " + std::to_string(period_id),
-		assignment_id, a_itr->ints.at("bypass_escrow"));
-
-	bank.makepayment (period_id, a_itr->names.at("assigned_account"), voice_payment, 
-		"Payment for role " + std::to_string(a_itr->ints.at("role_id")) + "; Period ID: " + std::to_string(period_id),
-		assignment_id, a_itr->ints.at("bypass_escrow"));
+	bank.makepayment (period_id, a_itr->names.at("assigned_account"), hypha_payment, memo, assignment_id, 1);
+	bank.makepayment (period_id, a_itr->names.at("assigned_account"), deferred_seeds_payment, memo,	assignment_id, 0);
+	bank.makepayment (period_id, a_itr->names.at("assigned_account"), instant_seeds_payment, memo, assignment_id, 1);
+	bank.makepayment (period_id, a_itr->names.at("assigned_account"), voice_payment, memo, assignment_id, 1);
+	bank.makepayment (period_id, a_itr->names.at("assigned_account"), husd_payment, memo, assignment_id, 1);
 }
