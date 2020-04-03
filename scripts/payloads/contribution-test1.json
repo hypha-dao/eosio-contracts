@@ -1,0 +1,76 @@
+{
+  "data": {
+    "scope": "proposal",
+    "names": [
+      {
+        "key": "ballot_id",
+        "value": "hypha1.....15"
+      },
+      {
+        "key": "owner",
+        "value": "johnnyhypha1"
+      },
+      {
+        "key": "proposal_type",
+        "value": "payouts"
+      },
+      {
+        "key": "proposer",
+        "value": "johnnyhypha1"
+      },
+      {
+        "key": "recipient",
+        "value": "johnnyhypha1"
+      },
+      {
+        "key": "trx_action_contract",
+        "value": "dao.hypha"
+      },
+      {
+        "key": "trx_action_name",
+        "value": "makepayout"
+      },
+      {
+        "key": "type",
+        "value": "payout"
+      }
+    ],
+    "strings": [
+      {
+        "key": "content",
+        "value": "# Contribution to the Passport App  \n\nPassport Lead (Team of 7) This contribution corresponds to the scoping, design, architecture and team management work done on the Passport App between Aug 2019 and Jan 2020. \n\nThis work allowed us to meet 2 important HYPHA milestones:\n- 5th Nov milestone;\n- 20th Feb milestone preparation.\n\nPriority Activities:\n- Connection to the blockchain\n- App design, look & Feel\n- Performance\n- UX and features: People, Forum, Wallet, Co-op (proposals) and Market."
+      },
+      {
+        "key": "description",
+        "value": "Contribution to the Passport App. Passport Lead (Team of 7) This contribution corresponds to the scoping, design, architecture and team management work done on the Passport App."
+      },
+      {
+        "key": "title",
+        "value": "Genesis 2 - From Aug 1 2019 to Jan 31 2020"
+      }
+    ],
+    "assets": [
+      {
+        "key": "hvoice_amount",
+        "value": "168724.00 HVOICE"
+      },
+      {
+        "key": "hypha_amount",
+        "value": "84362.00 HYPHA"
+      },
+      {
+        "key": "seeds_amount",
+        "value": "16872451.0000 SEEDS"
+      }
+    ],
+    "time_points": [
+      {
+        "key": "contribution_date",
+        "value": "2020-01-30T13:00:00.000"
+      }
+    ],
+    "ints": [],
+    "floats": [],
+    "trxs": []
+  }
+}
