@@ -345,14 +345,17 @@ CONTRACT hyphadao : public contract {
          object_table o_t_role (get_self(), "role"_n.value);
          auto o_itr_role = o_t_role.find (role_id);
          checkx (o_itr_role != o_t_role.end(), "Role ID: " + std::to_string(role_id) + " does not exist.");
-         int role_capacity = o_itr_role->ints.at("full_time_capacity_x100");
+         int role_capacity = o_itr_role->ints.at("fulltime_capacity_x100");
 
          object_table o_t_assignment (get_self(), "assignment"_n.value);
          auto sorted_by_role = o_t_assignment.get_index<"byfk"_n>();
          auto a_itr_by_role = sorted_by_role.find(role_id);
          int consumed_capacity = 0;
+         debug ("Role capacity: " + std::to_string(role_capacity) + ", fk: " + 
+               std::to_string(a_itr_by_role->ints.at("fk")) + "; Role ID: " + std::to_string(role_id));
          while (a_itr_by_role != sorted_by_role.end() && a_itr_by_role->ints.at("fk") == role_id) {
             consumed_capacity += a_itr_by_role->ints.at("time_share_x100");
+            a_itr_by_role++;
          }
 
          checkx (consumed_capacity + req_time_share_x100 <= role_capacity, "Role ID: " + 
