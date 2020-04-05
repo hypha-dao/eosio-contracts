@@ -226,6 +226,11 @@ void hyphadao::remapply (const name& applicant) {
 	a_t.erase (a_itr);
 }
 
+void hyphadao::debugmsg (const string& message) {
+	require_auth (get_self());
+	debug (message);
+}
+
 void hyphadao::updtrxs () {
 	require_auth (get_self());
 
@@ -443,10 +448,13 @@ void hyphadao::create (const name&						scope,
 
 				string debug_str = "";
 				// global ratios
-				float seeds_price_usd = get_float(c.ints, "seeds_usd_valuation_x100");
+				configtables c_t ("tlosto.seeds"_n, "tlosto.seeds"_n.value);
+				configtable config_t = c_t.get ();
+			
+				float seeds_price_usd = (float) 1 / ((float)config_t.seeds_per_usd.amount / (float) 10000); // get_float(c.ints, "seeds_usd_valuation_x100");
 				float seeds_deferral_coeff = get_float(c.ints, "seeds_deferral_factor_x100");
 				float hypha_deferral_coeff = get_float(c.ints, "hypha_deferral_factor_x100");
-				debug_str = debug_str + "Globals: seeds_price_usd: " + std::to_string(seeds_price_usd) + ", seeds_deferral_coeff: " +
+				debug_str = debug_str + "Globals: seeds_per_usd: " + config_t.seeds_per_usd.to_string() + ", seeds_price_usd: " + std::to_string(seeds_price_usd) + ", seeds_deferral_coeff: " +
 					std::to_string(seeds_deferral_coeff) + ", hypha_deferral_coeff: " + std::to_string(hypha_deferral_coeff) + ". ";
 
 				float deferred_perc = 1;
@@ -470,22 +478,20 @@ void hyphadao::create (const name&						scope,
 					", instant_husd_perc: " + std::to_string(instant_husd_perc) + ". ";
 
 				if (proposal_type == "assignment"_n) {
-					check (ints.find("role_id") != ints.end(), "Role ID is required when type is assignment.");
-					check (ints.find("time_share_x100") != ints.end(), "time_share_x100 is a required field for assignment proposals.");
-					check (ints.at("time_share_x100") > 0 && ints.at("time_share_x100") <= 10000, "time_share_x100 must be greater than zero and less than or equal to 100.");
-					check (ints.find("start_period") != ints.end(), "start_period is a required field for assignment proposals.");
-					check (ints.find("end_period") != ints.end(), "end_period is a required field for assignment proposals.");
+					checkx (ints.find("role_id") != ints.end(), "Role ID is required when type is assignment.");
+					checkx (ints.find("time_share_x100") != ints.end(), "time_share_x100 is a required field for assignment proposals.");
+					checkx (ints.at("time_share_x100") > 0 && ints.at("time_share_x100") <= 10000, "time_share_x100 must be greater than zero and less than or equal to 100.");
+					checkx (ints.find("start_period") != ints.end(), "start_period is a required field for assignment proposals.");
+					checkx (ints.find("end_period") != ints.end(), "end_period is a required field for assignment proposals.");
 					o.ints["fk"]	= ints.at("role_id");
 
 					object_table o_t_role (get_self(), "role"_n.value);
 					auto o_itr_role = o_t_role.find (ints.at("role_id"));
-					check (o_itr_role != o_t_role.end(), "Role ID: " + std::to_string(ints.at("role_id")) + " does not exist.");
+					checkx (o_itr_role != o_t_role.end(), "Role ID: " + std::to_string(ints.at("role_id")) + " does not exist.");
 
-					// role can support this additional assignment with capacity
-					// check (o_itr_role->ints.at("consumed_capacity_x100") + ints.at("time_share_x100") <= o_itr_role->ints.at("fulltime_capacity_x100"), "Role ID: " + 
-					// 	std::to_string (ints.at("role_id")) + " cannot support assignment. Full time capacity (x100) is " + std::to_string(o_itr_role->ints.at("fulltime_capacity_x100")) + 
-					// 	" and consumed capacity (x100) is " + std::to_string(o_itr_role->ints.at("consumed_capacity_x100")) + "; proposal requests time share (x100) of: " + std::to_string(ints.at("time_share_x100")));
-
+					// role has enough remaining capacity
+					check_capacity (ints.at("role_id"), ints.at("time_share_x100"));
+				
 					// assignment proposal time_share is greater that or equal role minimum
 					check (ints.at("time_share_x100") >= o_itr_role->ints.at("min_time_share_x100"), "Role ID: " + 
 						std::to_string (ints.at("role_id")) + " has a minimum commitment % (x100) of " + std::to_string(o_itr_role->ints.at("min_time_share_x100")) +
@@ -542,7 +548,7 @@ void hyphadao::create (const name&						scope,
 
 						//calculate HYPHA amount
 						o.assets["hypha_amount"] = adjust_asset ( asset { usd_amount.amount, common::S_HYPHA }, hypha_ratio); 
-						o.assets["hvoice_amount"] = asset { usd_amount.amount * 2, common::S_HVOICE };
+						o.assets["hvoice_amount"] = asset { usd_amount.amount, common::S_HVOICE };
 						asset husd_amount = adjust_asset ( asset {usd_amount.amount, common::S_HUSD }, 
 														(float) ((float)instant_husd_perc) * ((float) 1 - (float) deferred_perc) ); 
 						o.assets["husd_amount"] = husd_amount;
@@ -619,6 +625,7 @@ void hyphadao::newrole (const uint64_t& proposal_id) {
    	require_auth (get_self());
 	//change_scope ("proposal"_n, proposal_id, "proparchive"_n, false);
 	change_scope ("proposal"_n, proposal_id, "role"_n, false);
+	change_scope ("proposal"_n, proposal_id, "proparchive"_n, true);
 }
 
 void hyphadao::addperiod (const time_point& start_date, const time_point& end_date, const string& phase) {
@@ -645,22 +652,7 @@ void hyphadao::assign ( const uint64_t& 		proposal_id) {
 		a_itr++;
 	}
 
-	// Ensure that this proposal would not push the role over it's approved full time capacity
-	// object_table o_t_role (get_self(), "role"_n.value);
-	// auto o_itr_role = o_t_role.find (o_itr->ints.at("role_id"));
-	// check (o_itr_role != o_t_role.end(), "Role ID: " + std::to_string(o_itr->ints.at("role_id")) + " does not exist.");
-
-	// auto sorted_by_role = o_t_assignment.get_index<"byfk"_n>();
-	// auto a_itr_by_role = sorted_by_role.find(o_itr->ints.at("fk"));
-	// int consumed_capacity = 0;
-	// while (a_itr_by_role != sorted_by_role.end() && a_itr_by_role->ints.at("fk") == o_itr->ints.at("fk")) {
-	// 	consumed_capacity += a_itr_by_role->ints.at("time_share_x100");
-	// }
-
-	// check (consumed_capacity + o_itr->ints.at("time_share_x100") <= o_itr_role->ints.at("fulltime_capacity_x100"), "Role ID: " + 
-	// 	std::to_string (o_itr->ints.at("fk")) + " cannot support assignment. Full time capacity (x100) is " + std::to_string(o_itr_role->ints.at("fulltime_capacity_x100")) + 
-	// 	" and consumed capacity (x100) is " + std::to_string(consumed_capacity) + "; proposal requests time share (x100) of: " + std::to_string(o_itr->ints.at("time_share_x100")));
-
+	check_capacity (o_itr->ints.at("role_id"), o_itr->ints.at("time_share_x100"));
 	change_scope ("proposal"_n, proposal_id, "assignment"_n, false);
 }
 
@@ -727,6 +719,9 @@ void hyphadao::closeprop(const uint64_t& proposal_id) {
 		debug_str = debug_str + "Proposal passed. Executing transaction. ";
 		passed = true;
 		prop.trxs.at("exec_on_approval").send(current_block_time().to_time_point().sec_since_epoch(), get_self());		
+	} else {
+		change_scope ("proposal"_n, proposal_id, "failedprops"_n, false);
+		change_scope ("proposal"_n, proposal_id, "proparchive"_n, true);
 	}
 
 	debug_str = debug_str + string ("Ballot ID read from prop for closing ballot: " + prop.names.at("ballot_id").to_string() + "\n");
@@ -735,12 +730,6 @@ void hyphadao::closeprop(const uint64_t& proposal_id) {
 		c.names.at("telos_decide_contract"), "closevoting"_n,
 		std::make_tuple(prop.names.at("ballot_id"), true))
 	.send();
-
-	if (passed) {
-		change_scope ("proposal"_n, proposal_id, "proparchive"_n, true);
-	} else {
-		change_scope ("proposal"_n, proposal_id, "failedprops"_n, true);
-	}
 
 	debug (debug_str);
 }

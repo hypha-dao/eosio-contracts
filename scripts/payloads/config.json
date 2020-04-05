@@ -44,10 +44,6 @@
         "value": 60
       },
       {
-        "key": "seeds_usd_valuation_x100",
-        "value": 1
-      },
-      {
         "key": "paused",
         "value": 0
       }

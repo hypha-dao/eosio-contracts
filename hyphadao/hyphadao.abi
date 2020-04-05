@@ -328,6 +328,36 @@
             ]
         },
         {
+            "name": "configtable",
+            "base": "",
+            "fields": [
+                {
+                    "name": "seeds_per_usd",
+                    "type": "asset"
+                },
+                {
+                    "name": "tlos_per_usd",
+                    "type": "asset"
+                },
+                {
+                    "name": "citizen_limit",
+                    "type": "asset"
+                },
+                {
+                    "name": "resident_limit",
+                    "type": "asset"
+                },
+                {
+                    "name": "visitor_limit",
+                    "type": "asset"
+                },
+                {
+                    "name": "timestamp",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
             "name": "create",
             "base": "",
             "fields": [
@@ -362,6 +392,16 @@
                 {
                     "name": "trxs",
                     "type": "pair_string_transaction[]"
+                }
+            ]
+        },
+        {
+            "name": "debugmsg",
+            "base": "",
+            "fields": [
+                {
+                    "name": "message",
+                    "type": "string"
                 }
             ]
         },
@@ -803,6 +843,11 @@
             "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Create\nsummary: 'Create a new object'\nicon: http://dho.hypha.earth/statics/app-logo-128x128.png#a71ba6431c13b623eccde41cd14f0f5e3ee694da7e3878407e74d8137bf89916\n---\n\n{{$action.authorization.[0].actor}} creates a new object within the Hypha DHO with the following attributes:\nscope: {{scope}}\nnames: {{to_json names}}\nstrings: {{to_json strings}}\nassets: {{to_json assets}}\ntime_points: {{to_json time_points}}\nints: {{to_json ints}}\nfloats: {{to_json floats}}\ntransactions: {{to_json trxs}}"
         },
         {
+            "name": "debugmsg",
+            "type": "debugmsg",
+            "ricardian_contract": ""
+        },
+        {
             "name": "enroll",
             "type": "enroll",
             "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Enroll \nsummary: 'Enroll an applicant'\nicon: http://dho.hypha.earth/statics/app-logo-128x128.png#a71ba6431c13b623eccde41cd14f0f5e3ee694da7e3878407e74d8137bf89916\n---\n\n{{$action.authorization.[0].actor}} enrolls the existing applicant {{applicant}} with the content {{content}} to Hypha DAO."
@@ -916,6 +961,13 @@
         {
             "name": "config",
             "type": "Config",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "configtable",
+            "type": "configtable",
             "index_type": "i64",
             "key_names": [],
             "key_types": []

@@ -162,6 +162,17 @@ CONTRACT hyphadao : public contract {
 
       typedef multi_index<"debugs"_n, Debug> debug_table;
 
+      struct [[eosio::table, eosio::contract("hyphadao") ]] configtable {
+         asset seeds_per_usd;
+         asset tlos_per_usd;
+         asset citizen_limit;
+         asset resident_limit;
+         asset visitor_limit;
+         uint64_t timestamp;
+      };
+      typedef singleton<"config"_n, configtable> configtables;
+      typedef eosio::multi_index<"config"_n, configtable> dump_for_config;
+
       const uint64_t       MICROSECONDS_PER_HOUR   = (uint64_t)60 * (uint64_t)60 * (uint64_t)1000000;
       const uint64_t       MICROSECONDS_PER_YEAR   = MICROSECONDS_PER_HOUR * (uint64_t)24 * (uint64_t)365;
 
@@ -192,6 +203,7 @@ CONTRACT hyphadao : public contract {
       ACTION updtype ();
       ACTION updroleint (const uint64_t& role_id, const string& key, const int64_t& intvalue) ;
       ACTION recreate (const name& scope, const uint64_t& id);
+      ACTION debugmsg (const string& message);
       // ACTION backupobjs (const name& scope);
       // ACTION erasebackups (const name& scope);
       // ACTION restoreobjs (const name& scope);
@@ -309,6 +321,43 @@ CONTRACT hyphadao : public contract {
          } else {
             return string {""};
          }
+      }
+
+      void checkx (const bool& condition, const string& message) {
+
+         if (condition) {
+            return;
+         }
+
+         transaction trx (time_point_sec(current_time_point())+ (60));
+         trx.actions.emplace_back(
+            permission_level{get_self(), "active"_n}, 
+            get_self(), "debugmsg"_n,
+            std::make_tuple(message));
+         trx.delay_sec = 0;
+         trx.send(get_next_sender_id(), get_self());
+
+         check (false, message);
+      }
+
+      void check_capacity (const uint64_t& role_id, const uint64_t& req_time_share_x100) {
+         // Ensure that this proposal would not push the role over it's approved full time capacity
+         object_table o_t_role (get_self(), "role"_n.value);
+         auto o_itr_role = o_t_role.find (role_id);
+         checkx (o_itr_role != o_t_role.end(), "Role ID: " + std::to_string(role_id) + " does not exist.");
+         int role_capacity = o_itr_role->ints.at("full_time_capacity_x100");
+
+         object_table o_t_assignment (get_self(), "assignment"_n.value);
+         auto sorted_by_role = o_t_assignment.get_index<"byfk"_n>();
+         auto a_itr_by_role = sorted_by_role.find(role_id);
+         int consumed_capacity = 0;
+         while (a_itr_by_role != sorted_by_role.end() && a_itr_by_role->ints.at("fk") == role_id) {
+            consumed_capacity += a_itr_by_role->ints.at("time_share_x100");
+         }
+
+         checkx (consumed_capacity + req_time_share_x100 <= role_capacity, "Role ID: " + 
+            std::to_string (role_id) + " cannot support assignment. Full time capacity (x100) is " + std::to_string(role_capacity) + 
+            " and consumed capacity (x100) is " + std::to_string(consumed_capacity) + "; proposal requests time share (x100) of: " + std::to_string(req_time_share_x100));
       }
 };
 

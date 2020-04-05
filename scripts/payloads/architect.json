@@ -1,0 +1,93 @@
+{
+  "rows": [{
+      "id": 68,
+      "names": [{
+          "key": "ballot_id",
+          "value": "hypha1.....5c"
+        },{
+          "key": "owner",
+          "value": "hyphanewyork"
+        },{
+          "key": "trx_action_contract",
+          "value": "dao.hypha"
+        },{
+          "key": "trx_action_name",
+          "value": "newrole"
+        },{
+          "key": "type",
+          "value": "role"
+        }
+      ],
+      "strings": [{
+          "key": "client_version",
+          "value": "1.0.13 0c81dde6"
+        },{
+          "key": "contract_version",
+          "value": "1.0.1 366e8dfe"
+        },{
+          "key": "description",
+          "value": "PURPOSE  \n\nDesign and develop blockchain components, smart contracts, and backend services for Hypha projects.   \n\nACCOUNTABILITIES   \n\n\\- Lead the design of Hypha applications, especially related to blockchain components.  \n\n\\-Listen to Hypha community members, and translate proposals into technological solutions.  \n\n\\-Ensure Hypha maintains strong principles relating to security and decentralization.  \n\n\\-Develop and test smart contracts and related backend services.  \n\n\\-Contribute to definition of tokenomic and game theoretical algorithms to further the goals of Hypha.  \n\n\\-Develop integrations with the greater Telos and EOSIO ecosystem.  \n\n\\-Good understanding of using cryptography material such as certificates for identity management in order to authenticate members, transactions etc.  \n\n\\-Deep knowledge of EOSIO blockchains, including consensus and operations.  \n\n\\-Create security architecture for managing security of Blockchain and related applications.  \n\n\\-Ability to architect and design integration architecture for integrating applications with Blockchain and, also, participant organizations and their member nodes to Blockchain networks.  \n\n\\-Ability to document designs and clearly present ideas to the Hypha community.\n\n\\-Excellent understanding of source control, devops, Gitlab CI/CD, etc.  Excellent C++ skills, JavaScript/TypeScript a strong bonus.  \n\n\\-Manage the Hypha Open Source projects, including evaluating and approving merge requests.  \n\nDOMAIN  \n\n\\-Hypha Tech Strategy, especially EOSIO blockchain components  \n\n\\-Smart Contracts, Backend Services, and UI integration points  \n\n\\-Dev Ops"
+        },{
+          "key": "title",
+          "value": "Blockchain Architect"
+        },{
+          "key": "url",
+          "value": "https://docs.google.com/document/d/1QHOwoGe0nwGAwxjKxmAXwQoRqMtYeO_K49laY9Q6lGk/edit#"
+        }
+      ],
+      "assets": [{
+          "key": "annual_usd_salary",
+          "value": "213633.00 USD"
+        }
+      ],
+      "time_points": [],
+      "ints": [{
+          "key": "end_period",
+          "value": 84
+        },{
+          "key": "fulltime_capacity_x100",
+          "value": 100
+        },{
+          "key": "min_deferred_x100",
+          "value": 50
+        },{
+          "key": "min_time_share_x100",
+          "value": 10
+        },{
+          "key": "start_period",
+          "value": 36
+        }
+      ],
+      "trxs": [{
+          "key": "exec_on_approval",
+          "value": {
+            "expiration": "2020-05-09T22:30:44",
+            "ref_block_num": 15,
+            "ref_block_prefix": 46384,
+            "max_net_usage_words": 0,
+            "max_cpu_usage_ms": 0,
+            "delay_sec": 0,
+            "context_free_actions": [],
+            "actions": [{
+                "account": "dao.hypha",
+                "name": "newrole",
+                "authorization": [{
+                    "actor": "dao.hypha",
+                    "permission": "active"
+                  }
+                ],
+                "data": "4400000000000000"
+              }
+            ],
+            "transaction_extensions": []
+          }
+        }
+      ],
+      "floats": [],
+      "created_date": "2020-04-04T22:30:44.500",
+      "updated_date": "2020-04-04T22:30:44.500"
+    }
+  ],
+  "more": false,
+  "next_key": ""
+}

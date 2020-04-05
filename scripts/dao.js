@@ -255,7 +255,7 @@ const main = async () => {
     const proposal = JSON.parse(fs.readFileSync(opts.file.filename, 'utf8'));
     console.log ("\nParsing the proposal from : ", opts.file.filename);
     console.log ("-- title            : ", proposal.data.strings.find(o => o.key === 'title').value);
-    console.log ("-- type    : ", proposal.data.names.find(o => o.key === 'type').value);
+    console.log ("-- type             : ", proposal.data.names.find(o => o.key === 'type').value);
     console.log ("-- proposer         : ", proposal.data.names.find(o => o.key === 'owner').value);
 
     console.log ("\nSubmitting proposal : ", opts.file.filename);

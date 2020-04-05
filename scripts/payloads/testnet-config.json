@@ -18,13 +18,22 @@
         "value": "escrow.seeds"
       }
     ],
-    "strings": [],
+    "strings": [
+      {
+        "key": "client_version",
+        "value": "1.0.13 0c81dde6"
+      },
+      {
+        "key":"contract_version",
+        "value": "1.0.1 366e8dfe"
+      }
+    ],
     "assets": [],
     "time_points": [],
     "ints": [
       {
         "key": "voting_duration_sec",
-        "value": 604800
+        "value": 30
       },
       {
         "key": "seeds_deferral_factor_x100",
@@ -33,10 +42,6 @@
       {
         "key": "hypha_deferral_factor_x100",
         "value": 60
-      },
-      {
-        "key": "seeds_usd_valuation_x100",
-        "value": 1
       },
       {
         "key": "paused",
