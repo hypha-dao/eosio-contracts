@@ -204,6 +204,7 @@ CONTRACT hyphadao : public contract {
       ACTION updroleint (const uint64_t& role_id, const string& key, const int64_t& intvalue) ;
       ACTION recreate (const name& scope, const uint64_t& id);
       ACTION debugmsg (const string& message);
+      ACTION updversion (const string& component, const string& version);
       // ACTION backupobjs (const name& scope);
       // ACTION erasebackups (const name& scope);
       // ACTION restoreobjs (const name& scope);

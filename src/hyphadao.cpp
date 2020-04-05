@@ -175,6 +175,13 @@ void hyphadao::setconfig (	const map<string, name> 		names,
 	}
 }
 
+void hyphadao::updversion (const string& component, const string& version) {
+	config_table      config_s (get_self(), get_self().value);
+   	Config c = config_s.get_or_create (get_self(), Config());   
+	c.strings[component] = version;
+	config_s.set (c, get_self());
+}
+
 void hyphadao::setlastballt ( const name& last_ballot_id) {
 	require_auth (get_self());
 	config_table      config_s (get_self(), get_self().value);

@@ -799,6 +799,20 @@
             "name": "updtype",
             "base": "",
             "fields": []
+        },
+        {
+            "name": "updversion",
+            "base": "",
+            "fields": [
+                {
+                    "name": "component",
+                    "type": "string"
+                },
+                {
+                    "name": "version",
+                    "type": "string"
+                }
+            ]
         }
     ],
     "actions": [
@@ -940,6 +954,11 @@
         {
             "name": "updtype",
             "type": "updtype",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "updversion",
+            "type": "updversion",
             "ricardian_contract": ""
         }
     ],
