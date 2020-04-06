@@ -464,13 +464,7 @@ void hyphadao::create (const name&						scope,
 				debug_str = debug_str + "Globals: seeds_per_usd: " + config_t.seeds_per_usd.to_string() + ", seeds_price_usd: " + std::to_string(seeds_price_usd) + ", seeds_deferral_coeff: " +
 					std::to_string(seeds_deferral_coeff) + ", hypha_deferral_coeff: " + std::to_string(hypha_deferral_coeff) + ". ";
 
-				float deferred_perc = 1;
-				if (ints.find("deferred_x100") == ints.end()) {
-					deferred_perc = get_float(ints, "deferred_perc_x100");
-				} else {
-					deferred_perc = get_float(ints, "deferred_x100");
-				}
-				
+				float deferred_perc = get_float(ints, "deferred_perc_x100");
 				float instant_husd_perc = get_float(ints, "instant_husd_perc_x100");
 				if (deferred_perc == 1) {
 					check (instant_husd_perc == 0, "HUSD percentage must be 0 if deferred percentage is 100%; Your proposal: deferred percentage is " + std::to_string(deferred_perc) + ", HUSD percentage is " + std::to_string(instant_husd_perc));
@@ -505,9 +499,9 @@ void hyphadao::create (const name&						scope,
 						"; proposal requests commitment % (x100) of: " + std::to_string(ints.at("time_share_x100")));
 
 					// assignment proposal deferred pay % is greater that or equal role minimum
-					check (ints.at("deferred_x100") >= o_itr_role->ints.at("min_deferred_x100"), "Role ID: " + 
+					check (ints.at("deferred_perc_x100") >= o_itr_role->ints.at("min_deferred_x100"), "Role ID: " + 
 						std::to_string (ints.at("role_id")) + " has a minimum deferred pay % (x100) of " + std::to_string(o_itr_role->ints.at("min_deferred_x100")) +
-						"; proposal requests deferred % (x100) of: " + std::to_string(ints.at("deferred_x100")));
+						"; proposal requests deferred % (x100) of: " + std::to_string(ints.at("deferred_perc_x100")));
 
 					// assignment ratios
 					float time_share_perc = get_float(ints, "time_share_x100");
