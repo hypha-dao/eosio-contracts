@@ -209,23 +209,30 @@ class Bank {
                             const asset& token_amount,
                             const string& memo)
         {
+            // translate USD to HUSD - should be temporary fix
+            asset new_asset = token_amount;
+            if (token_amount.symbol.code().to_string() == "USD") {
+                new_asset = asset (token_amount.amount, common::S_HUSD);
+            } 
+            const asset updated_asset = new_asset;
+
             string debug_str = "";
             debug_str = debug_str + "Issue Token Event; ";
             debug_str = debug_str + "    Token Contract  : " + token_contract.to_string() + "; ";
             debug_str = debug_str + "    Issue To        : " + to.to_string() + "; ";
-            debug_str = debug_str + "    Issue Amount    : " + token_amount.to_string() + ";";
+            debug_str = debug_str + "    Issue Amount    : " + updated_asset.to_string() + ";";
             debug_str = debug_str + "    Memo            : " + memo + ".";
 
             action(
                 permission_level{contract, "active"_n},
                 token_contract, "issue"_n,
-                std::make_tuple(contract, token_amount, memo))
+                std::make_tuple(contract, updated_asset, memo))
             .send();
 
             action(
                 permission_level{contract, "active"_n},
                 token_contract, "transfer"_n,
-                std::make_tuple(contract, to, token_amount, memo))
+                std::make_tuple(contract, to, updated_asset, memo))
             .send();
 
             debug (debug_str);

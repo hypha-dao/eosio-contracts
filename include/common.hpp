@@ -12,6 +12,8 @@ namespace common {
     static const symbol         S_SEEDS                         ("SEEDS", 4);
     static const symbol         S_HUSD                          ("HUSD", 2);
 
+    static const asset          RAM_ALLOWANCE                   = asset (20000, symbol("TLOS", 4));
+
     // 365.25 / 7.4
     static const float          PHASES_PER_YEAR                 = 49.3581081081;
 

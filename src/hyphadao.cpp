@@ -212,6 +212,12 @@ void hyphadao::enroll (	const name& enroller,
 		make_tuple(applicant, one_hvoice, memo))
 	.send();
 
+	action(	
+		permission_level{get_self(), "active"_n}, 
+		"eosio"_n, "buyram"_n, 
+		make_tuple(get_self(), applicant, common::RAM_ALLOWANCE))
+	.send();
+
 	// Should we also send 1 HYPHA?  I think so, so I'll put it for now, but comment it out
 	// asset one_hypha = asset { 1, common::S_HYPHA };
 	// bank.makepayment (-1, applicant, one_hypha, memo, common::NO_ASSIGNMENT);
@@ -501,7 +507,7 @@ void hyphadao::create (const name&						scope,
 					// assignment proposal deferred pay % is greater that or equal role minimum
 					check (ints.at("deferred_perc_x100") >= o_itr_role->ints.at("min_deferred_x100"), "Role ID: " + 
 						std::to_string (ints.at("role_id")) + " has a minimum deferred pay % (x100) of " + std::to_string(o_itr_role->ints.at("min_deferred_x100")) +
-						"; proposal requests deferred % (x100) of: " + std::to_string(ints.at("deferred_perc_x100")));
+						"; proposal requests deferred % (x100) of: " + std::to_string(ints.at("deferred_perc_The x100")));
 
 					// assignment ratios
 					float time_share_perc = get_float(ints, "time_share_x100");
@@ -515,7 +521,8 @@ void hyphadao::create (const name&						scope,
 					// 3. multiply (2) by HUSD percent requested on this assignment proposal
 					asset time_share_usd_annual = adjust_asset (o_itr_role->assets.at("annual_usd_salary"), time_share_perc);
 					asset phase_usd_equiv = adjust_asset (time_share_usd_annual, common::PHASE_TO_YEAR_RATIO); 
-					asset phase_husd_salary = adjust_asset (phase_usd_equiv, (float) instant_husd_perc * (float) time_share_perc * ((float) 1 - (float) deferred_perc)); 
+					asset phase_usd_salary = adjust_asset (phase_usd_equiv, (float) instant_husd_perc * (float) time_share_perc * ((float) 1 - (float) deferred_perc)); 
+					asset phase_husd_salary = asset { phase_usd_salary.amount, common::S_HUSD };  // convert symbol
 					o.assets["husd_salary_per_phase"] = phase_husd_salary;
 
 					debug_str = debug_str + "Calcs: time_share_usd_annual: " + time_share_usd_annual.to_string() + ", phase_usd_equiv: " + 
@@ -743,6 +750,8 @@ void hyphadao::qualify_proposer (const name& proposer) {
 
 void hyphadao::payassign (const uint64_t& assignment_id, const uint64_t& period_id) {
 
+	//debugmsg ("paying assignment for assignment_id: " + std::to_string(assignment_id));
+
 	check ( !is_paused(), "Contract is paused for maintenance. Please try again later.");	
 
 	object_table o_t_assignment (get_self(), "assignment"_n.value);
@@ -765,6 +774,8 @@ void hyphadao::payassign (const uint64_t& assignment_id, const uint64_t& period_
 		per_itr++;
 	}
 
+	// debugmsg ("payment has not been  made for this period yet");
+
 	// Check that the period has elapsed
 	auto p_itr = bank.period_t.find (period_id);
 	check (p_itr != bank.period_t.end(), "Cannot make payment. Period ID not found: " + std::to_string(period_id));
@@ -778,7 +789,7 @@ void hyphadao::payassign (const uint64_t& assignment_id, const uint64_t& period_
 	// debug ( "Period end Seconds : " + std::to_string(p_itr->end_date.sec_since_epoch()));
 
 	// check that the creation date of the assignment is before the end of the period
-	check (a_itr->time_points.at("created_date").sec_since_epoch() < p_itr->end_date.sec_since_epoch(), 
+	check (a_itr->created_date.sec_since_epoch() < p_itr->end_date.sec_since_epoch(), 
 		"Cannot make payment to assignment. Assignment was not approved before this period.");
 
 	// check that pay period is between (inclusive) the start and end period of the role and the assignment
@@ -791,8 +802,8 @@ void hyphadao::payassign (const uint64_t& assignment_id, const uint64_t& period_
 	float first_phase_ratio_calc = 1;  // pro-rate based on elapsed % of the first phase
 
 	// pro-rate the payout if the assignment was created 
-	if (a_itr->time_points.at("created_date").sec_since_epoch() > p_itr->start_date.sec_since_epoch()) {
-		first_phase_ratio_calc = (float) ( (float) p_itr->end_date.sec_since_epoch() - a_itr->time_points.at("created_date").sec_since_epoch()) / 
+	if (a_itr->created_date.sec_since_epoch() > p_itr->start_date.sec_since_epoch()) {
+		first_phase_ratio_calc = (float) ( (float) p_itr->end_date.sec_since_epoch() - a_itr->created_date.sec_since_epoch()) / 
 							( (float) p_itr->end_date.sec_since_epoch() - p_itr->start_date.sec_since_epoch());
 	}
 
@@ -800,7 +811,7 @@ void hyphadao::payassign (const uint64_t& assignment_id, const uint64_t& period_
 	asset deferred_seeds_payment = adjust_asset(a_itr->assets.at("seeds_escrow_salary_per_phase"), first_phase_ratio_calc);
 	asset instant_seeds_payment = adjust_asset(a_itr->assets.at("seeds_instant_salary_per_phase"), first_phase_ratio_calc);
 	asset husd_payment = adjust_asset(a_itr->assets.at("husd_salary_per_phase"), first_phase_ratio_calc);
-	asset voice_payment = adjust_asset(r_itr->assets.at("hvoice_salary_per_phase"), first_phase_ratio_calc);
+	asset voice_payment = adjust_asset(a_itr->assets.at("hvoice_salary_per_phase"), first_phase_ratio_calc);
 
 	asspay_t.emplace (get_self(), [&](auto &a) {
 		a.ass_payment_id        = asspay_t.available_primary_key();

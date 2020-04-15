@@ -48,12 +48,12 @@ node dao.js -f proposals/config.json --config -h https://test.telos.kitchen
 
 const commandLineArgs = require("command-line-args");
 const fs = require('fs');
+const csv = require("fast-csv");
 
 const { Api, JsonRpc } = require("eosjs");
 const { JsSignatureProvider } = require("eosjs/dist/eosjs-jssig");
 const fetch = require("node-fetch");
 const { TextEncoder, TextDecoder } = require("util");
-const DAO_CONTRACT = "dao.hypha";
 
 async function sendtrx (prod, host, contract, action, authorizer, data) {
   const rpc = new JsonRpc(host, { fetch });
@@ -67,9 +67,9 @@ async function sendtrx (prod, host, contract, action, authorizer, data) {
   console.log("Transaction Successfull : ", result.transaction_id);
 }
 
-async function closeProposal (prod, host, proposal) {
+async function closeProposal (prod, host, contract, proposal) {
   try {
-    await sendtrx(prod, host, DAO_CONTRACT, "closeprop", DAO_CONTRACT,
+    await sendtrx(prod, host, contract, "closeprop", contract,
       { "proposal_id": proposal.id}
     )
   } catch (e) {
@@ -85,13 +85,13 @@ async function closeProposal (prod, host, proposal) {
   }
 }
 
-async function getVotingPeriod (host) {
+async function getVotingPeriod (host, contract) {
   let rpc;
   let options = {};
 
   rpc = new JsonRpc(host, { fetch });
-  options.code = DAO_CONTRACT;
-  options.scope = DAO_CONTRACT; 
+  options.code = contract;
+  options.scope = contract; 
 
   options.json = true;
   options.table = "config";
@@ -104,12 +104,12 @@ async function getVotingPeriod (host) {
   }
 }
 
-async function getProposals (host) {
+async function getProposals (host, contract) {
   let rpc;
   let options = {};
 
   rpc = new JsonRpc(host, { fetch });
-  options.code = DAO_CONTRACT;
+  options.code = contract;
   options.json = true;
   options.scope = "proposal";
   options.table = "objects";
@@ -125,12 +125,12 @@ async function getProposals (host) {
   return undefined;  
 }
 
-async function getProposal (host, proposal_id) {
+async function getProposal (host, contract, proposal_id) {
   let rpc;
   let options = {};
 
   rpc = new JsonRpc(host, { fetch });
-  options.code = DAO_CONTRACT;
+  options.code = contract;
   options.json = true;
   options.scope = "proposal";
   options.table = "objects";
@@ -147,13 +147,13 @@ async function getProposal (host, proposal_id) {
   return undefined;  
 }
 
-async function getLastCreatedProposal (host) {
+async function getLastCreatedProposal (host, contract) {
   let rpc;
   let options = {};
 
   rpc = new JsonRpc(host, { fetch });
-  options.code = DAO_CONTRACT;
-  options.scope = DAO_CONTRACT; 
+  options.code = contract;
+  options.scope = contract; 
 
   options.json = true;
   options.scope = "proposal";
@@ -172,6 +172,36 @@ async function getLastCreatedProposal (host) {
   return undefined;  
 }
 
+const addPeriod = async (prod, host, contract, periods) => {
+
+  //async function addPeriods (prod, host, contract, periods) {
+    for (let i = 0; i < periods.length; i++) {
+      try {
+        const { startdate, enddate, phasestart } = periods[i]
+        console.log ("Adding a period: ", startdate)
+        await sendtrx (prod, host, contract, "addperiod", contract, {
+          start_time: startdate,
+          end_time: enddate,
+          phase: phasestart
+        });
+  
+        console.log("Successfully created phase: ", startdate)
+      } catch (e) {
+        console.error(e)
+        console.log('Please, fix an error and run script again')
+        process.exit (1);
+      }
+    }
+  }
+  
+  const addPeriods = (file, prod, host, contract) => {
+    let periods = []
+    const handler = csv.parse({ headers: true })
+    handler.on('data', row => periods.push(row))
+    handler.on('end', () => addPeriod(prod, host, contract, periods))
+    fs.createReadStream(file).pipe(handler)
+  }
+
 class FileDetails {
   constructor (filename) {
     this.filename = filename
@@ -183,6 +213,8 @@ async function loadOptions() {
   const optionDefinitions = [
     { name: "file", alias: "f", type: filename => new FileDetails(filename)  },
     { name: "host", alias: "h", type: String, defaultValue: "https://test.telos.kitchen" },
+    { name: "contract", type: String, defaultValue: "dao.hypha" },
+    { name: "periods", type: Boolean, defaultValue: false },
     { name: "approve", alias: "a", type: Boolean, defaultValue: false },
     { name: "close", alias: "c", type: Boolean, defaultValue: false },
     { name: "closepropid", type: String},
@@ -246,7 +278,7 @@ const main = async () => {
     console.log ("-- telos_decide_contract  : ", config.data.names.find(o => o.key === 'telos_decide_contract').value);
 
     console.log ("\nSubmitting configuration : ", opts.file.filename);
-    await sendtrx(opts.prod, opts.host, DAO_CONTRACT, "setconfig", DAO_CONTRACT, config.data);
+    await sendtrx(opts.prod, opts.host, opts.contract, "setconfig", opts.contract, config.data);
   }
 
   // proposing
@@ -259,7 +291,7 @@ const main = async () => {
     console.log ("-- proposer         : ", proposal.data.names.find(o => o.key === 'owner').value);
 
     console.log ("\nSubmitting proposal : ", opts.file.filename);
-    await sendtrx(opts.prod, opts.host, DAO_CONTRACT, "create", 
+    await sendtrx(opts.prod, opts.host, opts.contract, "create", 
       proposal.data.names.find(o => o.key === 'owner').value, 
       proposal.data);
 
@@ -267,7 +299,7 @@ const main = async () => {
 
       // sleep to ensure the table is written
       await sleep (10000, "Eliminating likelihood of microfork before retrieving proposal...");
-      const lastProposal = await getLastCreatedProposal(opts.host);
+      const lastProposal = await getLastCreatedProposal(opts.host, opts.contract);
 
       if (opts.approve) {
 
@@ -295,25 +327,27 @@ const main = async () => {
         console.log ("-- -- proposal_id   : ", lastProposal.id);
 
         // sleep another 1 hour to ensure the ballot open window is complete
-        const sleepDuration = (await getVotingPeriod(opts.host) * 1000) + 20000;
+        const sleepDuration = (await getVotingPeriod(opts.host, opts.contract) * 1000) + 20000;
         await sleep (sleepDuration, "Waiting " + sleepDuration + " seconds while the ballot expiration expires...");
    
         // close the DAproposal
-        await sendtrx(opts.prod, opts.host, DAO_CONTRACT, "closeprop", 
+        await sendtrx(opts.prod, opts.host, opts.contract, "closeprop", 
           proposal.data.names.find(o => o.key === 'owner').value, 
           { "proposal_id":lastProposal.id });
       }
     }
   } else if (opts.closeall) {
 
-      let proposals = await getProposals(opts.host)
+      let proposals = await getProposals(opts.host, opts.contract)
       proposals.forEach (async function (proposal) {
-        await closeProposal (opts.prod, proposal);
+        await closeProposal (opts.prod, opts.contract, proposal);
       });      
   } else if (opts.closepropid) {
-    await closeProposal (opts.prod, opts.host, await getProposal (opts.host, opts.closepropid))
+    await closeProposal (opts.prod, opts.host, await getProposal (opts.host, opts.contract, opts.closepropid))
   } else if (opts.print_proposal) {
-    await printProposal (await getProposal(opts.host, opts.print_proposal))
+    await printProposal (await getProposal(opts.host, opts.contract, opts.print_proposal))
+  } else if (opts.file && opts.periods) {
+    addPeriods(opts.file.filename, opts.prod, opts.host, opts.contract)
   } else {
     console.log ("Command unsupported. You used: ", JSON.stringify(opts, null, 2));
   }  
