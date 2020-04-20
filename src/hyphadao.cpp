@@ -53,6 +53,11 @@ void hyphadao::remperiods (const uint64_t& begin_period_id,
     bank.remove_periods (begin_period_id, end_period_id);
 }
 
+void hyphadao::changescope (const name& current_scope, const uint64_t& id, const name& new_scope) {
+	require_auth (get_self());
+	change_scope (current_scope, id, new_scope, true);
+}
+
 void hyphadao::resetperiods () {
 	require_auth (get_self());
 	bank.reset_periods();
@@ -633,7 +638,6 @@ void hyphadao::newrole (const uint64_t& proposal_id) {
    	require_auth (get_self());
 	//change_scope ("proposal"_n, proposal_id, "proparchive"_n, false);
 	change_scope ("proposal"_n, proposal_id, "role"_n, false);
-	change_scope ("proposal"_n, proposal_id, "proparchive"_n, true);
 }
 
 void hyphadao::addperiod (const time_point& start_date, const time_point& end_date, const string& phase) {
@@ -662,6 +666,7 @@ void hyphadao::assign ( const uint64_t& 		proposal_id) {
 
 	check_capacity (o_itr->ints.at("role_id"), o_itr->ints.at("time_share_x100"));
 	change_scope ("proposal"_n, proposal_id, "assignment"_n, false);
+	change_scope ("proposal"_n, proposal_id, "proparchive"_n, true);
 }
 
 void hyphadao::makepayout (const uint64_t&        proposal_id) {
@@ -678,7 +683,8 @@ void hyphadao::makepayout (const uint64_t&        proposal_id) {
 	bank.makepayment (-1, o_itr->names.at("recipient"), o_itr->assets.at("hvoice_amount"), memo, common::NO_ASSIGNMENT, 1);
 	bank.makepayment (-1, o_itr->names.at("recipient"), o_itr->assets.at("seeds_instant_amount"), memo, common::NO_ASSIGNMENT, 1);
 	bank.makepayment (-1, o_itr->names.at("recipient"), o_itr->assets.at("seeds_escrow_amount"), memo, common::NO_ASSIGNMENT, 0);
-//	change_scope ("proposal"_n, proposal_id, "proparchive"_n, true);
+	change_scope ("proposal"_n, proposal_id, "payout"_n, false);
+	change_scope ("proposal"_n, proposal_id, "proparchive"_n, true);
 }
 
 void hyphadao::eraseobj (	const name& scope, 

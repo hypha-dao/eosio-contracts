@@ -304,6 +304,24 @@
             ]
         },
         {
+            "name": "changescope",
+            "base": "",
+            "fields": [
+                {
+                    "name": "scope",
+                    "type": "name"
+                },
+                {
+                    "name": "id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "new_scope",
+                    "type": "name"
+                }
+            ]
+        },
+        {
             "name": "closeprop",
             "base": "",
             "fields": [
@@ -840,6 +858,11 @@
             "name": "assign",
             "type": "assign",
             "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Assign\nsummary: 'Adds a new assignment'\nicon: http://dho.hypha.earth/statics/app-logo-128x128.png#a71ba6431c13b623eccde41cd14f0f5e3ee694da7e3878407e74d8137bf89916\n---\n\n{{$action.authorization.[0].actor}} adds a new assignment given the existing proposal with the id: {{proposal_id}}."
+        },
+        {
+            "name": "changescope",
+            "type": "changescope",
+            "ricardian_contract": ""
         },
         {
             "name": "closeprop",

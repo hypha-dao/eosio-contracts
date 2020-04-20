@@ -205,6 +205,7 @@ CONTRACT hyphadao : public contract {
       ACTION recreate (const name& scope, const uint64_t& id);
       ACTION debugmsg (const string& message);
       ACTION updversion (const string& component, const string& version);
+      ACTION changescope (const name& scope, const uint64_t& id, const name& new_scope);
       // ACTION backupobjs (const name& scope);
       // ACTION erasebackups (const name& scope);
       // ACTION restoreobjs (const name& scope);

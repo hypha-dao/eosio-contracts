@@ -1,27 +1,14 @@
-cleos -u https://test.telos.kitchen  push action eosio updateauth '{
-    "account": "escrow.seeds",
-    "permission": "active",
-    "parent": "owner",
+cleos -u https://api.telos.kitchen  push action eosio updateauth '{
+    "account": "kv.hypha",
+    "permission": "owner",
+    "parent": "",
     "auth": {
-        "keys": [
-            {
-                "key": "EOS8C9tXuPMkmB6EA7vDgGtzA99k1BN6UxjkGisC1QKpQ6YV7MFqm",
-                "weight": 1
-            }
-        ],
+        "keys": [],
         "threshold": 1,
-        "accounts": [
-            {
-                "permission": {
-                    "actor": "escrow.seeds",
-                    "permission": "eosio.code"
-                },
-                "weight": 1
-            }
-        ],
+        "accounts": [],
         "waits": []
     }
-}' -p escrow.seeds@owner
+}' -p kv.hypha@owner
 
 cleos -u https://test.telos.kitchen push action eosio updateauth '{
     "account": "dao.hypha",
