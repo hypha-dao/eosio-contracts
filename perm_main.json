@@ -10,6 +10,27 @@ cleos -u https://api.telos.kitchen  push action eosio updateauth '{
     }
 }' -p kv.hypha@owner
 
+cleos -u https://testnet.telos.caleos.io push action eosio updateauth '{
+    "account": "kv.hypha",
+    "permission": "active",
+    "parent": "owner",
+    "auth": {
+        "keys": [],
+        "threshold": 1,
+        "accounts": [
+            {
+                "permission": {
+                    "actor": "kv.hypha",
+                    "permission": "eosio.code"
+                },
+                "weight": 1
+            }
+        ],
+        "waits": []
+    }
+}' -p kv.hypha@owner
+
+
 cleos -u https://test.telos.kitchen push action eosio updateauth '{
     "account": "dao.hypha",
     "permission": "owner",
