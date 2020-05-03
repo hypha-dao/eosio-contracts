@@ -1,10 +1,7 @@
-For detailed documentation, you can see the Hypha DAO User's Guide, particularly creating a Payout Proposal: http://docs.hypha.earth/tech-docs/proposals/payouts/
+Deployed instance:  https://dho.hypha.earth
+User documentation: https://notepad.diglife.coop/6w_69K_8QLSbzNaYcDWtHw?view#
+
+Hypha Home: https://hypha.earth
 
 
-To use contracts: 
-```
-cmake .
-make
-set contract
-```
 
