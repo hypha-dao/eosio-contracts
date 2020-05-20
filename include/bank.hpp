@@ -178,9 +178,10 @@ class Bank {
                         std::make_tuple(contract, recipient, quantity, memo))
                     .send();
                 }
-            } else {   // handles HUSD and HYPHA
-                // need to add steps in here about the deferments         
-                issuetoken (c.names.at("hypha_token_contract"), recipient, quantity, memo );
+            } else if (quantity.symbol == common::S_HUSD) {
+                issuetoken (c.names.at("husd_token_contract"), c.names.at("treasury_contract"), recipient, quantity, memo );
+            } else {   
+                issuetoken (c.names.at("hypha_token_contract"), contract, recipient, quantity, memo );
             } 
            
             payment_t.emplace (contract, [&](auto &p) {
@@ -205,6 +206,7 @@ class Bank {
         }
 
         void issuetoken(const name& token_contract,
+                            const name& issuer,
                             const name& to,
                             const asset& token_amount,
                             const string& memo)
@@ -219,20 +221,21 @@ class Bank {
             string debug_str = "";
             debug_str = debug_str + "Issue Token Event; ";
             debug_str = debug_str + "    Token Contract  : " + token_contract.to_string() + "; ";
+            debug_str = debug_str + "    Issuer          : " + issuer.to_string() + "; ";
             debug_str = debug_str + "    Issue To        : " + to.to_string() + "; ";
             debug_str = debug_str + "    Issue Amount    : " + updated_asset.to_string() + ";";
             debug_str = debug_str + "    Memo            : " + memo + ".";
 
             action(
-                permission_level{contract, "active"_n},
+                permission_level{issuer, "active"_n},
                 token_contract, "issue"_n,
-                std::make_tuple(contract, updated_asset, memo))
+                std::make_tuple(issuer, updated_asset, memo))
             .send();
 
             action(
-                permission_level{contract, "active"_n},
+                permission_level{issuer, "active"_n},
                 token_contract, "transfer"_n,
-                std::make_tuple(contract, to, updated_asset, memo))
+                std::make_tuple(issuer, to, updated_asset, memo))
             .send();
 
             debug (debug_str);

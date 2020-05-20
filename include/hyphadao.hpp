@@ -192,7 +192,7 @@ CONTRACT hyphadao : public contract {
 					      const string& content);
 
       // Admin
-      ACTION reset ();
+      // ACTION reset ();
       ACTION resetperiods();
       ACTION eraseobjs (const name& scope);
       ACTION eraseobj (const name& scope,
@@ -206,6 +206,9 @@ CONTRACT hyphadao : public contract {
       ACTION debugmsg (const string& message);
       ACTION updversion (const string& component, const string& version);
       ACTION changescope (const name& scope, const uint64_t& id, const name& new_scope);
+      ACTION updusdtohusd ();
+      ACTION updballot(const uint64_t& proposal_id, const name& ballot_id);
+      ACTION updcreated (const uint64_t& assignment_id, const time_point& tp);
       // ACTION backupobjs (const name& scope);
       // ACTION erasebackups (const name& scope);
       // ACTION restoreobjs (const name& scope);

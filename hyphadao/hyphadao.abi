@@ -684,11 +684,6 @@
             ]
         },
         {
-            "name": "reset",
-            "base": "",
-            "fields": []
-        },
-        {
             "name": "resetperiods",
             "base": "",
             "fields": []
@@ -791,6 +786,34 @@
             ]
         },
         {
+            "name": "updballot",
+            "base": "",
+            "fields": [
+                {
+                    "name": "proposal_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "ballot_id",
+                    "type": "name"
+                }
+            ]
+        },
+        {
+            "name": "updcreated",
+            "base": "",
+            "fields": [
+                {
+                    "name": "assignment_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "tp",
+                    "type": "time_point"
+                }
+            ]
+        },
+        {
             "name": "updroleint",
             "base": "",
             "fields": [
@@ -815,6 +838,11 @@
         },
         {
             "name": "updtype",
+            "base": "",
+            "fields": []
+        },
+        {
+            "name": "updusdtohusd",
             "base": "",
             "fields": []
         },
@@ -940,11 +968,6 @@
             "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Remove Periods\nsummary: 'Remove a given range of periods'\nicon: http://dho.hypha.earth/statics/app-logo-128x128.png#a71ba6431c13b623eccde41cd14f0f5e3ee694da7e3878407e74d8137bf89916\n---\n\n{{$action.authorization.[0].actor}} removes periods from begin period: {{begin_period_id}} and end period: {{end_period_id}}."
         },
         {
-            "name": "reset",
-            "type": "reset",
-            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Reset\nsummary: 'Reset all tables within this contract'\nicon: http://dho.hypha.earth/statics/app-logo-128x128.png#a71ba6431c13b623eccde41cd14f0f5e3ee694da7e3878407e74d8137bf89916\n---\n\n{{$action.authorization.[0].actor}} resets all the tables within this contract."
-        },
-        {
             "name": "resetperiods",
             "type": "resetperiods",
             "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Reset Periods\nsummary: 'Reset all the periods within this contract'\nicon: http://dho.hypha.earth/statics/app-logo-128x128.png#a71ba6431c13b623eccde41cd14f0f5e3ee694da7e3878407e74d8137bf89916\n---\n\n{{$action.authorization.[0].actor}} resets all the periods within this contract."
@@ -965,6 +988,16 @@
             "ricardian_contract": ""
         },
         {
+            "name": "updballot",
+            "type": "updballot",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "updcreated",
+            "type": "updcreated",
+            "ricardian_contract": ""
+        },
+        {
             "name": "updroleint",
             "type": "updroleint",
             "ricardian_contract": ""
@@ -977,6 +1010,11 @@
         {
             "name": "updtype",
             "type": "updtype",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "updusdtohusd",
+            "type": "updusdtohusd",
             "ricardian_contract": ""
         },
         {
