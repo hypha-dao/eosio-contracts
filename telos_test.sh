@@ -13,6 +13,15 @@ jameshypha11
 thomashypha1
 haydenhypha1
 
+ddd, eee, fff, ggg, hhh
+
+export ACCT=treasurerhhh
+cleos -u https://test.telos.kitchen system newaccount --stake-cpu "1.0000 TLOS" --stake-net "1.0000 TLOS" --buy-ram "1.0000 TLOS" hypha $ACCT EOS76fKLADHgSV4thW7zkA3Z6f1hScTp7Fq1yv3yAFd2NWAVzijTs
+cleos -u https://test.telos.kitchen push action trailservice regvoter '['"$ACCT"', "2,HVOICE", null]' -p $ACCT
+cleos -u https://test.telos.kitchen push action trailservice mint '['"$ACCT"', "1.00 HVOICE", "original mint"]' -p dao.hypha
+cleos -u https://test.telos.kitchen push action dao.hypha apply '['"$ACCT"', "Enroll me please"]' -p $ACCT
+cleos -u https://test.telos.kitchen push action dao.hypha enroll '["johnnyhypha1", '"$ACCT"', "enrolled"]' -p johnnyhypha1
+
 
 cleos -u https://test.telos.kitchen set contract dao.hypha hyphadao/hyphadao
 cleos -u https://test.telos.kitchen set contract token.hypha ~/dev/token/token/
@@ -241,14 +250,14 @@ cleos -u https://test.telos.kitchen push action hyphadaobal1 reset '[]' -p hypha
 cleos -u https://test.telos.kitchen push action hyphadaobali setconfig '["token.hypha", "token.hypha"]' -p hyphadaobali
 
 
-cleos -u https://test.telos.kitchen push action eosio updateauth '{
-    "account": "dao.hypha",
+cleos -u https://api.telos.kitchen push action eosio updateauth '{
+    "account": "bank.hypha",
     "permission": "owner",
     "parent": "",
     "auth": {
         "keys": [
             {
-                "key": "EOS5tEdJd32ANvoxSecRnY5ucr1jbzaVN2rQZegj6NxsevGU8JoaJ",
+                "key": "EOS5PEdGhBeDd4hSN79zv9GnwKRVUW6ZXwsTtTzkNJmt3NDrsWXhd",
                 "weight": 1
             }
         ],
@@ -256,7 +265,7 @@ cleos -u https://test.telos.kitchen push action eosio updateauth '{
         "accounts": [
             {
                 "permission": {
-                    "actor": "dao.hypha",
+                    "actor": "bank.hypha",
                     "permission": "eosio.code"
                 },
                 "weight": 1
@@ -264,16 +273,16 @@ cleos -u https://test.telos.kitchen push action eosio updateauth '{
         ],
         "waits": []
     }
-}' -p dao.hypha@owner
+}' -p bank.hypha@owner
 
-cleos -u https://test.telos.kitchen push action eosio updateauth '{
-    "account": "dao.hypha",
+cleos -u https://api.telos.kitchen push action eosio updateauth '{
+    "account": "bank.hypha",
     "permission": "active",
     "parent": "owner",
     "auth": {
         "keys": [
             {
-                "key": "EOS5tEdJd32ANvoxSecRnY5ucr1jbzaVN2rQZegj6NxsevGU8JoaJ",
+                "key": "EOS5PEdGhBeDd4hSN79zv9GnwKRVUW6ZXwsTtTzkNJmt3NDrsWXhd",
                 "weight": 1
             }
         ],
@@ -281,7 +290,7 @@ cleos -u https://test.telos.kitchen push action eosio updateauth '{
         "accounts": [
             {
                 "permission": {
-                    "actor": "dao.hypha",
+                    "actor": "bank.hypha",
                     "permission": "eosio.code"
                 },
                 "weight": 1
@@ -289,7 +298,7 @@ cleos -u https://test.telos.kitchen push action eosio updateauth '{
         ],
         "waits": []
     }
-}' -p dao.hypha@owner
+}' -p bank.hypha@owner
 
 
 

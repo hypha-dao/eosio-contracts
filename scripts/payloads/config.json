@@ -6,6 +6,14 @@
         "value": "token.hypha"
       },
       {
+        "key": "husd_token_contract",
+        "value": "husd.hypha"
+      },
+      {
+        "key":"treasury_contract",
+        "value":"bank.hypha"
+      },
+      {
         "key": "seeds_token_contract",
         "value": "token.seeds"
       },
@@ -33,7 +41,7 @@
     "ints": [
       {
         "key": "voting_duration_sec",
-        "value": 604800
+        "value": 30
       },
       {
         "key": "seeds_deferral_factor_x100",

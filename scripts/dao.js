@@ -67,6 +67,29 @@ async function sendtrx (prod, host, contract, action, authorizer, data) {
   console.log("Transaction Successfull : ", result.transaction_id);
 }
 
+async function exportToCSV (data) {
+
+  const { ExportToCsv } = require('export-to-csv');
+
+  const options = { 
+    fieldSeparator: ',',
+    quoteStrings: '"',
+    decimalSeparator: '.',
+    filename: 'hyphadata.csv',
+    showLabels: true, 
+    showTitle: true,
+    title: 'Hypha DAO Data',
+    useTextFile: false,
+    useBom: false,
+    useKeysAsHeaders: false,
+    // headers: ['Column 1', 'Column 2', etc...] <-- Won't work with useKeysAsHeaders present!
+  };
+
+  const csvExporter = new ExportToCsv(options);
+  console.log (data);
+  return csvExporter.generateCsv(data);
+}
+
 async function closeProposal (prod, host, contract, proposal) {
   try {
     await sendtrx(prod, host, contract, "closeprop", contract,
@@ -223,7 +246,8 @@ async function loadOptions() {
     { name: "updstrings", type: Boolean, defaultValue: false},
     { name: "closeall", type: Boolean, defaultValue: false},
     { name: "print_proposal", alias: "x", type: String},
-    { name: "prod", type: Boolean, defaultValue: false}
+    { name: "prod", type: Boolean, defaultValue: false},
+    { name: "export", type: Boolean, defaultValue: false}
     // see here to add new options:
     //   - https://github.com/75lb/command-line-args/blob/master/doc/option-definition.md
   ];
@@ -348,6 +372,24 @@ const main = async () => {
     await printProposal (await getProposal(opts.host, opts.contract, opts.print_proposal))
   } else if (opts.file && opts.periods) {
     addPeriods(opts.file.filename, opts.prod, opts.host, opts.contract)
+  } else if (opts.export) {
+    let rpc;
+    let options = {};
+
+    rpc = new JsonRpc(opts.host, { fetch });
+    options.code = opts.contract;
+    options.json = true;
+    options.scope = "assignment";
+    options.table = "objects";
+    options.reverse = false;
+    options.limit = 100;
+    
+    const result = await rpc.get_table_rows(options);
+    if (result.rows.length == 0) {
+      console.log ('No data to export');
+      return;
+    }   
+    await exportToCSV(result.rows);
   } else {
     console.log ("Command unsupported. You used: ", JSON.stringify(opts, null, 2));
   }  

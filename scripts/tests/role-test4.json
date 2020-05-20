@@ -3,16 +3,16 @@
     "scope": "proposal",
     "names": [
       {
-        "key":"type",
-        "value":"role"
+        "key": "type",
+        "value": "role"
       },
       {
-        "key":"owner",
-        "value":"johnnyhypha1"
+        "key": "owner",
+        "value": "johnnyhypha1"
       },
       {
-        "key":"trx_action_name",
-        "value":"newrole"
+        "key": "trx_action_name",
+        "value": "newrole"
       }
     ],
     "strings": [
@@ -32,7 +32,7 @@
     "assets": [
       {
         "key": "annual_usd_salary",
-        "value": "175000.00 USD"
+        "value": "190000.00 USD"
       }
     ],
     "time_points": [],

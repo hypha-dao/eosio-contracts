@@ -1,0 +1,67 @@
+{
+  "data": {
+    "scope": "proposal",
+    "names": [
+      {
+        "key": "assigned_account",
+        "value": "johnnyhypha1"
+      },
+      {
+        "key": "owner",
+        "value": "johnnyhypha1"
+      },
+      {
+        "key": "type",
+        "value": "assignment"
+      },
+      {
+        "key": "trx_action_name",
+        "value": "assign"
+      }
+    ],
+    "strings": [
+      {
+        "key": "title",
+        "value": "Test 3"
+      },
+      {
+        "key": "description",
+        "value": "Weave baskets at the bottom of the sea - Atlantic Ocean"
+      },
+      {
+        "key": "url",
+        "value": "null"
+      }
+    ],
+    "assets": [],
+    "time_points": [],
+    "ints": [
+      {
+        "key": "start_period",
+        "value": "37"
+      },
+      {
+        "key": "end_period",
+        "value": "53"
+      },
+      {
+        "key": "role_id",
+        "value": "6"
+      },
+      {
+        "key": "time_share_x100",
+        "value": "100"
+      },
+      {
+        "key": "deferred_perc_x100",
+        "value": "50"
+      },
+      {
+        "key": "instant_husd_perc_x100",
+        "value": "100"
+      }
+    ],
+    "floats": [],
+    "trxs": []
+  }
+}

@@ -81,3 +81,36 @@ cleos -u https://api.telos.kitchen multisig approve hyphanewyork testtrx '{"acto
 cleos -u https://api.telos.kitchen multisig exec hyphanewyork testtrx 
 
 
+
+
+// cleos -u https://t17.... push action eosio updateauth '{
+//     "account": "drawmanager",  <-- change to actual account name
+//     "permission": "active",
+//     "parent": "owner",
+//     "auth": {
+//         "keys": [
+//             {
+//                 "key": "EOS5tEdJ.....",  <-- change to actual public key
+//                 "weight": 1
+//             }
+//         ],
+//         "threshold": 1,
+//         "accounts": [
+//             {
+//                 "permission": {
+//                     "actor": "entrymanager",  <-- change to actual account name
+//                     "permission": "eosio.code"
+//                 },
+//                 "weight": 1
+//             },
+//             {
+//                 "permission": {
+//                     "actor": "drawmanager",  <-- change to actual account name
+//                     "permission": "eosio.code"
+//                 },
+//                 "weight": 1
+//             }
+//         ],
+//         "waits": []
+//     }
+// }' -p drawmanager@owner  <-- same as account as first one above, owner permission
