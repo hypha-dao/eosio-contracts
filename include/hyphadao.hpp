@@ -277,28 +277,31 @@ CONTRACT hyphadao : public contract {
          });
       }
 
-      void change_scope (const name& current_scope, const uint64_t& id, const name& new_scope, const bool& remove_old) {
+      void change_scope (const name& current_scope, const uint64_t& id, const vector<name>& new_scopes, const bool& remove_old) {
 
          object_table o_t_current (get_self(), current_scope.value);
 	      auto o_itr_current = o_t_current.find(id);
 	      check (o_itr_current != o_t_current.end(), "Scope: " + current_scope.to_string() + "; Object ID: " + std::to_string(id) + " does not exist.");
 
-         object_table o_t_new (get_self(), new_scope.value);
-	      o_t_new.emplace (get_self(), [&](auto &o) {
-            o.id                          = o_t_new.available_primary_key();
-            o.names                       = o_itr_current->names;
-            o.names["prior_scope"]        = current_scope;
-            o.assets                      = o_itr_current->assets;
-            o.strings                     = o_itr_current->strings;
-            o.floats                      = o_itr_current->floats;
-            o.time_points                 = o_itr_current->time_points;
-            o.ints                        = o_itr_current->ints;
-            o.ints["prior_id"]            = o_itr_current->id;  
-            o.trxs                        = o_itr_current->trxs;
-	      });
-
+         for (name new_scope : new_scopes) {
+            object_table o_t_new (get_self(), new_scope.value);
+            o_t_new.emplace (get_self(), [&](auto &o) {
+               o.id                          = o_t_new.available_primary_key();
+               o.names                       = o_itr_current->names;
+               o.names["prior_scope"]        = current_scope;
+               o.assets                      = o_itr_current->assets;
+               o.strings                     = o_itr_current->strings;
+               o.floats                      = o_itr_current->floats;
+               o.time_points                 = o_itr_current->time_points;
+               o.ints                        = o_itr_current->ints;
+               o.ints["prior_id"]            = o_itr_current->id;  
+               o.trxs                        = o_itr_current->trxs;
+            });
+            debug ("Added object ID: " + std::to_string(id) + " from scope: " + current_scope.to_string() + " to scope: " + new_scope.to_string());
+         }
+         
          if (remove_old) {
-            debug ("Erasing object from : " + current_scope.to_string() + "; copying to : " + new_scope.to_string());
+            debug ("Erasing object ID: " + std::to_string(id) + " from : " + current_scope.to_string());
             o_t_current.erase (o_itr_current);
          }
       }

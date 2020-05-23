@@ -57,7 +57,8 @@ void hyphadao::remperiods(const uint64_t &begin_period_id,
 void hyphadao::changescope(const name &current_scope, const uint64_t &id, const name &new_scope)
 {
 	require_auth(get_self());
-	change_scope(current_scope, id, new_scope, true);
+	vector<name> new_scopes = {new_scope};
+	change_scope(current_scope, id, new_scopes, true);
 }
 
 void hyphadao::resetperiods()
@@ -663,7 +664,8 @@ void hyphadao::exectrx(const uint64_t &proposal_id)
 void hyphadao::newrole(const uint64_t &proposal_id)
 {
 	require_auth(get_self());
-	change_scope("proposal"_n, proposal_id, "role"_n, false);
+	vector<name> new_scopes = {name("role"), name("proparchive")};
+	change_scope("proposal"_n, proposal_id, new_scopes, true);
 }
 
 void hyphadao::addperiod(const time_point &start_date, const time_point &end_date, const string &phase)
@@ -685,6 +687,7 @@ void hyphadao::assign(const uint64_t &proposal_id)
 	auto sorted_by_owner = o_t_assignment.get_index<"byowner"_n>();
 	auto a_itr = sorted_by_owner.find(o_itr->names.at("owner").value);
 
+	// this prevents the same user from signing up for the same assignment, disabled since we are enforcing role capacity
 	// while (a_itr != sorted_by_owner.end() && a_itr->names.at("owner") == o_itr->names.at("owner"))
 	// {
 	// 	check(!(a_itr->ints.at("role_id") == o_itr->ints.at("role_id") && a_itr->names.at("owner") == o_itr->names.at("owner")),
@@ -693,8 +696,9 @@ void hyphadao::assign(const uint64_t &proposal_id)
 	// }
 
 	check_capacity(o_itr->ints.at("role_id"), o_itr->ints.at("time_share_x100"));
-	change_scope("proposal"_n, proposal_id, "assignment"_n, false);
-	change_scope("proposal"_n, proposal_id, "proparchive"_n, true);
+
+	vector<name> new_scopes = {name("assignment"), name("proparchive")};
+	change_scope("proposal"_n, proposal_id, new_scopes, true);
 }
 
 void hyphadao::makepayout(const uint64_t &proposal_id)
@@ -711,8 +715,9 @@ void hyphadao::makepayout(const uint64_t &proposal_id)
 	bank.makepayment(-1, o_itr->names.at("recipient"), o_itr->assets.at("hvoice_amount"), memo, common::NO_ASSIGNMENT, 1);
 	bank.makepayment(-1, o_itr->names.at("recipient"), o_itr->assets.at("seeds_instant_amount"), memo, common::NO_ASSIGNMENT, 1);
 	bank.makepayment(-1, o_itr->names.at("recipient"), o_itr->assets.at("seeds_escrow_amount"), memo, common::NO_ASSIGNMENT, 0);
-	change_scope("proposal"_n, proposal_id, "payout"_n, false);
-	change_scope("proposal"_n, proposal_id, "proparchive"_n, true);
+
+	vector<name> new_scopes = {name("payout"), name("proparchive")};
+	change_scope("proposal"_n, proposal_id, new_scopes, true);
 }
 
 void hyphadao::eraseobj(const name &scope,
@@ -767,8 +772,8 @@ void hyphadao::closeprop(const uint64_t &proposal_id)
 	}
 	else
 	{
-		change_scope("proposal"_n, proposal_id, "failedprops"_n, false);
-		change_scope("proposal"_n, proposal_id, "proparchive"_n, true);
+		vector<name> new_scopes = {name("failedprops"), name("proparchive")};
+		change_scope("proposal"_n, proposal_id, new_scopes, true);
 	}
 
 	debug_str = debug_str + string("Ballot ID read from prop for closing ballot: " + prop.names.at("ballot_id").to_string() + "\n");
