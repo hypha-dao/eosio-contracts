@@ -834,12 +834,22 @@
         {
             "name": "updtrxs",
             "base": "",
-            "fields": []
+            "fields": [
+                {
+                    "name": "note",
+                    "type": "string"
+                }
+            ]
         },
         {
             "name": "updtype",
             "base": "",
-            "fields": []
+            "fields": [
+                {
+                    "name": "note",
+                    "type": "string"
+                }
+            ]
         },
         {
             "name": "updusdtohusd",

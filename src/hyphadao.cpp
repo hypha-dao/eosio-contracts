@@ -253,7 +253,7 @@ void hyphadao::updusdtohusd()
 	}
 }
 
-void hyphadao::updtrxs()
+void hyphadao::updtrxs(const string& note)
 {
 	require_auth(get_self());
 
@@ -275,7 +275,7 @@ void hyphadao::updtrxs()
 	}
 }
 
-void hyphadao::updtype()
+void hyphadao::updtype(const string& note)
 {
 	require_auth(get_self());
 

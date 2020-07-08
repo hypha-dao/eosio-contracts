@@ -184,8 +184,8 @@ CONTRACT hyphadao : public contract {
                         const uint64_t&   id);
       ACTION togglepause ();
       ACTION addowner (const name& scope);
-      ACTION updtrxs ();
-      ACTION updtype ();
+      ACTION updtrxs (const string& note);
+      ACTION updtype (const string& note);
       ACTION updroleint (const uint64_t& role_id, const string& key, const int64_t& intvalue) ;
       ACTION recreate (const name& scope, const uint64_t& id);
       ACTION debugmsg (const string& message);
