@@ -81,41 +81,26 @@ CONTRACT hyphadao : public contract {
                const_mem_fun<AssignmentPayout, uint64_t, &AssignmentPayout::by_recipient>>
       > asspay_table;
 
-      // // scope: proposal, proparchive, roles, assignments
-      // struct [[eosio::table, eosio::contract("hyphadao") ]] BUObject
+      // // scope: get_self()
+      // struct [[eosio:;table, eosio::contract("hyphadao")]] CompletedChallenge 
       // {
-      //    uint64_t                   id                ;
-         
-      //    // core maps
-      //    map<string, name>          names             ;
-      //    map<string, string>        strings           ;
-      //    map<string, asset>         assets            ;
-      //    map<string, time_point>    time_points       ;
-      //    map<string, uint64_t>      ints              ;
-      //    map<string, transaction>   trxs              ;
-      //    map<string, float>         floats            ;
-      //    uint64_t                   primary_key()     const { return id; }
+      //    uint64_t    cc_id             ;
+      //    name        completer         ;
+      //    uint64_t    challenge_id      ;
+      //    name        challenge_key     ;
+      //    time_point  completed_date    = current_time_point();
 
-      //    // indexes
-      //    uint64_t                   by_owner()        const { return names.at("owner").value; }
-      //    uint64_t                   by_type ()        const { return names.at("type").value; }
-       
+      //    uint64_t    primary_key()     const { return cc_id; }
+      //    uint64_t    by_completer()    const { return completer.value; }
+      //    uint64_t    by_challengeid()  const { return challenge_id; }
+      //    uint64_t    by_completeddt()  const { return completed_date.sec_since_epoch(); }
+      // }
 
-      //    // timestamps
-      //    time_point                 created_date    = current_time_point();
-      //    time_point                 updated_date    = current_time_point();
-      //    uint64_t    by_created () const { return created_date.sec_since_epoch(); }
-      //    uint64_t    by_updated () const { return updated_date.sec_since_epoch(); }
-      // };
-
-      // typedef multi_index<"backupobjs"_n, BUObject,
-      //    indexed_by<"bycreated"_n, const_mem_fun<BUObject, uint64_t, &BUObject::by_created>>,
-      //    indexed_by<"byupdated"_n, const_mem_fun<BUObject, uint64_t, &BUObject::by_updated>>,
-      //    indexed_by<"byowner"_n, const_mem_fun<BUObject, uint64_t, &BUObject::by_owner>>,
-      //    indexed_by<"bytype"_n, const_mem_fun<BUObject, uint64_t, &BUObject::by_type>>
-         
-      // > backup_object_table;
-
+      // typdef multi_index<"compchallngs"_n, CompletedChallenge,
+      //    indexed_by<"bycompleter"_n, const_mem_fun<CompletedChallenge, uint64_t, &CompletedChallenge::by_completer>>,
+      //    indexed_by<"bychallengid"_n, const_mem_fun<CompletedChallenge, uint64_t, &CompletedChallenge::by_challengeid>>,
+      //    indexed_by<"bycompletedt"_n, const_mem_fun<CompletedChallenge, uint64_t, &CompletedChallenge::by_completeddt>>
+      // > compchallenge_table;
 
       // scope: proposal, proparchive, role, assignment
       struct [[eosio::table, eosio::contract("hyphadao") ]] Object
@@ -209,6 +194,7 @@ CONTRACT hyphadao : public contract {
       ACTION updusdtohusd ();
       ACTION updballot(const uint64_t& proposal_id, const name& ballot_id);
       ACTION updcreated (const uint64_t& assignment_id, const time_point& tp);
+
       // ACTION backupobjs (const name& scope);
       // ACTION erasebackups (const name& scope);
       // ACTION restoreobjs (const name& scope);
@@ -370,6 +356,27 @@ CONTRACT hyphadao : public contract {
             std::to_string (role_id) + " cannot support assignment. Full time capacity (x100) is " + std::to_string(role_capacity) + 
             " and consumed capacity (x100) is " + std::to_string(consumed_capacity) + "; proposal requests time share (x100) of: " + std::to_string(req_time_share_x100));
       }
+
+      // void check_challenge_completion (const name& completer, const uint64_t& challenge_id, const name& challenge_key) {
+      //    // find the challenge
+      //    object_table o_t_challenge(get_self(), "challenge"_n.value);
+      //    auto c_itr = o_t_challenge.find(challenge_id);
+      //    check(c_itr != o_t_challenge.end(), "Challenge does not exist: " + std::to_string(challenge_id));
+      //    check(c_itr->names.at("status") != name("closed"), "Challenge has been closed: " + std::to_string(challenge_id));		
+      //    check(c_itr->names.at("challenge_key") == challenge_key, "Challenge key mismatch. " + c_itr->names.at("challenge_key").to_string() + " does not match " + challenge_key.to_string());
+
+      //    if (c_itr->names.at("claim_type") == name("1claimperuser")) {
+      //       // check that the user hasn't already completed this challenge
+	   //       compchallenge_table cc_t(get_self(), get_self().value);
+      //       auto idx_by_completer = cc_t.get_index<"bycompleter"_n>();
+      //       auto cc_itr = idx_by_completer.find(completer.value);
+      //       while (cc_itr != idx_by_completer.end() && cc_itr->completer == completer) {
+      //          check (cc_itr->challenge_key != challenge_key, "Challenge is only once per user, and this user has already completed this challenge. Challenge key dup.");
+      //          check (cc_itr->challenge_id != challenge_id, "Challenge is only once per user, and this user has already completed this challenge. Challenge ID dup.");
+      //          cc_itr++;
+      //       }
+      //    } 		
+      // }
 };
 
 #endif

@@ -13,10 +13,14 @@ jameshypha11
 thomashypha1
 haydenhypha1
 
-ddd, eee, fff, ggg, hhh
+Private key: 5KBBECPRDtgPJNsTVUerFfxXpya1Ce93avTye9rn4oButkCSbPZ
+Public key: EOS7PJ3hWdozwGZPdTFvuZhAvPakuKTGy4SJfweLGB7Pgu9sU9aW7
 
-export ACCT=treasurerhhh
-cleos -u https://test.telos.kitchen system newaccount --stake-cpu "1.0000 TLOS" --stake-net "1.0000 TLOS" --buy-ram "1.0000 TLOS" hypha $ACCT EOS76fKLADHgSV4thW7zkA3Z6f1hScTp7Fq1yv3yAFd2NWAVzijTs
+ddd, eee, fff, ggg, hhh
+iii, jjj, lll
+
+export ACCT=treasurermmm
+cleos -u https://test.telos.kitchen system newaccount --stake-cpu "1.0000 TLOS" --stake-net "1.0000 TLOS" --buy-ram "1.0000 TLOS" dao.hypha $ACCT EOS7PJ3hWdozwGZPdTFvuZhAvPakuKTGy4SJfweLGB7Pgu9sU9aW7
 cleos -u https://test.telos.kitchen push action trailservice regvoter '['"$ACCT"', "2,HVOICE", null]' -p $ACCT
 cleos -u https://test.telos.kitchen push action trailservice mint '['"$ACCT"', "1.00 HVOICE", "original mint"]' -p dao.hypha
 cleos -u https://test.telos.kitchen push action dao.hypha apply '['"$ACCT"', "Enroll me please"]' -p $ACCT
@@ -320,3 +324,57 @@ hyphamember4
 hyphamember5
 hyphadaobali
 token.hypha
+
+
+
+[{"key":"note number 1", "value":" Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam at vehicula nunc, ac porttitor diam. Morbi semper sem eget tristique bibendum. Quisque viverra blandit leo, non luctus arcu molestie vel. Nullam nec odio venenatis, viverra lacus quis, consectetur quam. Maecenas vel elit lectus. Praesent mauris urna, commodo eu suscipit quis, imperdiet vitae neque. Nunc tincidunt, velit eu egestas convallis, erat diam fermentum ex, et pharetra enim magna varius purus. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Nulla egestas viverra elit, a maximus justo iaculis eget. Suspendisse potenti. Sed arcu nulla, suscipit quis semper in, accumsan ut justo. Nullam eget ligula eget nisl scelerisque vehicula."},{"key":"note number 1", "value":"Sed fermentum, nisl vitae convallis ultrices, velit lectus porta arcu, id pulvinar tellus risus condimentum urna. Aenean elementum justo eu erat imperdiet, quis mollis ipsum viverra. Vivamus lectus neque, ullamcorper a rhoncus ac, facilisis sit amet ligula. Curabitur interdum, dui nec commodo cursus, metus nunc scelerisque eros, in imperdiet dui elit sed mi. Aliquam viverra, augue at ultrices sodales, risus nunc efficitur elit, nec scelerisque ipsum ipsum a est. Nullam dictum tempor est id accumsan. Praesent vestibulum quis metus id fermentum. Nam semper venenatis velit, eu mattis nunc interdum a. Sed efficitur ligula vel maximus molestie. Etiam lacinia consequat dui vitae mattis. Integer eros tortor, vestibulum non turpis placerat, faucibus feugiat libero. Quisque porta semper consectetur. Etiam ut rutrum tellus. Cras auctor, nisi eu euismod porta, ex ligula interdum ipsum, ut fringilla tortor sem a turpis. Nam eleifend consectetur odio, vel accumsan mauris efficitur at."},{"key":"value 3", "value":"Etiam odio quam, tempus vel gravida ut, scelerisque sit amet augue. Aenean tristique eleifend leo blandit porta. Nunc vel rhoncus leo. Nulla nec tellus cursus, eleifend leo ac, vestibulum purus. Nunc ornare nunc quis lacus sagittis imperdiet et ut turpis. Morbi porttitor feugiat sagittis. Ut dignissim odio ligula, quis blandit sapien efficitur ut. Phasellus vitae turpis congue, molestie sem quis, tempus massa. Phasellus eu consectetur lorem. Praesent blandit, magna gravida pulvinar tempor, ipsum arcu lacinia leo, ut iaculis libero urna sit amet nulla. Nam diam massa, imperdiet at metus vel, iaculis vehicula dui. Suspendisse cursus tortor tincidunt mauris rutrum, in placerat arcu pellentesque."},{"key":"number 5", "value":" Curabitur at lobortis dolor. Pellentesque non eros in massa aliquet posuere non vitae felis. Vivamus eget viverra velit. Duis orci leo, efficitur sit amet nisi eu, egestas vestibulum ex. Proin iaculis tortor non eleifend pharetra. In hac habitasse platea dictumst. Nulla ut dui laoreet, ultrices libero non, fermentum mauris. Nunc egestas commodo massa in tincidunt. Aenean bibendum eu sapien id efficitur. In hac habitasse platea dictumst. Nunc nec urna vel mauris dapibus auctor a varius massa. Proin dui nibh, lacinia a tortor ut, auctor maximus erat. Suspendisse eu dui dui. Suspendisse scelerisque sapien odio, at ullamcorper felis finibus eget. Cras sed molestie justo, feugiat luctus enim. Aliquam nec purus eu leo faucibus egestas vitae ac enim. Donec imperdiet leo lorem, nec egestas metus fermentum eu. Phasellus massa enim, porttitor sed neque posuere, iaculis bibendum leo. Proin id euismod tortor, facilisis luctus quam. Nam ante libero, consequat non neque et, molestie tempor mi. Maecenas facilisis egestas malesuada. "},{"key":"value 8", "value":"Aliquam nec facilisis ligula, nec fermentum elit. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vivamus in sapien eros. Curabitur in tellus faucibus, dictum mauris sit amet, porta nunc. Donec sed elit dapibus, rutrum nisi at, ullamcorper ipsum. Vivamus commodo nunc at arcu aliquam iaculis. Fusce aliquam dolor eu dolor efficitur, ut tincidunt augue lacinia. Curabitur scelerisque blandit ipsum, vitae tempus arcu blandit dapibus. Aenean gravida est at dui viverra fermentum. Nunc pellentesque magna nec fermentum pharetra. Praesent enim justo, dignissim nec sollicitudin in, volutpat vitae urna. Sed auctor elit libero, vitae tempor sem aliquam vitae. Nunc tempor quam ut lacus pharetra, id sollicitudin ipsum luctus. In ac facilisis dolor, sit amet scelerisque leo. Quisque ac augue sit amet orci sollicitudin tempus laoreet sit amet velit. Quisque rutrum nisl vel augue accumsan iaculis. "}]
+
+[{"key":"note","value":"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris in purus vitae neque faucibus porttitor. Pellentesque metus augue, suscipit et augue et, pretium iaculis erat. Duis pharetra felis quam, ac dictum tellus tincidunt nec. Maecenas risus dui, euismod vitae pellentesque et, ullamcorper eu risus. Curabitur ultrices sit amet eros in facilisis. Vestibulum molestie, velit bibendum eleifend aliquet, justo nibh sollicitudin dolor, vel consequat dui odio non mauris. Etiam id posuere eros, ut dictum nunc. Phasellus vel cursus est, ac dapibus neque. Vestibulum ac suscipit orci, eget rutrum arcu. Fusce commodo commodo risus sit amet rhoncus. Proin ut tempor nisl. Maecenas vitae auctor diam. Sed tortor turpis, semper non diam et, ultricies venenatis urna.Phasellus eu purus dolor. Curabitur interdum consectetur nisi et porttitor. Donec justo lorem, imperdiet et sollicitudin eu, facilisis nec nisl. Nullam vel nisi eget lorem malesuada aliquet et ac orci. Nunc semper orci imperdiet magna varius placerat. Donec vel metus purus. Phasellus venenatis neque sit amet erat suscipit dictum id in augue. Suspendisse egestas ipsum sed felis porttitor congue. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Vivamus egestas purus velit, suscipit vehicula nunc aliquet sit amet.Aenean vehicula at arcu non consequat. Quisque posuere gravida neque, ut hendrerit nibh placerat non. Mauris ornare neque sed erat dapibus sollicitudin. Sed posuere maximus orci at mollis. In hac habitasse platea dictumst. Quisque blandit nunc ligula, a lacinia leo consequat at. Phasellus accumsan vel ex in tincidunt. Mauris tincidunt tellus efficitur mauris dictum, eu volutpat erat volutpat. Sed posuere mauris velit, a venenatis metus faucibus a. Nulla nec sapien ut quam porttitor consectetur. Nullam molestie tortor orci, sed volutpat velit viverra sit amet. Donec tempus tempor suscipit. Ut finibus laoreet congue.Sed eget ullamcorper massa. Maecenas porta, ipsum non facilisis convallis, ligula metus finibus massa, in malesuada orci nisi at lacus. Maecenas id consequat libero. Suspendisse gravida ornare urna quis venenatis. Nullam rhoncus hendrerit orci, ac mattis lectus sagittis non. Suspendisse bibendum leo id urna dictum tempus. Suspendisse nulla odio, porta vel interdum eget, egestas sit amet ligula. Pellentesque lobortis aliquam sodales. Quisque vel velit lobortis, congue dolor eu, tristique turpis. Duis egestas maximus maximus. Pellentesque erat sem, efficitur quis urna suscipit, imperdiet varius purus.Etiam rutrum eget nibh a consectetur. Praesent in euismod dolor. Interdum et malesuada fames ac ante ipsum primis in faucibus. Pellentesque id malesuada quam. Nunc dolor augue, euismod nec est eu, malesuada rutrum turpis. Nullam rutrum rhoncus turpis, sed cursus odio rutrum et. Fusce egestas massa risus. Morbi porta molestie condimentum. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Aliquam erat volutpat biam. "}]
+
+
+
+
+eosc -u https://test.telos.kitchen --vault-file ../gba-vault-test.json tx create dao.gba setconfig '{
+    "names": [
+      {
+        "key": "telos_decide_contract",
+        "value": "telos.decide"
+      },
+      {
+        "key":"reward_token_contract",
+        "value":"token.gba"
+      }
+    ],
+    "strings": [
+      {
+        "key": "client_version",
+        "value": "pre-alpha"
+      },
+      {
+        "key":"contract_version",
+        "value": "pre-alpha"
+      }
+    ],
+    "assets": [],
+    "time_points": [],
+    "ints": [
+      {
+        "key": "approve_threshold_perc_x100",
+        "value": 50
+      },
+      {
+        "key": "paused",
+        "value": 0
+      },
+      {
+        "key": "quorum_perc_x100",
+        "value": 20
+      },
+      {
+        "key": "voting_duration_sec",
+        "value": 60
+      }
+    ],
+    "floats": [],
+    "trxs": []
+}' -p dao.gba

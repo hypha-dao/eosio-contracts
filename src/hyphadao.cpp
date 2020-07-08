@@ -451,8 +451,10 @@ void hyphadao::create(const name &scope,
 		o.strings["client_version"] = get_string(c.strings, "client_version");
 		o.strings["contract_version"] = get_string(c.strings, "contract_version");
 
+		string debug_str = "";
 		if (scope == "proposal"_n)
 		{
+			check (names.find("type") != names.end(), "Name value with the key of 'type' is required for proposals.");
 			name proposal_type = names.at("type");
 
 			o.names["ballot_id"] = register_ballot(owner, strings);
@@ -462,19 +464,19 @@ void hyphadao::create(const name &scope,
 			{
 				o.names["trx_action_contract"] = get_self();
 			}
-
+			
 			if (names.find("trx_action_name") != names.end())
-			{
-				// this transaction executes if the proposal passes
+			{			// this transaction executes if the proposal passes
 				transaction trx(time_point_sec(current_time_point()) + (60 * 60 * 24 * 35));
 				trx.actions.emplace_back(
 					permission_level{get_self(), "active"_n},
 					o.names.at("trx_action_contract"), o.names.at("trx_action_name"),
 					std::make_tuple(o.id));
 				trx.delay_sec = 0;
-				o.trxs["exec_on_approval"] = trx;
+				o.trxs["exec_on_approval"] = trx;			
 			}
 
+			// input cleaning and calculations for the various proposal types
 			if (proposal_type == "role"_n)
 			{
 				// role logic/business rules
@@ -483,8 +485,6 @@ void hyphadao::create(const name &scope,
 			}
 			else if (proposal_type == "assignment"_n || proposal_type == "payout"_n)
 			{
-
-				string debug_str = "";
 				// global ratios
 				configtables c_t("tlosto.seeds"_n, "tlosto.seeds"_n.value);
 				configtable config_t = c_t.get();
@@ -524,7 +524,7 @@ void hyphadao::create(const name &scope,
 					checkx(o_itr_role != o_t_role.end(), "Role ID: " + std::to_string(ints.at("role_id")) + " does not exist.");
 
 					// role has enough remaining capacity
-					check_capacity(ints.at("role_id"), ints.at("time_share_x100"));
+					// check_capacity(ints.at("role_id"), ints.at("time_share_x100"));
 
 					// assignment proposal time_share is greater that or equal role minimum
 					check(ints.at("time_share_x100") >= o_itr_role->ints.at("min_time_share_x100"), "Role ID: " +
@@ -577,7 +577,6 @@ void hyphadao::create(const name &scope,
 				}
 				else if (proposal_type == "payout"_n)
 				{
-
 					if (assets.find("usd_amount") != assets.end())
 					{
 						// using USD amount + configured parameters
@@ -615,10 +614,11 @@ void hyphadao::create(const name &scope,
 							o.assets.erase(o.assets.find("seeds_amount"));
 						}
 					}
-				}
-				debug(debug_str);
-			}
+				}					
+				
+			} 
 		}
+		debug(debug_str);
 	});
 }
 
@@ -695,7 +695,7 @@ void hyphadao::assign(const uint64_t &proposal_id)
 	// 	a_itr++;
 	// }
 
-	check_capacity(o_itr->ints.at("role_id"), o_itr->ints.at("time_share_x100"));
+	// check_capacity(o_itr->ints.at("role_id"), o_itr->ints.at("time_share_x100"));
 
 	vector<name> new_scopes = {name("assignment"), name("proparchive")};
 	change_scope("proposal"_n, proposal_id, new_scopes, true);
