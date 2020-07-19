@@ -11,6 +11,7 @@
 
 using namespace eosio;
 using std::string;
+using std::map;
 
 namespace hyphaspace
 {
@@ -181,6 +182,8 @@ namespace hyphaspace
                   const map<string, uint64_t> ints,
                   const map<string, float> floats,
                   const map<string, transaction> trxs);
+      
+      ACTION propsuspend (const name &proposer, const name &scope, const uint64_t &id);
 
       ACTION apply(const name &applicant, const string &content);
 
@@ -238,6 +241,7 @@ namespace hyphaspace
       ACTION makepayout(const uint64_t &proposal_id);
       ACTION exectrx(const uint64_t &proposal_id);
       ACTION mergeobject(const uint64_t& proposal_id);
+      ACTION suspend(const uint64_t &proposal_id);
 
       // anyone can call closeprop, it executes the transaction if the voting passed
       ACTION closeprop(const uint64_t &proposal_id);
@@ -269,5 +273,14 @@ namespace hyphaspace
       string get_string(const std::map<string, string> strings, string key);
       void checkx(const bool &condition, const string &message);
       void check_capacity(const uint64_t &role_id, const uint64_t &req_time_share_x100);
+
+      uint64_t get_last_period_id();
+
+      void new_proposal (const map<string, name> &names,
+                           const map<string, string> &strings,
+                           const map<string, asset> &assets,
+                           const map<string, time_point> &time_points,
+                           const map<string, uint64_t> &ints,
+                           const map<string, transaction> &trxs) ;
    };
 } // namespace hyphasapce

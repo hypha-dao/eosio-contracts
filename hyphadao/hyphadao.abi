@@ -424,6 +424,48 @@
             ]
         },
         {
+            "name": "edit",
+            "base": "",
+            "fields": [
+                {
+                    "name": "scope",
+                    "type": "name"
+                },
+                {
+                    "name": "id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "names",
+                    "type": "pair_string_name[]"
+                },
+                {
+                    "name": "strings",
+                    "type": "pair_string_string[]"
+                },
+                {
+                    "name": "assets",
+                    "type": "pair_string_asset[]"
+                },
+                {
+                    "name": "time_points",
+                    "type": "pair_string_time_point[]"
+                },
+                {
+                    "name": "ints",
+                    "type": "pair_string_uint64[]"
+                },
+                {
+                    "name": "floats",
+                    "type": "pair_string_float32[]"
+                },
+                {
+                    "name": "trxs",
+                    "type": "pair_string_transaction[]"
+                }
+            ]
+        },
+        {
             "name": "enroll",
             "base": "",
             "fields": [
@@ -491,6 +533,16 @@
         },
         {
             "name": "makepayout",
+            "base": "",
+            "fields": [
+                {
+                    "name": "proposal_id",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "mergeobject",
             "base": "",
             "fields": [
                 {
@@ -636,6 +688,24 @@
             ]
         },
         {
+            "name": "propsuspend",
+            "base": "",
+            "fields": [
+                {
+                    "name": "proposer",
+                    "type": "name"
+                },
+                {
+                    "name": "scope",
+                    "type": "name"
+                },
+                {
+                    "name": "id",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
             "name": "recreate",
             "base": "",
             "fields": [
@@ -729,6 +799,16 @@
                 {
                     "name": "last_ballot_id",
                     "type": "name"
+                }
+            ]
+        },
+        {
+            "name": "suspend",
+            "base": "",
+            "fields": [
+                {
+                    "name": "proposal_id",
+                    "type": "uint64"
                 }
             ]
         },
@@ -923,6 +1003,11 @@
             "ricardian_contract": ""
         },
         {
+            "name": "edit",
+            "type": "edit",
+            "ricardian_contract": ""
+        },
+        {
             "name": "enroll",
             "type": "enroll",
             "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Enroll\nsummary: 'Enroll a member in the organization'\nicon: https://eos.gyftie.org/statics/logos/mobile.png#54b516210a9fe709b1ccc8c075e16538d51e3664674f707f80630a7e53dbd2e7\n---\n\n{{$action.authorization.[0].actor}} enrolls the existing applicant {{applicant}} with the content {{content}} to Hypha DAO.\""
@@ -948,6 +1033,11 @@
             "ricardian_contract": ""
         },
         {
+            "name": "mergeobject",
+            "type": "mergeobject",
+            "ricardian_contract": ""
+        },
+        {
             "name": "newrole",
             "type": "newrole",
             "ricardian_contract": ""
@@ -956,6 +1046,11 @@
             "name": "payassign",
             "type": "payassign",
             "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Claim Assignment Pay\nsummary: 'Claim assignment pay for a specified assignment and period ID'\nicon: https://eos.gyftie.org/statics/logos/mobile.png#54b516210a9fe709b1ccc8c075e16538d51e3664674f707f80630a7e53dbd2e7\n---\n\n{{$action.authorization.[0].actor}} pays the given assignment with the id: {{assignment_id}} in the period with the id: {{period_id}}.\""
+        },
+        {
+            "name": "propsuspend",
+            "type": "propsuspend",
+            "ricardian_contract": ""
         },
         {
             "name": "recreate",
@@ -990,6 +1085,11 @@
         {
             "name": "setlastballt",
             "type": "setlastballt",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "suspend",
+            "type": "suspend",
             "ricardian_contract": ""
         },
         {
@@ -1056,13 +1156,6 @@
             "key_types": []
         },
         {
-            "name": "configtable",
-            "type": "configtable",
-            "index_type": "i64",
-            "key_names": [],
-            "key_types": []
-        },
-        {
             "name": "debugs",
             "type": "Debug",
             "index_type": "i64",
@@ -1093,6 +1186,13 @@
         {
             "name": "periods",
             "type": "Period",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "seedsconfig",
+            "type": "configtable",
             "index_type": "i64",
             "key_names": [],
             "key_types": []
