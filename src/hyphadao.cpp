@@ -84,8 +84,9 @@ void hyphadao::propsuspend (const name& proposer, const name& scope, const uint6
 	map<string, name> temp_names {}; 
 	map<string, uint64_t> temp_ints {}; 
 
-	temp_names["original_scope"] = scope;	
+	temp_names["original_scope"] = scope;		
 	temp_ints["original_object_id"] = id;
+	temp_names["owner"] = proposer;
 	temp_names["type"] = name("suspend");
 	temp_names["trx_action_name"] = name("suspend");
 
@@ -132,7 +133,7 @@ void hyphadao::edit(const name &scope,
 	temp_names["original_scope"] = scope;	
 	temp_ints["original_object_id"] = id;
 	temp_names["type"] = name("edit");
-	temp_names["trx_action_name"] = name("mergeobjects");
+	temp_names["trx_action_name"] = name("mergeobject");
 
 	new_proposal (temp_names, strings, assets, time_points, temp_ints, trxs);
 }
@@ -190,7 +191,7 @@ void hyphadao::newrole(const uint64_t &proposal_id)
 {
 	require_auth(get_self());
 	vector<name> new_scopes = {name("role"), name("proparchive")};
-	change_scope("proposal"_n, proposal_id, new_scopes, true);
+	change_scope(name("proposal"), proposal_id, new_scopes, true);
 }
 
 void hyphadao::suspend(const uint64_t &proposal_id)
@@ -213,7 +214,7 @@ void hyphadao::suspend(const uint64_t &proposal_id)
 
 	// move the proposal to the archives
 	vector<name> new_scopes = {name("edit"), name("proparchive")};
-	change_scope("proposal"_n, proposal_id, new_scopes, true);
+	change_scope(name("proposal"), proposal_id, new_scopes, true);
 }
 
 void hyphadao::addperiod(const time_point &start_date, const time_point &end_date, const string &phase)
@@ -256,9 +257,9 @@ void hyphadao::mergeobject(const uint64_t &proposal_id) {
 	auto proposal_itr = o_t.find(proposal_id);
 	check(proposal_itr != o_t.end(), "Scope: " + name("proposal").to_string() + "; Object ID: " + std::to_string(proposal_id) + " does not exist.");
 
-	object_table original_t (get_self(), proposal_itr->names.at("scope").value);
+	object_table original_t (get_self(), proposal_itr->names.at("original_scope").value);
 	auto original_itr = original_t.find(proposal_itr->ints.at("original_object_id"));
-	check(original_itr != original_t.end(), "Scope: " + proposal_itr->names.at("scope").to_string() + 
+	check(original_itr != original_t.end(), "Scope: " + proposal_itr->names.at("original_scope").to_string() + 
 		"; Original Object ID: " + std::to_string(proposal_itr->ints.at("original_object_id")) + " does not exist.");
 
 	original_t.modify (original_itr, get_self(), [&](auto &orig) {
@@ -266,11 +267,19 @@ void hyphadao::mergeobject(const uint64_t &proposal_id) {
 		// edit all maps, over-writing any values having the same key
 		std::map<string, name>::const_iterator name_itr;
 		for (name_itr = proposal_itr->names.begin(); name_itr != proposal_itr->names.end(); ++name_itr) {
+			// skip over system attributes
+			if (name_itr->first == "type" || name_itr->first == "ballot_id" || name_itr->first == "prior_scope" ||
+				name_itr->first == "trx_action_name" || name_itr->first == "trx_action_contract" || name_itr->first == "original_scope") {
+				continue;
+			} 
 			orig.names[name_itr->first] = name_itr->second;
 		}
 
 		std::map<string, string>::const_iterator string_itr;
 		for (string_itr = proposal_itr->strings.begin(); string_itr != proposal_itr->strings.end(); ++string_itr) {
+			if (string_itr->first == "client_version" || string_itr->first == "contract_version") {
+				continue;
+			} 
 			orig.strings[string_itr->first] = string_itr->second;
 		}
 
@@ -286,6 +295,9 @@ void hyphadao::mergeobject(const uint64_t &proposal_id) {
 
 		std::map<string, uint64_t>::const_iterator int_itr;
 		for (int_itr = proposal_itr->ints.begin(); int_itr != proposal_itr->ints.end(); ++int_itr) {
+			if (int_itr->first == "revisions" || int_itr->first == "prior_id") {
+				continue;
+			} 
 			orig.ints[int_itr->first] = int_itr->second;
 		}
 
@@ -317,7 +329,7 @@ void hyphadao::makepayout(const uint64_t &proposal_id)
 	bank.makepayment(-1, o_itr->names.at("recipient"), o_itr->assets.at("seeds_escrow_amount"), memo, common::NO_ASSIGNMENT, 0);
 
 	vector<name> new_scopes = {name("payout"), name("proparchive")};
-	change_scope("proposal"_n, proposal_id, new_scopes, true);
+	change_scope(name("proposal"), proposal_id, new_scopes, true);
 }
 
 void hyphadao::closeprop(const uint64_t &proposal_id)
@@ -364,7 +376,7 @@ void hyphadao::closeprop(const uint64_t &proposal_id)
 	else
 	{
 		vector<name> new_scopes = {name("failedprops"), name("proparchive")};
-		change_scope("proposal"_n, proposal_id, new_scopes, true);
+		change_scope(name("proposal"), proposal_id, new_scopes, true);
 	}
 
 	debug_str = debug_str + string("Ballot ID read from prop for closing ballot: " + prop.names.at("ballot_id").to_string() + "\n");
@@ -430,8 +442,8 @@ void hyphadao::payassign(const uint64_t &assignment_id, const uint64_t &period_i
 	check(a_itr->ints.at("start_period") <= period_id && a_itr->ints.at("end_period") >= period_id, "For assignment, period ID must be between " +
 																										std::to_string(a_itr->ints.at("start_period")) + " and " + std::to_string(a_itr->ints.at("end_period")) + " (inclusive). You tried: " + std::to_string(period_id));
 
-	check(r_itr->ints.at("start_period") <= period_id && r_itr->ints.at("end_period") >= period_id, "For role, period ID must be between " +
-																										std::to_string(r_itr->ints.at("start_period")) + " and " + std::to_string(r_itr->ints.at("end_period")) + " (inclusive). You tried: " + std::to_string(period_id));
+	// check(r_itr->ints.at("start_period") <= period_id && r_itr->ints.at("end_period") >= period_id, "For role, period ID must be between " +
+	// 																									std::to_string(r_itr->ints.at("start_period")) + " and " + std::to_string(r_itr->ints.at("end_period")) + " (inclusive). You tried: " + std::to_string(period_id));
 
 	float first_phase_ratio_calc = 1; // pro-rate based on elapsed % of the first phase
 

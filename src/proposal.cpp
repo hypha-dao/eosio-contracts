@@ -62,11 +62,11 @@ void hyphadao::new_proposal(const map<string, name> &names,
             configtables c_t(name("tlosto.seeds"), name("tlosto.seeds").value);
             configtable config_t = c_t.get();
 
-            float seeds_price_usd = (float)1 / ((float)config_t.seeds_per_usd.amount / (float)10000); // get_float(c.ints, "seeds_usd_valuation_x100");
+            float seeds_price_usd = (float)1 / ((float) config_t.seeds_per_usd.amount / (float)10000); // get_float(c.ints, "seeds_usd_valuation_x100");
             float seeds_deferral_coeff = get_float(c.ints, "seeds_deferral_factor_x100");
             float hypha_deferral_coeff = get_float(c.ints, "hypha_deferral_factor_x100");
-            debug_str = debug_str + "Globals: seeds_per_usd: " + config_t.seeds_per_usd.to_string() + ", seeds_price_usd: " + std::to_string(seeds_price_usd) + ", seeds_deferral_coeff: " +
-                        std::to_string(seeds_deferral_coeff) + ", hypha_deferral_coeff: " + std::to_string(hypha_deferral_coeff) + ". ";
+            // debug_str = debug_str + "Globals: seeds_per_usd: " + config_t.seeds_per_usd.to_string() + ", seeds_price_usd: " + std::to_string(seeds_price_usd) + ", seeds_deferral_coeff: " +
+            //             std::to_string(seeds_deferral_coeff) + ", hypha_deferral_coeff: " + std::to_string(hypha_deferral_coeff) + ". ";
 
             float deferred_perc = get_float(ints, "deferred_perc_x100");
             float instant_husd_perc = get_float(ints, "instant_husd_perc_x100");

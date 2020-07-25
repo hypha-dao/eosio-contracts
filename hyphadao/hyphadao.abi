@@ -1156,6 +1156,13 @@
             "key_types": []
         },
         {
+            "name": "configtable",
+            "type": "configtable",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
             "name": "debugs",
             "type": "Debug",
             "index_type": "i64",
@@ -1186,13 +1193,6 @@
         {
             "name": "periods",
             "type": "Period",
-            "index_type": "i64",
-            "key_names": [],
-            "key_types": []
-        },
-        {
-            "name": "seedsconfig",
-            "type": "configtable",
             "index_type": "i64",
             "key_names": [],
             "key_types": []

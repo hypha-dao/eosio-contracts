@@ -158,8 +158,8 @@ namespace hyphaspace
          asset visitor_limit;
          uint64_t timestamp;
       };
-      typedef singleton<name("seedsconfig"), configtable> configtables;
-      typedef eosio::multi_index<name("seedsconfig"), configtable> dump_for_config;
+      typedef singleton<name("config"), configtable> configtables;
+      typedef eosio::multi_index<name("config"), configtable> dump_for_config;
 
       const uint64_t MICROSECONDS_PER_HOUR = (uint64_t)60 * (uint64_t)60 * (uint64_t)1000000;
       const uint64_t MICROSECONDS_PER_YEAR = MICROSECONDS_PER_HOUR * (uint64_t)24 * (uint64_t)365;
