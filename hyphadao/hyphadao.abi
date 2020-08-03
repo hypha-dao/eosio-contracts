@@ -949,6 +949,24 @@
                     "type": "string"
                 }
             ]
+        },
+        {
+            "name": "withdraw",
+            "base": "",
+            "fields": [
+                {
+                    "name": "withdrawer",
+                    "type": "name"
+                },
+                {
+                    "name": "assignment_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "notes",
+                    "type": "string"
+                }
+            ]
         }
     ],
     "actions": [
@@ -1130,6 +1148,11 @@
         {
             "name": "updversion",
             "type": "updversion",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "withdraw",
+            "type": "withdraw",
             "ricardian_contract": ""
         }
     ],

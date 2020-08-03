@@ -98,7 +98,7 @@ void hyphadao::recreate(const name &scope, const uint64_t &id)
 		.send();
 
 	// erase original object
-	eraseobj(scope, id);
+	// eraseobj(scope, id);
 }
 
 void hyphadao::eraseobjs(const name &scope)

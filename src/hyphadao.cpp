@@ -69,6 +69,29 @@ name hyphadao::register_ballot(const name &proposer,
 	return new_ballot_id;
 }
 
+void hyphadao::withdraw (const name &withdrawer, const uint64_t &assignment_id, const string& notes) 
+{
+	// check paused state
+	check(!is_paused(), "Contract is paused for maintenance. Please try again later.");
+	require_auth (withdrawer);
+
+	// confirm that the object to be suspended exists
+	object_table original_t (get_self(), name("assignment").value);
+	auto original_itr = original_t.find(assignment_id);
+	check(original_itr != original_t.end(), "Cannot withdraw, original does not exist. Assignment: " + 
+		std::to_string(assignment_id) + " does not exist.");
+	
+	check (original_itr->names.at("assigned_account") == withdrawer, "Only the assigned account can withdraw from an assignment. You are: " + 
+		withdrawer.to_string() + " but the assigned account is " + original_itr->names.at("assigned_account").to_string());
+
+	original_t.modify (original_itr, get_self(), [&](auto &o) {
+		o.ints["end_period"] = bank.get_last_period_id();
+		o.time_points["withdrawal_date"] = current_time_point();
+		o.strings["withdrawal_notes"] = notes;
+		o.updated_date = current_time_point();
+	});
+}
+
 void hyphadao::propsuspend (const name& proposer, const name& scope, const uint64_t& id) 
 {
 	// check paused state
@@ -165,8 +188,6 @@ void hyphadao::create(const name &scope,
 	new_proposal (names, strings, assets, time_points, temp_ints, trxs);
 }
 
-
-
 void hyphadao::exectrx(const uint64_t &proposal_id)
 {
 	require_auth(get_self());
@@ -210,6 +231,8 @@ void hyphadao::suspend(const uint64_t &proposal_id)
 
 	original_t.modify (original_itr, get_self(), [&](auto &o) {
 		o.ints["end_period"] = bank.get_last_period_id();
+		o.time_points["suspension_date"] = current_time_point();
+		o.updated_date = current_time_point();
 	});
 
 	// move the proposal to the archives
@@ -232,9 +255,9 @@ void hyphadao::assign(const uint64_t &proposal_id)
 	check(o_itr != o_t_proposal.end(), "Scope: " + name("proposal").to_string() + "; Object ID: " + std::to_string(proposal_id) + " does not exist.");
 
 	// Ensure that the owner of this proposer doesn't already have this assignment
-	object_table o_t_assignment(get_self(), name("assignment").value);
-	auto sorted_by_owner = o_t_assignment.get_index<name("byowner")>();
-	auto a_itr = sorted_by_owner.find(o_itr->names.at("owner").value);
+	// object_table o_t_assignment(get_self(), name("assignment").value);
+	// auto sorted_by_owner = o_t_assignment.get_index<name("byowner")>();
+	// auto a_itr = sorted_by_owner.find(o_itr->names.at("owner").value);
 
 	// this prevents the same user from signing up for the same assignment, disabled since we are enforcing role capacity
 	// while (a_itr != sorted_by_owner.end() && a_itr->names.at("owner") == o_itr->names.at("owner"))

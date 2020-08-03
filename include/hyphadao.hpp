@@ -184,7 +184,8 @@ namespace hyphaspace
                   const map<string, transaction> trxs);
       
       ACTION propsuspend (const name &proposer, const name &scope, const uint64_t &id);
-
+      ACTION withdraw (const name &withdrawer, const uint64_t &assignment_id, const string& notes);
+      
       ACTION apply(const name &applicant, const string &content);
 
       ACTION enroll(const name &enroller,
