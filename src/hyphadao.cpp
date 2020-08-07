@@ -129,11 +129,7 @@ void hyphadao::edit(const name &scope,
 
 	// check paused state
 	check(!is_paused(), "Contract is paused for maintenance. Please try again later.");
-
-	// the transaction must have the authority of 'self' or the account listed as the owner
-	const name owner = names.at("owner");
-	check(has_auth(owner) || has_auth(get_self()), "Authentication failed. Must have authority from owner: " +
-													   owner.to_string() + "@active or " + get_self().to_string() + "@active.");
+	check(scope != name("proposal"), "Proposals cannot be edited; it must be re-proposed.");
 
 	// check to see if original object exists
 	object_table original_t (get_self(), scope.value);
@@ -141,14 +137,13 @@ void hyphadao::edit(const name &scope,
 	check(original_itr != original_t.end(), "Cannot edit, original does not exist. Scope: " + scope.to_string() + 
 		"; Original Object ID: " + std::to_string(id) + " does not exist.");
 
-	// only owner may propose edits to their object
-	check(original_itr->names.at("owner") == owner, "Only owners can edit their objects. The owner of Original Object ID: " 
-		+ std::to_string(id) + " is " + original_itr->names.at("owner").to_string() + ". You submitted: " + owner.to_string());
+	name owner = original_itr->names.at("owner");
+	check(has_auth(owner) || has_auth(get_self()), "Authentication failed. Must have authority from owner: " +
+													   owner.to_string() + "@active or " + get_self().to_string() + "@active.");
 
 	if (scope == name("draft")) {
 		merge(scope, id, names, strings, assets, time_points, ints, trxs);
 	} else {
-		// create a proposal for the edit
 		// if the proposal was created by 'self' and NOT the owner, flag it as so
 		map<string, uint64_t> temp_ints = ints; 
 		if (!has_auth(owner)) {
@@ -319,7 +314,6 @@ void hyphadao::makepayout(const uint64_t &proposal_id)
 
 void hyphadao::closeprop(const uint64_t &proposal_id)
 {
-
 	check(!is_paused(), "Contract is paused for maintenance. Please try again later.");
 
 	object_table o_t(get_self(), name("proposal").value);
