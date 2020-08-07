@@ -19,6 +19,15 @@ Public key: EOS7PJ3hWdozwGZPdTFvuZhAvPakuKTGy4SJfweLGB7Pgu9sU9aW7
 ddd, eee, fff, ggg, hhh
 iii, jjj, lll
 
+
+eosc -u https://test.telos.kitchen --vault-file ../eosc-testnet-vault.json system newaccount hypha monitor.hypha --stake-cpu "1.0000 TLOS" --stake-net "1.0000 TLOS" --transfer --auth-key EOS5Y5MwfVEDUzRBJVBoWepYK3DBeQ75E8xnhAUjMv6JDuQCJ69UC
+eosc -u https://test.telos.kitchen --vault-file ../eosc-testnet-vault.json transfer dao.hypha publsh.hypha "100.0000 TLOS"
+eosc -u https://test.telos.kitchen --vault-file ../eosc-testnet-vault.json system buyrambytes publsh.hypha publsh.hypha 10000
+
+eosc -u https://test.telos.kitchen --vault-file ../../teloskitchen/tk-dev.json transfer teloskitchen publsh.hypha "1000.0000 TLOS"
+eosc -u https://api.telos.kitchen --vault-file dao.hypha.json system setcontract publsh.hypha ../monitor/monitor/monitor.wasm ../monitor/monitor/monitor.abi
+
+
 export ACCT=treasurermmm
 cleos -u https://test.telos.kitchen system newaccount --stake-cpu "1.0000 TLOS" --stake-net "1.0000 TLOS" --buy-ram "1.0000 TLOS" dao.hypha $ACCT EOS7PJ3hWdozwGZPdTFvuZhAvPakuKTGy4SJfweLGB7Pgu9sU9aW7
 cleos -u https://test.telos.kitchen push action trailservice regvoter '['"$ACCT"', "2,HVOICE", null]' -p $ACCT

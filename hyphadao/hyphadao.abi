@@ -252,16 +252,6 @@
             ]
         },
         {
-            "name": "addowner",
-            "base": "",
-            "fields": [
-                {
-                    "name": "scope",
-                    "type": "name"
-                }
-            ]
-        },
-        {
             "name": "addperiod",
             "base": "",
             "fields": [
@@ -376,6 +366,24 @@
             ]
         },
         {
+            "name": "copytodraft",
+            "base": "",
+            "fields": [
+                {
+                    "name": "copier",
+                    "type": "name"
+                },
+                {
+                    "name": "scope",
+                    "type": "name"
+                },
+                {
+                    "name": "id",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
             "name": "create",
             "base": "",
             "fields": [
@@ -484,7 +492,7 @@
             ]
         },
         {
-            "name": "eraseobj",
+            "name": "erasedoc",
             "base": "",
             "fields": [
                 {
@@ -498,12 +506,12 @@
             ]
         },
         {
-            "name": "eraseobjs",
+            "name": "erasedraft",
             "base": "",
             "fields": [
                 {
-                    "name": "scope",
-                    "type": "name"
+                    "name": "id",
+                    "type": "uint64"
                 }
             ]
         },
@@ -688,6 +696,16 @@
             ]
         },
         {
+            "name": "propdraft",
+            "base": "",
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
             "name": "propsuspend",
             "base": "",
             "fields": [
@@ -757,6 +775,16 @@
             "name": "resetperiods",
             "base": "",
             "fields": []
+        },
+        {
+            "name": "resetscope",
+            "base": "",
+            "fields": [
+                {
+                    "name": "scope",
+                    "type": "name"
+                }
+            ]
         },
         {
             "name": "setconfig",
@@ -866,77 +894,6 @@
             ]
         },
         {
-            "name": "updballot",
-            "base": "",
-            "fields": [
-                {
-                    "name": "proposal_id",
-                    "type": "uint64"
-                },
-                {
-                    "name": "ballot_id",
-                    "type": "name"
-                }
-            ]
-        },
-        {
-            "name": "updcreated",
-            "base": "",
-            "fields": [
-                {
-                    "name": "assignment_id",
-                    "type": "uint64"
-                },
-                {
-                    "name": "tp",
-                    "type": "time_point"
-                }
-            ]
-        },
-        {
-            "name": "updroleint",
-            "base": "",
-            "fields": [
-                {
-                    "name": "role_id",
-                    "type": "uint64"
-                },
-                {
-                    "name": "key",
-                    "type": "string"
-                },
-                {
-                    "name": "intvalue",
-                    "type": "int64"
-                }
-            ]
-        },
-        {
-            "name": "updtrxs",
-            "base": "",
-            "fields": [
-                {
-                    "name": "note",
-                    "type": "string"
-                }
-            ]
-        },
-        {
-            "name": "updtype",
-            "base": "",
-            "fields": [
-                {
-                    "name": "note",
-                    "type": "string"
-                }
-            ]
-        },
-        {
-            "name": "updusdtohusd",
-            "base": "",
-            "fields": []
-        },
-        {
             "name": "updversion",
             "base": "",
             "fields": [
@@ -976,11 +933,6 @@
             "ricardian_contract": ""
         },
         {
-            "name": "addowner",
-            "type": "addowner",
-            "ricardian_contract": ""
-        },
-        {
             "name": "addperiod",
             "type": "addperiod",
             "ricardian_contract": ""
@@ -1011,6 +963,11 @@
             "ricardian_contract": ""
         },
         {
+            "name": "copytodraft",
+            "type": "copytodraft",
+            "ricardian_contract": ""
+        },
+        {
             "name": "create",
             "type": "create",
             "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Create Object\nsummary: 'Create an object in the contract'\nicon: https://eos.gyftie.org/statics/logos/mobile.png#54b516210a9fe709b1ccc8c075e16538d51e3664674f707f80630a7e53dbd2e7\n---\n\n{{$action.authorization.[0].actor}} applies"
@@ -1031,13 +988,13 @@
             "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Enroll\nsummary: 'Enroll a member in the organization'\nicon: https://eos.gyftie.org/statics/logos/mobile.png#54b516210a9fe709b1ccc8c075e16538d51e3664674f707f80630a7e53dbd2e7\n---\n\n{{$action.authorization.[0].actor}} enrolls the existing applicant {{applicant}} with the content {{content}} to Hypha DAO.\""
         },
         {
-            "name": "eraseobj",
-            "type": "eraseobj",
+            "name": "erasedoc",
+            "type": "erasedoc",
             "ricardian_contract": ""
         },
         {
-            "name": "eraseobjs",
-            "type": "eraseobjs",
+            "name": "erasedraft",
+            "type": "erasedraft",
             "ricardian_contract": ""
         },
         {
@@ -1064,6 +1021,11 @@
             "name": "payassign",
             "type": "payassign",
             "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Claim Assignment Pay\nsummary: 'Claim assignment pay for a specified assignment and period ID'\nicon: https://eos.gyftie.org/statics/logos/mobile.png#54b516210a9fe709b1ccc8c075e16538d51e3664674f707f80630a7e53dbd2e7\n---\n\n{{$action.authorization.[0].actor}} pays the given assignment with the id: {{assignment_id}} in the period with the id: {{period_id}}.\""
+        },
+        {
+            "name": "propdraft",
+            "type": "propdraft",
+            "ricardian_contract": ""
         },
         {
             "name": "propsuspend",
@@ -1096,6 +1058,11 @@
             "ricardian_contract": ""
         },
         {
+            "name": "resetscope",
+            "type": "resetscope",
+            "ricardian_contract": ""
+        },
+        {
             "name": "setconfig",
             "type": "setconfig",
             "ricardian_contract": ""
@@ -1113,36 +1080,6 @@
         {
             "name": "togglepause",
             "type": "togglepause",
-            "ricardian_contract": ""
-        },
-        {
-            "name": "updballot",
-            "type": "updballot",
-            "ricardian_contract": ""
-        },
-        {
-            "name": "updcreated",
-            "type": "updcreated",
-            "ricardian_contract": ""
-        },
-        {
-            "name": "updroleint",
-            "type": "updroleint",
-            "ricardian_contract": ""
-        },
-        {
-            "name": "updtrxs",
-            "type": "updtrxs",
-            "ricardian_contract": ""
-        },
-        {
-            "name": "updtype",
-            "type": "updtype",
-            "ricardian_contract": ""
-        },
-        {
-            "name": "updusdtohusd",
-            "type": "updusdtohusd",
             "ricardian_contract": ""
         },
         {

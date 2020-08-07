@@ -119,13 +119,13 @@ void hyphadao::propsuspend (const name& proposer, const name& scope, const uint6
 
 void hyphadao::edit(const name &scope,
 					const uint64_t &id,
-					  const map<string, name> names,
-					  const map<string, string> strings,
-					  const map<string, asset> assets,
-					  const map<string, time_point> time_points,
-					  const map<string, uint64_t> ints,
-					  const map<string, float> floats,
-					  const map<string, transaction> trxs) {
+					const map<string, name> names,
+					const map<string, string> strings,
+					const map<string, asset> assets,
+					const map<string, time_point> time_points,
+					const map<string, uint64_t> ints,
+					const map<string, float> floats,
+					const map<string, transaction> trxs) {
 
 	// check paused state
 	check(!is_paused(), "Contract is paused for maintenance. Please try again later.");
@@ -145,20 +145,25 @@ void hyphadao::edit(const name &scope,
 	check(original_itr->names.at("owner") == owner, "Only owners can edit their objects. The owner of Original Object ID: " 
 		+ std::to_string(id) + " is " + original_itr->names.at("owner").to_string() + ". You submitted: " + owner.to_string());
 
-	// if the proposal was created by 'self' and NOT the owner, flag it as so
-	map<string, uint64_t> temp_ints = ints; 
-	if (!has_auth(owner)) {
-		temp_ints["created_by_owner"] = 0;
+	if (scope == name("draft")) {
+		merge(scope, id, names, strings, assets, time_points, ints, trxs);
+	} else {
+		// create a proposal for the edit
+		// if the proposal was created by 'self' and NOT the owner, flag it as so
+		map<string, uint64_t> temp_ints = ints; 
+		if (!has_auth(owner)) {
+			temp_ints["created_by_owner"] = 0;
+		}
+
+		map<string, name> temp_names = names; 
+		
+		temp_names["original_scope"] = scope;	
+		temp_ints["original_object_id"] = id;
+		temp_names["type"] = name("edit");
+		temp_names["trx_action_name"] = name("mergeobject");
+
+		new_proposal (temp_names, strings, assets, time_points, temp_ints, trxs);
 	}
-
-	map<string, name> temp_names = names; 
-	
-	temp_names["original_scope"] = scope;	
-	temp_ints["original_object_id"] = id;
-	temp_names["type"] = name("edit");
-	temp_names["trx_action_name"] = name("mergeobject");
-
-	new_proposal (temp_names, strings, assets, time_points, temp_ints, trxs);
 }
 
 void hyphadao::create(const name &scope,
@@ -185,7 +190,12 @@ void hyphadao::create(const name &scope,
 	}
 
 	qualify_proposer(owner);
-	new_proposal (names, strings, assets, time_points, temp_ints, trxs);
+
+	if (scope == name("draft")) {
+		newdoc(scope, names, strings, assets, time_points, ints, trxs);
+	} else {
+		new_proposal (names, strings, assets, time_points, temp_ints, trxs);
+	}
 }
 
 void hyphadao::exectrx(const uint64_t &proposal_id)
@@ -273,6 +283,7 @@ void hyphadao::assign(const uint64_t &proposal_id)
 	change_scope(name("proposal"), proposal_id, new_scopes, true);
 }
 
+
 void hyphadao::mergeobject(const uint64_t &proposal_id) {
 	require_auth(get_self());
 
@@ -280,58 +291,9 @@ void hyphadao::mergeobject(const uint64_t &proposal_id) {
 	auto proposal_itr = o_t.find(proposal_id);
 	check(proposal_itr != o_t.end(), "Scope: " + name("proposal").to_string() + "; Object ID: " + std::to_string(proposal_id) + " does not exist.");
 
-	object_table original_t (get_self(), proposal_itr->names.at("original_scope").value);
-	auto original_itr = original_t.find(proposal_itr->ints.at("original_object_id"));
-	check(original_itr != original_t.end(), "Scope: " + proposal_itr->names.at("original_scope").to_string() + 
-		"; Original Object ID: " + std::to_string(proposal_itr->ints.at("original_object_id")) + " does not exist.");
-
-	original_t.modify (original_itr, get_self(), [&](auto &orig) {
-
-		// edit all maps, over-writing any values having the same key
-		std::map<string, name>::const_iterator name_itr;
-		for (name_itr = proposal_itr->names.begin(); name_itr != proposal_itr->names.end(); ++name_itr) {
-			// skip over system attributes
-			if (name_itr->first == "type" || name_itr->first == "ballot_id" || name_itr->first == "prior_scope" ||
-				name_itr->first == "trx_action_name" || name_itr->first == "trx_action_contract" || name_itr->first == "original_scope") {
-				continue;
-			} 
-			orig.names[name_itr->first] = name_itr->second;
-		}
-
-		std::map<string, string>::const_iterator string_itr;
-		for (string_itr = proposal_itr->strings.begin(); string_itr != proposal_itr->strings.end(); ++string_itr) {
-			if (string_itr->first == "client_version" || string_itr->first == "contract_version") {
-				continue;
-			} 
-			orig.strings[string_itr->first] = string_itr->second;
-		}
-
-		std::map<string, asset>::const_iterator asset_itr;
-		for (asset_itr = proposal_itr->assets.begin(); asset_itr != proposal_itr->assets.end(); ++asset_itr) {
-			orig.assets[asset_itr->first] = asset_itr->second;
-		}
-
-		std::map<string, time_point>::const_iterator time_point_itr;
-		for (time_point_itr = proposal_itr->time_points.begin(); time_point_itr != proposal_itr->time_points.end(); ++time_point_itr) {
-			orig.time_points[time_point_itr->first] = time_point_itr->second;
-		}
-
-		std::map<string, uint64_t>::const_iterator int_itr;
-		for (int_itr = proposal_itr->ints.begin(); int_itr != proposal_itr->ints.end(); ++int_itr) {
-			if (int_itr->first == "revisions" || int_itr->first == "prior_id") {
-				continue;
-			} 
-			orig.ints[int_itr->first] = int_itr->second;
-		}
-
-		if (original_itr->ints.find("revisions") != original_itr->ints.end()) {
-			orig.ints["revisions"] = original_itr->ints.at("revisions") + 1;
-		} else {
-			orig.ints["revisions"] = 1;
-		}
-		orig.updated_date = current_time_point();	
-	});
-
+	merge (name("proposal"), proposal_id,  proposal_itr->names, proposal_itr->strings, 
+		proposal_itr->assets, proposal_itr->time_points, proposal_itr->ints, proposal_itr->trxs);
+	
 	vector<name> new_scopes = {name("edit"), name("proparchive")};
 	change_scope(name("proposal"), proposal_id, new_scopes, true);
 }

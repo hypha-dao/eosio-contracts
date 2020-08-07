@@ -21,6 +21,9 @@ namespace hyphaspace
       hyphadao(name self, name code, datastream<const char *> ds);
       ~hyphadao();
 
+      // v2 data structure will use variants for more generic support
+      typedef std::variant<name, string, asset, time_point, uint64_t> flexvalue;
+
       struct [[eosio::table, eosio::contract("hyphadao")]] Config
       {
          // required configurations:
@@ -183,6 +186,10 @@ namespace hyphaspace
                   const map<string, float> floats,
                   const map<string, transaction> trxs);
       
+      ACTION copytodraft (const name& copier, const name &scope, const uint64_t &id);
+      ACTION propdraft (const uint64_t& id);
+      ACTION erasedraft (const uint64_t& id);
+      
       ACTION propsuspend (const name &proposer, const name &scope, const uint64_t &id);
       ACTION withdraw (const name &withdrawer, const uint64_t &assignment_id, const string& notes);
       
@@ -195,21 +202,15 @@ namespace hyphaspace
       // Admin
       // ACTION reset ();
       ACTION resetperiods();
-      ACTION eraseobjs(const name &scope);
-      ACTION eraseobj(const name &scope,
+      ACTION resetscope(const name &scope);
+      ACTION erasedoc(const name &scope,
                       const uint64_t &id);
       ACTION togglepause();
-      ACTION addowner(const name &scope);
-      ACTION updtrxs(const string &note);
-      ACTION updtype(const string &note);
-      ACTION updroleint(const uint64_t &role_id, const string &key, const int64_t &intvalue);
+    
       ACTION recreate(const name &scope, const uint64_t &id);
       ACTION debugmsg(const string &message);
       ACTION updversion(const string &component, const string &version);
       ACTION changescope(const name &scope, const uint64_t &id, const name &new_scope);
-      ACTION updusdtohusd();
-      ACTION updballot(const uint64_t &proposal_id, const name &ballot_id);
-      ACTION updcreated(const uint64_t &assignment_id, const time_point &tp);
 
       // ACTION backupobjs (const name& scope);
       // ACTION erasebackups (const name& scope);
@@ -277,11 +278,31 @@ namespace hyphaspace
 
       uint64_t get_last_period_id();
 
+      void newdoc (const name &scope,
+					  const map<string, name> names,
+					  const map<string, string> strings,
+					  const map<string, asset> assets,
+					  const map<string, time_point> time_points,
+					  const map<string, uint64_t> ints,
+					  const map<string, transaction> trxs);
+
       void new_proposal (const map<string, name> &names,
                            const map<string, string> &strings,
                            const map<string, asset> &assets,
                            const map<string, time_point> &time_points,
                            const map<string, uint64_t> &ints,
                            const map<string, transaction> &trxs) ;
+
+      void merge (const name& scope, 
+					  const uint64_t& id, 
+					  const map<string, name> names,
+					  const map<string, string> strings,
+					  const map<string, asset> assets,
+					  const map<string, time_point> time_points,
+					  const map<string, uint64_t> ints,
+					  const map<string, transaction> trxs);
+
+      void set(const name &scope, const uint64_t& id, 
+                  const string& key, const hyphadao::flexvalue& value);
    };
 } // namespace hyphasapce

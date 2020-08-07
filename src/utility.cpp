@@ -2,53 +2,6 @@
 
 using namespace hyphaspace;
 
-void hyphadao::updtrxs(const string &note)
-{
-	require_auth(get_self());
-
-	object_table o_t(get_self(), name("proposal").value);
-	auto o_itr = o_t.begin();
-	while (o_itr != o_t.end())
-	{
-		transaction trx(time_point_sec(current_time_point()) + (60 * 60 * 24 * 35));
-		trx.actions.emplace_back(
-			permission_level{get_self(), "active"_n},
-			o_itr->names.at("trx_action_contract"), o_itr->names.at("trx_action_name"),
-			std::make_tuple(o_itr->id));
-		trx.delay_sec = 0;
-
-		o_t.modify(o_itr, get_self(), [&](auto &o) {
-			o.trxs["exec_on_approval"] = trx;
-		});
-		o_itr++;
-	}
-}
-
-void hyphadao::updtype(const string &note)
-{
-	require_auth(get_self());
-
-	object_table o_t(get_self(), name("proposal").value);
-	auto o_itr = o_t.begin();
-	while (o_itr != o_t.end())
-	{
-		o_t.modify(o_itr, get_self(), [&](auto &o) {
-			o.names["type"] = name("payout"); // o_itr->names.at("proposal_type");
-		});
-		o_itr++;
-	}
-
-	o_t = object_table(get_self(), name("proparchive").value);
-	o_itr = o_t.begin();
-	while (o_itr != o_t.end())
-	{
-		o_t.modify(o_itr, get_self(), [&](auto &o) {
-			o.names["type"] = name("payout"); // o_itr->names.at("proposal_type");
-		});
-		o_itr++;
-	}
-}
-
 void hyphadao::clrdebugs(const uint64_t &starting_id, const uint64_t &batch_size)
 {
 	check(has_auth(name("hyphanewyork")) || has_auth(get_self()), "Requires higher permission."); // TODO: remove hyphanewyork
@@ -68,115 +21,10 @@ void hyphadao::clrdebugs(const uint64_t &starting_id, const uint64_t &batch_size
 	out.send(get_next_sender_id(), get_self());
 }
 
-void hyphadao::eraseobj(const name &scope,
-						const uint64_t &id)
-{
-	require_auth(get_self());
-	object_table o_t(get_self(), scope.value);
-	auto o_itr = o_t.find(id);
-	check(o_itr != o_t.end(), "Scope: " + scope.to_string() + "; Object ID: " + std::to_string(id) + " does not exist.");
-	o_t.erase(o_itr);
-}
-
-void hyphadao::recreate(const name &scope, const uint64_t &id)
-{
-	require_auth(get_self());
-	object_table o_t(get_self(), scope.value);
-	auto o_itr = o_t.find(id);
-	check(o_itr != o_t.end(), "Proposal not found. Scope: " + scope.to_string() + "; ID: " + std::to_string(id));
-
-	action(
-		permission_level{get_self(), name("active")},
-		get_self(), name("create"),
-		std::make_tuple(scope, o_itr->names,
-						o_itr->strings,
-						o_itr->assets,
-						o_itr->time_points,
-						o_itr->ints,
-						o_itr->floats,
-						o_itr->trxs))
-		.send();
-
-	// erase original object
-	// eraseobj(scope, id);
-}
-
-void hyphadao::eraseobjs(const name &scope)
-{
-	require_auth(get_self());
-	object_table o_t(get_self(), scope.value);
-	auto o_itr = o_t.begin();
-	while (o_itr != o_t.end())
-	{
-		o_itr = o_t.erase(o_itr);
-	}
-}
-
-void hyphadao::remperiods(const uint64_t &begin_period_id,
-						  const uint64_t &end_period_id)
-{
-	require_auth(get_self());
-	bank.remove_periods(begin_period_id, end_period_id);
-}
-
-void hyphadao::changescope(const name &current_scope, const uint64_t &id, const name &new_scope)
-{
-	require_auth(get_self());
-	vector<name> new_scopes = {new_scope};
-	change_scope(current_scope, id, new_scopes, true);
-}
-
 void hyphadao::resetperiods()
 {
 	require_auth(get_self());
 	bank.reset_periods();
-}
-
-void hyphadao::addowner(const name &scope)
-{
-	require_auth(get_self());
-	object_table o_t(get_self(), scope.value);
-	auto o_itr = o_t.begin();
-	while (o_itr != o_t.end())
-	{
-		o_t.modify(o_itr, get_self(), [&](auto &o) {
-			o.names["owner"] = o_itr->names.at("proposer");
-		});
-		o_itr++;
-	}
-}
-
-void hyphadao::updroleint(const uint64_t &role_id, const string &key, const int64_t &intvalue)
-{
-	object_table o_t(get_self(), name("role").value);
-	auto o_itr = o_t.find(role_id);
-	check(o_itr != o_t.end(), "Role ID not found: " + std::to_string(role_id));
-
-	o_t.modify(o_itr, get_self(), [&](auto &o) {
-		o.ints[key] = intvalue;
-	});
-}
-
-void hyphadao::updballot(const uint64_t &proposal_id, const name &ballot_id)
-{
-	object_table o_t(get_self(), name("proposal").value);
-	auto o_itr = o_t.find(proposal_id);
-	check(o_itr != o_t.end(), "Proposal ID not found: " + std::to_string(proposal_id));
-
-	o_t.modify(o_itr, get_self(), [&](auto &o) {
-		o.names["ballot_id"] = ballot_id;
-	});
-}
-
-void hyphadao::updcreated(const uint64_t &assignment_id, const time_point &tp)
-{
-	object_table o_t(get_self(), name("assignment").value);
-	auto o_itr = o_t.find(assignment_id);
-	check(o_itr != o_t.end(), "Assignment ID not found: " + std::to_string(assignment_id));
-
-	o_t.modify(o_itr, get_self(), [&](auto &o) {
-		o.created_date = tp;
-	});
 }
 
 void hyphadao::debugmsg(const string &message)
@@ -185,39 +33,14 @@ void hyphadao::debugmsg(const string &message)
 	debug(message);
 }
 
-void hyphadao::updusdtohusd()
+void hyphadao::debug(const string &notes)
 {
-	require_auth(get_self());
-
-	symbol usd_symbol = symbol("USD", 2);
-
-	object_table o_t(get_self(), name("assignment").value);
-	auto o_itr = o_t.begin();
-
-	while (o_itr != o_t.end())
-	{
-		if (o_itr->assets.at("husd_salary_per_phase").symbol == usd_symbol)
-		{
-			o_t.modify(o_itr, get_self(), [&](auto &o) {
-				o.assets["husd_salary_per_phase"] = asset{o_itr->assets.at("husd_salary_per_phase").amount, common::S_HUSD};
-			});
-		}
-		o_itr++;
-	}
+	debug_table d_t(get_self(), get_self().value);
+	d_t.emplace(get_self(), [&](auto &d) {
+		d.debug_id = d_t.available_primary_key();
+		d.notes = notes;
+	});
 }
-
-// uint64_t hyphadao::hash(std::string str)
-// {
-// 	uint64_t id = 0;
-// 	checksum256 h = sha256(const_cast<char *>(str.c_str()), str.size());
-// 	auto hbytes = h.extract_as_byte_array();
-// 	for (int i = 0; i < 4; i++)
-// 	{
-// 		id <<= 8;
-// 		id |= hbytes[i];
-// 	}
-// 	return id;
-// }
 
 uint64_t hyphadao::get_next_sender_id()
 {
@@ -230,45 +53,11 @@ uint64_t hyphadao::get_next_sender_id()
 	return return_senderid;
 }
 
-void hyphadao::debug(const string &notes)
+void hyphadao::remperiods(const uint64_t &begin_period_id,
+						  const uint64_t &end_period_id)
 {
-	debug_table d_t(get_self(), get_self().value);
-	d_t.emplace(get_self(), [&](auto &d) {
-		d.debug_id = d_t.available_primary_key();
-		d.notes = notes;
-	});
-}
-
-void hyphadao::change_scope(const name &current_scope, const uint64_t &id, const vector<name> &new_scopes, const bool &remove_old)
-{
-
-	object_table o_t_current(get_self(), current_scope.value);
-	auto o_itr_current = o_t_current.find(id);
-	check(o_itr_current != o_t_current.end(), "Scope: " + current_scope.to_string() + "; Object ID: " + std::to_string(id) + " does not exist.");
-
-	for (name new_scope : new_scopes)
-	{
-		object_table o_t_new(get_self(), new_scope.value);
-		o_t_new.emplace(get_self(), [&](auto &o) {
-			o.id = o_t_new.available_primary_key();
-			o.names = o_itr_current->names;
-			o.names["prior_scope"] = current_scope;
-			o.assets = o_itr_current->assets;
-			o.strings = o_itr_current->strings;
-			o.floats = o_itr_current->floats;
-			o.time_points = o_itr_current->time_points;
-			o.ints = o_itr_current->ints;
-			o.ints["prior_id"] = o_itr_current->id;
-			o.trxs = o_itr_current->trxs;
-		});
-		debug("Added object ID: " + std::to_string(id) + " from scope: " + current_scope.to_string() + " to scope: " + new_scope.to_string());
-	}
-
-	if (remove_old)
-	{
-		debug("Erasing object ID: " + std::to_string(id) + " from : " + current_scope.to_string());
-		o_t_current.erase(o_itr_current);
-	}
+	require_auth(get_self());
+	bank.remove_periods(begin_period_id, end_period_id);
 }
 
 asset hyphadao::adjust_asset(const asset &original_asset, const float &adjustment)

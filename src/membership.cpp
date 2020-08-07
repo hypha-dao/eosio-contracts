@@ -50,7 +50,7 @@ void hyphadao::enroll(const name &enroller,
 	asset one_hvoice = asset{100, common::S_HVOICE};
 	string memo{"Welcome to Hypha DAO!"};
 	action(
-		permission_level{get_self(), "active"_n},
+		permission_level{get_self(), name("active")},
 		c.names.at("telos_decide_contract"), name("mint"),
 		make_tuple(applicant, one_hvoice, memo))
 		.send();
