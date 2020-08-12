@@ -46,6 +46,37 @@ void hyphadao::setconfig(const map<string, name> names,
 	}
 }
 
+void hyphadao::setconfigatt(const string& key, const hyphadao::flexvalue& value)
+{
+	require_auth(get_self());
+
+	config_table config_s(get_self(), get_self().value);
+	Config c = config_s.get_or_create(get_self(), Config());
+
+	if (std::holds_alternative<name>(value))
+	{
+		c.names[key] = std::get<name>(value);
+	}
+	else if (std::holds_alternative<string>(value))
+	{
+		c.strings[key] = std::get<string>(value);
+	}
+	else if (std::holds_alternative<asset>(value))
+	{
+		c.assets[key] = std::get<asset>(value);
+	}
+	else if (std::holds_alternative<time_point>(value))
+	{
+		c.time_points[key] = std::get<time_point>(value);
+	}
+	else if (std::holds_alternative<uint64_t>(value))
+	{
+		c.ints[key] = std::get<uint64_t>(value);
+	}
+	c.time_points["updated_date"] = current_time_point();
+ 	config_s.set(c, get_self());
+}
+
 void hyphadao::updversion(const string &component, const string &version)
 {
 	config_table config_s(get_self(), get_self().value);

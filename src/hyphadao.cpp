@@ -11,7 +11,7 @@ name hyphadao::register_ballot(const name &proposer,
 {
 	check(has_auth(proposer) || has_auth(get_self()), "Authentication failed. Must have authority from proposer: " +
 														  proposer.to_string() + "@active or " + get_self().to_string() + "@active.");
-	qualify_proposer(proposer);
+	qualify_owner(proposer);
 
 	config_table config_s(get_self(), get_self().value);
 	Config c = config_s.get_or_create(get_self(), Config());
@@ -173,7 +173,9 @@ void hyphadao::create(const name &scope,
 	// check paused state
 	check(!is_paused(), "Contract is paused for maintenance. Please try again later.");
 
-	// the transaction must have the authority of 'self' or the account listed as the owner
+	// owner is currently required; TODO: promote to top level parameter?
+	check (names.find("owner") != names.end(), "owner is a required entry for the names map");
+
 	const name owner = names.at("owner");
 	check(has_auth(owner) || has_auth(get_self()), "Authentication failed. Must have authority from owner: " +
 													   owner.to_string() + "@active or " + get_self().to_string() + "@active.");
@@ -184,10 +186,10 @@ void hyphadao::create(const name &scope,
 		temp_ints["created_by_owner"] = 0;
 	}
 
-	qualify_proposer(owner);
+	qualify_owner(owner);
 
 	if (scope == name("draft")) {
-		newdoc(scope, names, strings, assets, time_points, ints, trxs);
+		newdoc(scope, names, strings, assets, time_points, temp_ints, trxs);
 	} else {
 		new_proposal (names, strings, assets, time_points, temp_ints, trxs);
 	}
@@ -368,7 +370,7 @@ void hyphadao::closeprop(const uint64_t &proposal_id)
 	debug(debug_str);
 }
 
-void hyphadao::qualify_proposer(const name &proposer)
+void hyphadao::qualify_owner(const name &proposer)
 {
 	// Should we require that users hold Hypha before they are allowed to propose?  Disabled for now.
 	// check (bank.holds_hypha (proposer), "Proposer: " + proposer.to_string() + " does not hold HYPHA.");
@@ -376,7 +378,6 @@ void hyphadao::qualify_proposer(const name &proposer)
 
 void hyphadao::payassign(const uint64_t &assignment_id, const uint64_t &period_id)
 {
-
 	check(!is_paused(), "Contract is paused for maintenance. Please try again later.");
 
 	object_table o_t_assignment(get_self(), name("assignment").value);

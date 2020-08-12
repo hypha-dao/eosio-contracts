@@ -73,7 +73,7 @@ void hyphadao::merge(const name& scope,
 		std::map<string, name>::const_iterator name_itr;
 		for (name_itr = names.begin(); name_itr != names.end(); ++name_itr) {
 			// skip over system attributes
-			if (name_itr->first == "type" || name_itr->first == "ballot_id" || name_itr->first == "prior_scope" ||
+			if (name_itr->first == "owner" || name_itr->first == "type" || name_itr->first == "ballot_id" || name_itr->first == "prior_scope" ||
 				name_itr->first == "trx_action_name" || name_itr->first == "trx_action_contract" || name_itr->first == "original_scope") {
 				continue;
 			} 

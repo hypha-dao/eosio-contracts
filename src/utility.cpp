@@ -2,6 +2,64 @@
 
 using namespace hyphaspace;
 
+void hyphadao::event(const name &level,
+					 const map<string, hyphadao::flexvalue> &values)
+{
+
+	config_table config_s(get_self(), get_self().value);
+	Config c = config_s.get_or_create(get_self(), Config());
+	name publisher_contract = c.names.at("publisher_contract");
+
+	action(
+		permission_level{get_self(), name("active")},
+		publisher_contract, name("event"),
+		make_tuple(get_self(), level, values))
+		.send();
+}
+
+// translates the typed maps to a flexvalue map used by more recent
+// code within the smart contract
+map<string, hyphadao::flexvalue> hyphadao::variant_helper(const map<string, name> &names,
+														  const map<string, string> &strings,
+														  const map<string, asset> &assets,
+														  const map<string, time_point> &time_points,
+														  const map<string, uint64_t> &ints)
+{
+
+	map<string, hyphadao::flexvalue> flexvalues;
+
+	map<string, name>::const_iterator name_itr;
+	for (name_itr = names.begin(); name_itr != names.end(); ++name_itr)
+	{
+		flexvalues[name_itr->first] = name_itr->second;
+	}
+
+	map<string, string>::const_iterator string_itr;
+	for (string_itr = strings.begin(); string_itr != strings.end(); ++string_itr)
+	{
+		flexvalues[string_itr->first] = string_itr->second;
+	}
+
+	map<string, asset>::const_iterator asset_itr;
+	for (asset_itr = assets.begin(); asset_itr != assets.end(); ++asset_itr)
+	{
+		flexvalues[asset_itr->first] = asset_itr->second;
+	}
+
+	map<string, time_point>::const_iterator time_point_itr;
+	for (time_point_itr = time_points.begin(); time_point_itr != time_points.end(); ++time_point_itr)
+	{
+		flexvalues[time_point_itr->first] = time_point_itr->second;
+	}
+
+	map<string, uint64_t>::const_iterator int_itr;
+	for (int_itr = ints.begin(); int_itr != ints.end(); ++int_itr)
+	{
+		flexvalues[int_itr->first] = int_itr->second;
+	}
+	return flexvalues;
+}
+
 void hyphadao::clrdebugs(const uint64_t &starting_id, const uint64_t &batch_size)
 {
 	check(has_auth(name("hyphanewyork")) || has_auth(get_self()), "Requires higher permission."); // TODO: remove hyphanewyork
@@ -16,7 +74,7 @@ void hyphadao::clrdebugs(const uint64_t &starting_id, const uint64_t &batch_size
 	eosio::transaction out{};
 	out.actions.emplace_back(permission_level{get_self(), name("active")},
 							 get_self(), name("clrdebugs"),
-							 std::make_tuple(d_itr->debug_id, batch_size));
+							 make_tuple(d_itr->debug_id, batch_size));
 	out.delay_sec = 1;
 	out.send(get_next_sender_id(), get_self());
 }
@@ -65,7 +123,7 @@ asset hyphadao::adjust_asset(const asset &original_asset, const float &adjustmen
 	return asset{static_cast<int64_t>(original_asset.amount * adjustment), original_asset.symbol};
 }
 
-float hyphadao::get_float(const std::map<string, uint64_t> ints, string key)
+float hyphadao::get_float(const map<string, uint64_t> ints, string key)
 {
 	return (float)ints.at(key) / (float)100;
 }
@@ -80,7 +138,7 @@ bool hyphadao::is_paused()
 	return paused == 1;
 }
 
-string hyphadao::get_string(const std::map<string, string> strings, string key)
+string hyphadao::get_string(const map<string, string> strings, string key)
 {
 	if (strings.find(key) != strings.end())
 	{
@@ -104,7 +162,7 @@ void hyphadao::checkx(const bool &condition, const string &message)
 	trx.actions.emplace_back(
 		permission_level{get_self(), name("active")},
 		get_self(), name("debugmsg"),
-		std::make_tuple(message));
+		make_tuple(message));
 	trx.delay_sec = 0;
 	trx.send(get_next_sender_id(), get_self());
 
@@ -116,15 +174,15 @@ void hyphadao::check_capacity(const uint64_t &role_id, const uint64_t &req_time_
 	// Ensure that this proposal would not push the role over it's approved full time capacity
 	object_table o_t_role(get_self(), name("role").value);
 	auto o_itr_role = o_t_role.find(role_id);
-	checkx(o_itr_role != o_t_role.end(), "Role ID: " + std::to_string(role_id) + " does not exist.");
+	checkx(o_itr_role != o_t_role.end(), "Role ID: " + to_string(role_id) + " does not exist.");
 	int role_capacity = o_itr_role->ints.at("fulltime_capacity_x100");
 
 	object_table o_t_assignment(get_self(), name("assignment").value);
 	auto sorted_by_role = o_t_assignment.get_index<name("byfk")>();
 	auto a_itr_by_role = sorted_by_role.find(role_id);
 	int consumed_capacity = 0;
-	debug("Role capacity: " + std::to_string(role_capacity) + ", fk: " +
-		  std::to_string(a_itr_by_role->ints.at("fk")) + "; Role ID: " + std::to_string(role_id));
+	debug("Role capacity: " + to_string(role_capacity) + ", fk: " +
+		  to_string(a_itr_by_role->ints.at("fk")) + "; Role ID: " + to_string(role_id));
 	while (a_itr_by_role != sorted_by_role.end() && a_itr_by_role->ints.at("fk") == role_id)
 	{
 		consumed_capacity += a_itr_by_role->ints.at("time_share_x100");
@@ -132,8 +190,8 @@ void hyphadao::check_capacity(const uint64_t &role_id, const uint64_t &req_time_
 	}
 
 	checkx(consumed_capacity + req_time_share_x100 <= role_capacity, "Role ID: " +
-																		 std::to_string(role_id) + " cannot support assignment. Full time capacity (x100) is " + std::to_string(role_capacity) +
-																		 " and consumed capacity (x100) is " + std::to_string(consumed_capacity) + "; proposal requests time share (x100) of: " + std::to_string(req_time_share_x100));
+																		 to_string(role_id) + " cannot support assignment. Full time capacity (x100) is " + to_string(role_capacity) +
+																		 " and consumed capacity (x100) is " + to_string(consumed_capacity) + "; proposal requests time share (x100) of: " + to_string(req_time_share_x100));
 }
 
 // void hyphadao::reset()

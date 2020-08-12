@@ -1,7 +1,12 @@
 {
     "____comment": "This file was generated with eosio-abigen. DO NOT EDIT ",
     "version": "eosio::abi/1.1",
-    "types": [],
+    "types": [
+        {
+            "new_type_name": "flexvalue",
+            "type": "variant_name_string_asset_time_point_uint64"
+        }
+    ],
     "structs": [
         {
             "name": "Applicant",
@@ -821,6 +826,20 @@
             ]
         },
         {
+            "name": "setconfigatt",
+            "base": "",
+            "fields": [
+                {
+                    "name": "key",
+                    "type": "string"
+                },
+                {
+                    "name": "value",
+                    "type": "flexvalue"
+                }
+            ]
+        },
+        {
             "name": "setlastballt",
             "base": "",
             "fields": [
@@ -1068,6 +1087,11 @@
             "ricardian_contract": ""
         },
         {
+            "name": "setconfigatt",
+            "type": "setconfigatt",
+            "ricardian_contract": ""
+        },
+        {
             "name": "setlastballt",
             "type": "setlastballt",
             "ricardian_contract": ""
@@ -1159,5 +1183,10 @@
         }
     ],
     "ricardian_clauses": [],
-    "variants": []
+    "variants": [
+        {
+            "name": "variant_name_string_asset_time_point_uint64",
+            "types": ["name","string","asset","time_point","uint64"]
+        }
+    ]
 }

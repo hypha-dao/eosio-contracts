@@ -10,8 +10,7 @@
 #include "trail.hpp"
 
 using namespace eosio;
-using std::string;
-using std::map;
+using namespace std;
 
 namespace hyphaspace
 {
@@ -189,7 +188,7 @@ namespace hyphaspace
       ACTION copytodraft (const name& copier, const name &scope, const uint64_t &id);
       ACTION propdraft (const uint64_t& id);
       ACTION erasedraft (const uint64_t& id);
-      
+
       ACTION propsuspend (const name &proposer, const name &scope, const uint64_t &id);
       ACTION withdraw (const name &withdrawer, const uint64_t &assignment_id, const string& notes);
       
@@ -223,6 +222,8 @@ namespace hyphaspace
                        const map<string, uint64_t> ints,
                        const map<string, float> floats,
                        const map<string, transaction> trxs);
+
+      ACTION setconfigatt(const string& key, const hyphadao::flexvalue& value);
 
       ACTION setlastballt(const name &last_ballot_id);
 
@@ -259,7 +260,7 @@ namespace hyphaspace
       Bank bank = Bank(get_self());
 
       void defcloseprop(const uint64_t &proposal_id);
-      void qualify_proposer(const name &proposer);
+      void qualify_owner(const name &proposer);
       name register_ballot(const name &proposer,
                            const map<string, string> &strings);
       uint64_t hash (std::string str); 
@@ -303,6 +304,24 @@ namespace hyphaspace
 					  const map<string, transaction> trxs);
 
       void set(const name &scope, const uint64_t& id, 
-                  const string& key, const hyphadao::flexvalue& value);
+                  const string& key, const flexvalue& value);
+
+      void event (const name &level,
+                  const map<string, flexvalue> &values);
+
+      map<string, flexvalue> variant_helper (const map<string, name> &names,
+                            const map<string, string> &strings,
+                            const map<string, asset> &assets,
+                            const map<string, time_point> &time_points,
+                            const map<string, uint64_t> &ints );
+
+      map<string, asset> get_assets(const asset &usd_amount,
+                                        const float &deferred_perc);
+                                 
+      map<string, asset> get_assets(const uint64_t &role_id, 
+                                        const float &deferred_perc, 
+                                        const float &time_share_perc);
+                                        
+      float get_seeds_price_usd () ;
    };
 } // namespace hyphasapce
