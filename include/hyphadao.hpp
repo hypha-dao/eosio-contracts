@@ -209,6 +209,7 @@ namespace hyphaspace
       ACTION recreate(const name &scope, const uint64_t &id);
       ACTION debugmsg(const string &message);
       ACTION updversion(const string &component, const string &version);
+      ACTION updassets(const uint64_t &proposal_id);
       ACTION changescope(const name &scope, const uint64_t &id, const name &new_scope);
 
       // ACTION backupobjs (const name& scope);
@@ -321,7 +322,7 @@ namespace hyphaspace
       map<string, asset> get_assets(const uint64_t &role_id, 
                                         const float &deferred_perc, 
                                         const float &time_share_perc);
-                                        
+
       float get_seeds_price_usd () ;
    };
 } // namespace hyphasapce

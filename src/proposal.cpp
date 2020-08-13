@@ -2,6 +2,24 @@
 
 using namespace hyphaspace;
 
+void hyphadao::updassets (const uint64_t &proposal_id) 
+{
+    require_auth (get_self());
+
+    object_table o_t(get_self(), name("proposal").value);
+    auto p_itr = o_t.find(proposal_id);
+    check (p_itr != o_t.end(), "Proposal ID does not exist: " + std::to_string(proposal_id));
+
+    o_t.modify (p_itr, get_self(), [&](auto &p) {
+        // merge calculated assets into map
+        map<string, asset> calculated_assets = get_assets(p_itr->ints.at("role_id"), get_float(p_itr->ints, "deferred_perc_x100"), get_float(p_itr->ints, "time_share_x100"));
+        std::map<string, asset>::const_iterator asset_itr;
+        for (asset_itr = calculated_assets.begin(); asset_itr != calculated_assets.end(); ++asset_itr) {
+            p.assets[asset_itr->first] = asset_itr->second;
+        }
+    });
+}
+
 float hyphadao::get_seeds_price_usd () {
     configtables c_t(name("tlosto.seeds"), name("tlosto.seeds").value);
     configtable config_t = c_t.get();

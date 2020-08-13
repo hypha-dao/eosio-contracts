@@ -913,6 +913,16 @@
             ]
         },
         {
+            "name": "updassets",
+            "base": "",
+            "fields": [
+                {
+                    "name": "proposal_id",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
             "name": "updversion",
             "base": "",
             "fields": [
@@ -1104,6 +1114,11 @@
         {
             "name": "togglepause",
             "type": "togglepause",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "updassets",
+            "type": "updassets",
             "ricardian_contract": ""
         },
         {
