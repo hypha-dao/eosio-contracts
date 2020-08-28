@@ -350,12 +350,17 @@ void hyphadao::closeprop(const uint64_t &proposal_id)
 		adjust_asset(votes_pass, 0.2500000000) > votes_fail)
 	{ // must have 80% of the vote power
 		debug_str = debug_str + "Proposal passed. Executing transaction. ";
+		prop.strings["Event"] = "Proposal has passed";
+		event (name("high"), variant_helper(prop.names, prop.strings, prop.assets, prop.time_points, prop.ints));
+
 		passed = true;
 		// TODO: change to inline transaction for known proposal types
 		prop.trxs.at("exec_on_approval").send(current_block_time().to_time_point().sec_since_epoch(), get_self());
 	}
 	else
 	{
+		prop.strings["Event"] = "Proposal has failed";
+		event (name("high"), variant_helper(prop.names, prop.strings, prop.assets, prop.time_points, prop.ints));
 		vector<name> new_scopes = {name("failedprops"), name("proparchive")};
 		change_scope(name("proposal"), proposal_id, new_scopes, true);
 	}

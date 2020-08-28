@@ -30,6 +30,11 @@ void hyphadao::apply(const name &applicant,
 			a.content = content;
 		});
 	}
+
+	map<string, hyphadao::flexvalue> event_data;
+	event_data["New Applicant"] = applicant;
+	event_data["Content"] = content;
+	event (name("medium"), event_data);
 }
 
 void hyphadao::enroll(const name &enroller,
@@ -71,6 +76,13 @@ void hyphadao::enroll(const name &enroller,
 	m_t.emplace(get_self(), [&](auto &m) {
 		m.member = applicant;
 	});
+
+	map<string, hyphadao::flexvalue> event_data;
+	event_data["New Member"] = applicant;
+	event_data["Enroller"] = enroller;
+	event_data["Content"] = content;
+	event_data["Purchased RAM"] = common::RAM_ALLOWANCE;
+	event (name("high"), event_data);
 
 	a_t.erase(a_itr);
 }

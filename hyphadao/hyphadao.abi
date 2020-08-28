@@ -792,6 +792,28 @@
             ]
         },
         {
+            "name": "set",
+            "base": "",
+            "fields": [
+                {
+                    "name": "scope",
+                    "type": "name"
+                },
+                {
+                    "name": "id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "key",
+                    "type": "string"
+                },
+                {
+                    "name": "flexvalue",
+                    "type": "flexvalue"
+                }
+            ]
+        },
+        {
             "name": "setconfig",
             "base": "",
             "fields": [
@@ -1089,6 +1111,11 @@
         {
             "name": "resetscope",
             "type": "resetscope",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "set",
+            "type": "set",
             "ricardian_contract": ""
         },
         {

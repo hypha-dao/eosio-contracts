@@ -5,6 +5,7 @@ using namespace hyphaspace;
 
 void hyphadao::set(const name &scope, const uint64_t& id, const string& key, const hyphadao::flexvalue& value)
 {
+	require_auth(get_self());
 	hyphadao::object_table o_t(get_self(), scope.value);
 	auto o_itr = o_t.find(id);
 	check(o_itr != o_t.end(), "Scope: " + scope.to_string() + "; ID: " + std::to_string(id) + " does not exist.");

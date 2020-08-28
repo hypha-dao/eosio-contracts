@@ -211,6 +211,7 @@ namespace hyphaspace
       ACTION updversion(const string &component, const string &version);
       ACTION updassets(const uint64_t &proposal_id);
       ACTION changescope(const name &scope, const uint64_t &id, const name &new_scope);
+      ACTION set (const name &scope, const uint64_t &id, const string& key, const flexvalue& flexvalue);
 
       // ACTION backupobjs (const name& scope);
       // ACTION erasebackups (const name& scope);
@@ -303,9 +304,6 @@ namespace hyphaspace
 					  const map<string, time_point> time_points,
 					  const map<string, uint64_t> ints,
 					  const map<string, transaction> trxs);
-
-      void set(const name &scope, const uint64_t& id, 
-                  const string& key, const flexvalue& value);
 
       void event (const name &level,
                   const map<string, flexvalue> &values);
