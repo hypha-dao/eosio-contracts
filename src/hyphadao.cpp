@@ -288,8 +288,14 @@ void hyphadao::mergeobject(const uint64_t &proposal_id) {
 	auto proposal_itr = o_t.find(proposal_id);
 	check(proposal_itr != o_t.end(), "Scope: " + name("proposal").to_string() + "; Object ID: " + std::to_string(proposal_id) + " does not exist.");
 
-	merge (name("proposal"), proposal_id,  proposal_itr->names, proposal_itr->strings, 
-		proposal_itr->assets, proposal_itr->time_points, proposal_itr->ints, proposal_itr->trxs);
+	merge (	proposal_itr->names.at("original_scope"), 
+			proposal_itr->ints.at("original_object_id"),  
+			proposal_itr->names, 
+			proposal_itr->strings, 
+			proposal_itr->assets, 
+			proposal_itr->time_points, 
+			proposal_itr->ints, 
+			proposal_itr->trxs);
 	
 	vector<name> new_scopes = {name("edit"), name("proparchive")};
 	change_scope(name("proposal"), proposal_id, new_scopes, true);

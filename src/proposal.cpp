@@ -20,6 +20,30 @@ void hyphadao::updassets (const uint64_t &proposal_id)
     });
 }
 
+void hyphadao::updassassets (const uint64_t &assignment_id) 
+{
+    require_auth (get_self());
+
+    object_table o_t(get_self(), name("assignment").value);
+    auto a_itr = o_t.find(assignment_id);
+    check (a_itr != o_t.end(), "Assignment ID does not exist: " + std::to_string(assignment_id));
+
+    o_t.modify (a_itr, get_self(), [&](auto &a) {
+
+        auto instant_seeds_itr = a.assets.find ("seeds_instant_salary_per_phase");
+        if (instant_seeds_itr != a.assets.end()) {
+            a.assets.erase (instant_seeds_itr);
+        }
+        // merge calculated assets into map
+        map<string, asset> calculated_assets = get_assets(a_itr->ints.at("role_id"), get_float(a_itr->ints, "deferred_perc_x100"), get_float(a_itr->ints, "time_share_x100"));
+        std::map<string, asset>::const_iterator asset_itr;
+        for (asset_itr = calculated_assets.begin(); asset_itr != calculated_assets.end(); ++asset_itr) {
+            a.assets[asset_itr->first] = asset_itr->second;
+        }
+        a.updated_date = current_time_point();
+    });
+}
+
 float hyphadao::get_seeds_price_usd () {
     configtables c_t(name("tlosto.seeds"), name("tlosto.seeds").value);
     configtable config_t = c_t.get();

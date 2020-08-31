@@ -935,6 +935,16 @@
             ]
         },
         {
+            "name": "updassassets",
+            "base": "",
+            "fields": [
+                {
+                    "name": "assignment_id",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
             "name": "updassets",
             "base": "",
             "fields": [
@@ -1141,6 +1151,11 @@
         {
             "name": "togglepause",
             "type": "togglepause",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "updassassets",
+            "type": "updassassets",
             "ricardian_contract": ""
         },
         {

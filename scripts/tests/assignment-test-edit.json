@@ -1,0 +1,54 @@
+{
+  "scope": "assignment",
+  "id": 1,
+  "names": [
+    {
+      "key": "assigned_account",
+      "value": "johnnyhypha1"
+    },
+    {
+      "key": "owner",
+      "value": "johnnyhypha1"
+    }
+  ],
+  "strings": [
+    {
+      "key": "title",
+      "value": "Underwater Basketweaver - Atlantic"
+    },
+    {
+      "key": "description",
+      "value": "Weave baskets at the bottom of the sea - Atlantic Ocean"
+    },
+    {
+      "key": "url",
+      "value": "null"
+    }
+  ],
+  "assets": [],
+  "time_points": [],
+  "ints": [
+    {
+      "key": "start_period",
+      "value": "1"
+    },
+    {
+      "key": "end_period",
+      "value": "250"
+    },
+    {
+      "key": "role_id",
+      "value": "0"
+    },
+    {
+      "key": "time_share_x100",
+      "value": "100"
+    },
+    {
+      "key": "deferred_perc_x100",
+      "value": "85"
+    }
+  ],
+  "floats": [],
+  "trxs": []
+}

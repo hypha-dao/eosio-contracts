@@ -212,6 +212,7 @@ namespace hyphaspace
       ACTION updassets(const uint64_t &proposal_id);
       ACTION changescope(const name &scope, const uint64_t &id, const name &new_scope);
       ACTION set (const name &scope, const uint64_t &id, const string& key, const flexvalue& flexvalue);
+      ACTION updassassets (const uint64_t &assignment_id);
 
       // ACTION backupobjs (const name& scope);
       // ACTION erasebackups (const name& scope);
