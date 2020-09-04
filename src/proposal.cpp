@@ -34,6 +34,8 @@ void hyphadao::updassassets (const uint64_t &assignment_id)
         if (instant_seeds_itr != a.assets.end()) {
             a.assets.erase (instant_seeds_itr);
         }
+
+        
         // merge calculated assets into map
         map<string, asset> calculated_assets = get_assets(a_itr->ints.at("role_id"), get_float(a_itr->ints, "deferred_perc_x100"), get_float(a_itr->ints, "time_share_x100"));
         std::map<string, asset>::const_iterator asset_itr;

@@ -214,6 +214,10 @@ namespace hyphaspace
       ACTION set (const name &scope, const uint64_t &id, const string& key, const flexvalue& flexvalue);
       ACTION updassassets (const uint64_t &assignment_id);
 
+      // alerts Group
+      ACTION setalert (const name &level, const string &content);
+      ACTION remalert ();
+
       // ACTION backupobjs (const name& scope);
       // ACTION erasebackups (const name& scope);
       // ACTION restoreobjs (const name& scope);
@@ -227,6 +231,7 @@ namespace hyphaspace
                        const map<string, transaction> trxs);
 
       ACTION setconfigatt(const string& key, const hyphadao::flexvalue& value);
+      ACTION remconfigatt(const string& key);
 
       ACTION setlastballt(const name &last_ballot_id);
 

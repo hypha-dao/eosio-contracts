@@ -743,12 +743,27 @@
             ]
         },
         {
+            "name": "remalert",
+            "base": "",
+            "fields": []
+        },
+        {
             "name": "remapply",
             "base": "",
             "fields": [
                 {
                     "name": "applicant",
                     "type": "name"
+                }
+            ]
+        },
+        {
+            "name": "remconfigatt",
+            "base": "",
+            "fields": [
+                {
+                    "name": "key",
+                    "type": "string"
                 }
             ]
         },
@@ -810,6 +825,20 @@
                 {
                     "name": "flexvalue",
                     "type": "flexvalue"
+                }
+            ]
+        },
+        {
+            "name": "setalert",
+            "base": "",
+            "fields": [
+                {
+                    "name": "level",
+                    "type": "name"
+                },
+                {
+                    "name": "content",
+                    "type": "string"
                 }
             ]
         },
@@ -1099,8 +1128,18 @@
             "ricardian_contract": ""
         },
         {
+            "name": "remalert",
+            "type": "remalert",
+            "ricardian_contract": ""
+        },
+        {
             "name": "remapply",
             "type": "remapply",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "remconfigatt",
+            "type": "remconfigatt",
             "ricardian_contract": ""
         },
         {
@@ -1126,6 +1165,11 @@
         {
             "name": "set",
             "type": "set",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "setalert",
+            "type": "setalert",
             "ricardian_contract": ""
         },
         {

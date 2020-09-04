@@ -66,6 +66,8 @@ name hyphadao::register_ballot(const name &proposer,
 		std::make_tuple(new_ballot_id, expiration))
 		.send();
 
+	// TODO: add a record to the seeds scheduler to close the proposal
+
 	return new_ballot_id;
 }
 
@@ -447,7 +449,13 @@ void hyphadao::payassign(const uint64_t &assignment_id, const uint64_t &period_i
 
 	asset hypha_payment = adjust_asset(a_itr->assets.at("hypha_salary_per_phase"), first_phase_ratio_calc);
 	asset deferred_seeds_payment = adjust_asset(a_itr->assets.at("seeds_escrow_salary_per_phase"), first_phase_ratio_calc);
-	asset instant_seeds_payment = adjust_asset(a_itr->assets.at("seeds_instant_salary_per_phase"), first_phase_ratio_calc);
+	asset instant_seeds_payment ;
+	if (a_itr->assets.find("seeds_instant_salary_per_phase") != a_itr->assets.end()) {
+		instant_seeds_payment = adjust_asset(a_itr->assets.at("seeds_instant_salary_per_phase"), first_phase_ratio_calc);
+	} else {
+		instant_seeds_payment = asset {0, common::S_SEEDS};
+	}
+
 	asset husd_payment = adjust_asset(a_itr->assets.at("husd_salary_per_phase"), first_phase_ratio_calc);
 	asset voice_payment = adjust_asset(a_itr->assets.at("hvoice_salary_per_phase"), first_phase_ratio_calc);
 

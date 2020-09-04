@@ -77,6 +77,79 @@ void hyphadao::setconfigatt(const string& key, const hyphadao::flexvalue& value)
  	config_s.set(c, get_self());
 }
 
+void hyphadao::remconfigatt(const string& key)
+{
+	require_auth(get_self());
+
+	config_table config_s(get_self(), get_self().value);
+	Config c = config_s.get_or_create(get_self(), Config());
+
+	if (c.names.find(key) != c.names.end())
+	{
+		c.names.erase (key);
+	}
+	else if (c.strings.find(key) != c.strings.end())
+	{
+		c.strings.erase (key);
+	}
+	else if (c.assets.find(key) != c.assets.end())
+	{
+		c.assets.erase (key);
+	}
+	else if (c.time_points.find(key) != c.time_points.end())
+	{
+		c.time_points.erase (key);
+	}
+	else if (c.ints.find(key) != c.ints.end())
+	{
+		c.ints.erase (key);
+	}
+	c.time_points["updated_date"] = current_time_point();
+ 	config_s.set(c, get_self());
+}
+
+
+void hyphadao::setalert (const name &level, const string &content)
+{
+	// inline actions seem happiest when affixing types
+	string alert_level = string {"alert_level"};
+	string alert_content = string {"alert_content"};
+	hyphadao::flexvalue fv_level = level;
+	hyphadao::flexvalue fv_content = content;
+
+	action(
+		permission_level{get_self(), name("active")},
+		get_self(), name("setconfigatt"),
+		std::make_tuple(alert_level, fv_level))
+	.send();
+	
+	action(
+		permission_level{get_self(), name("active")},
+		get_self(), name("setconfigatt"),
+		std::make_tuple(alert_content, fv_content))
+	.send();
+}
+
+void hyphadao::remalert ()
+{
+	// inline actions seem happiest when affixing types
+	string alert_level = string {"alert_level"};
+	string alert_content = string {"alert_content"};
+	
+	action(
+		permission_level{get_self(), name("active")},
+		get_self(), name("remconfigatt"),
+		std::make_tuple(alert_level))
+	.send();
+
+	action(
+		permission_level{get_self(), name("active")},
+		get_self(), name("remconfigatt"),
+		std::make_tuple(alert_content))
+	.send();
+}
+
+
 void hyphadao::updversion(const string &component, const string &version)
 {
 	config_table config_s(get_self(), get_self().value);
