@@ -289,7 +289,6 @@ async function printProposal (p) {
   console.log("")
 }
 
-
 const main = async () => {
   const opts = await loadOptions();
 
@@ -310,14 +309,14 @@ const main = async () => {
 
     const proposal = JSON.parse(fs.readFileSync(opts.file.filename, 'utf8'));
     console.log ("\nParsing the proposal from : ", opts.file.filename);
-    console.log ("-- title            : ", proposal.data.strings.find(o => o.key === 'title').value);
-    console.log ("-- type             : ", proposal.data.names.find(o => o.key === 'type').value);
-    console.log ("-- proposer         : ", proposal.data.names.find(o => o.key === 'owner').value);
+    console.log ("-- title            : ", proposal.strings.find(o => o.key === 'title').value);
+    console.log ("-- type             : ", proposal.names.find(o => o.key === 'type').value);
+    console.log ("-- proposer         : ", proposal.names.find(o => o.key === 'owner').value);
 
     console.log ("\nSubmitting proposal : ", opts.file.filename);
     await sendtrx(opts.prod, opts.host, opts.contract, "create", 
-      proposal.data.names.find(o => o.key === 'owner').value, 
-      proposal.data);
+      proposal.names.find(o => o.key === 'owner').value, 
+      proposal);
 
     if (opts.approve || opts.close) {
 
@@ -333,13 +332,13 @@ const main = async () => {
   
         console.log ("\Approving the proposal");
         console.log ("-- calling trailservice::castvote with the following parms:");
-        console.log ("-- -- voter       : ", proposal.data.names.find(o => o.key === 'owner').value);
+        console.log ("-- -- voter       : ", proposal.names.find(o => o.key === 'owner').value);
         console.log ("-- -- ballot_id   : ", lastProposal.names.find(o => o.key === 'ballot_id').value);
         console.log ("-- -- options     : ", options);
   
         await sendtrx(opts.prod, opts.host, "trailservice", "castvote", 
-          proposal.data.names.find(o => o.key === 'owner').value, 
-          { "voter":proposal.data.names.find(o => o.key === 'owner').value, 
+          proposal.names.find(o => o.key === 'owner').value, 
+          { "voter":proposal.names.find(o => o.key === 'owner').value, 
             "ballot_name":lastProposal.names.find(o => o.key === 'ballot_id').value, 
             "options":options });
       }
@@ -356,7 +355,7 @@ const main = async () => {
    
         // close the DAproposal
         await sendtrx(opts.prod, opts.host, opts.contract, "closeprop", 
-          proposal.data.names.find(o => o.key === 'owner').value, 
+          proposal.names.find(o => o.key === 'owner').value, 
           { "proposal_id":lastProposal.id });
       }
     }

@@ -30,7 +30,7 @@ public:
         map<string, float> floats;
     };
 
-    typedef singleton<"config"_n, Config> config_table;
+    typedef singleton<name("config"), Config> config_table;
 
     struct [[eosio::table, eosio::contract("hyphadao")]] Period
     {
@@ -58,12 +58,12 @@ public:
         uint64_t by_assignment() const { return assignment_id; }
     };
 
-    typedef multi_index<"periods"_n, Period> period_table;
+    typedef multi_index<name("periods"), Period> period_table;
 
-    typedef multi_index<"payments"_n, Payment,
-                        indexed_by<"byperiod"_n, const_mem_fun<Payment, uint64_t, &Payment::by_period>>,
-                        indexed_by<"byrecipient"_n, const_mem_fun<Payment, uint64_t, &Payment::by_recipient>>,
-                        indexed_by<"byassignment"_n, const_mem_fun<Payment, uint64_t, &Payment::by_assignment>>>
+    typedef multi_index<name("payments"), Payment,
+                        indexed_by<name("byperiod"), const_mem_fun<Payment, uint64_t, &Payment::by_period>>,
+                        indexed_by<name("byrecipient"), const_mem_fun<Payment, uint64_t, &Payment::by_recipient>>,
+                        indexed_by<name("byassignment"), const_mem_fun<Payment, uint64_t, &Payment::by_assignment>>>
         payment_table;
 
     struct [[eosio::table, eosio::contract("hyphadao")]] Debug
@@ -74,7 +74,7 @@ public:
         uint64_t primary_key() const { return debug_id; }
     };
 
-    typedef multi_index<"debugs"_n, Debug> debug_table;
+    typedef multi_index<name("debugs"), Debug> debug_table;
 
     void debug(const string &notes)
     {
@@ -151,8 +151,8 @@ public:
         if (quantity.symbol == common::S_HVOICE)
         {
             action(
-                permission_level{contract, "active"_n},
-                c.names.at("telos_decide_contract"), "mint"_n,
+                permission_level{contract, name("active")},
+                c.names.at("telos_decide_contract"), name("mint"),
                 std::make_tuple(recipient, quantity, memo))
                 .send();
         }
@@ -162,19 +162,19 @@ public:
             if (bypass_escrow == 0)
             {
                 action(
-                    permission_level{contract, "active"_n},
-                    c.names.at("seeds_token_contract"), "transfer"_n,
+                    permission_level{contract, name("active")},
+                    c.names.at("seeds_token_contract"), name("transfer"),
                     std::make_tuple(contract, c.names.at("seeds_escrow_contract"), quantity, memo))
                     .send();
 
                 action(
-                    permission_level{contract, "active"_n},
-                    c.names.at("seeds_escrow_contract"), "lock"_n,
-                    std::make_tuple("event"_n,
+                    permission_level{contract, name("active")},
+                    c.names.at("seeds_escrow_contract"), name("lock"),
+                    std::make_tuple(name("event"),
                                     contract,
                                     recipient,
                                     quantity,
-                                    "golive"_n,
+                                    name("golive"),
                                     contract,
                                     time_point(current_time_point().time_since_epoch() +
                                                current_time_point().time_since_epoch()), // long time from now
@@ -184,8 +184,8 @@ public:
             else
             {
                 action(
-                    permission_level{contract, "active"_n},
-                    c.names.at("seeds_token_contract"), "transfer"_n,
+                    permission_level{contract, name("active")},
+                    c.names.at("seeds_token_contract"), name("transfer"),
                     std::make_tuple(contract, recipient, quantity, memo))
                     .send();
             }
@@ -244,14 +244,14 @@ public:
         debug_str = debug_str + "    Memo            : " + memo + ".";
 
         action(
-            permission_level{issuer, "active"_n},
-            token_contract, "issue"_n,
+            permission_level{issuer, name("active")},
+            token_contract, name("issue"),
             std::make_tuple(issuer, updated_asset, memo))
             .send();
 
         action(
-            permission_level{issuer, "active"_n},
-            token_contract, "transfer"_n,
+            permission_level{issuer, name("active")},
+            token_contract, name("transfer"),
             std::make_tuple(issuer, to, updated_asset, memo))
             .send();
 

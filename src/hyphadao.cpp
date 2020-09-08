@@ -67,7 +67,6 @@ name hyphadao::register_ballot(const name &proposer,
 		.send();
 
 	// TODO: add a record to the seeds scheduler to close the proposal
-
 	return new_ballot_id;
 }
 
@@ -362,7 +361,6 @@ void hyphadao::closeprop(const uint64_t &proposal_id)
 		event (name("high"), variant_helper(prop.names, prop.strings, prop.assets, prop.time_points, prop.ints));
 
 		passed = true;
-		// TODO: change to inline transaction for known proposal types
 		prop.trxs.at("exec_on_approval").send(current_block_time().to_time_point().sec_since_epoch(), get_self());
 	}
 	else
@@ -397,6 +395,7 @@ void hyphadao::payassign(const uint64_t &assignment_id, const uint64_t &period_i
 	auto a_itr = o_t_assignment.find(assignment_id);
 	check(a_itr != o_t_assignment.end(), "Cannot pay assignment. Assignment ID does not exist: " + std::to_string(assignment_id));
 
+	// Only the assigned account can claim their pay; prevents inactive members from receiving tokens
 	require_auth(a_itr->names.at("assigned_account"));
 
 	object_table o_t_role(get_self(), name("role").value);
@@ -414,41 +413,50 @@ void hyphadao::payassign(const uint64_t &assignment_id, const uint64_t &period_i
 		per_itr++;
 	}
 
-	// debugmsg ("payment has not been  made for this period yet");
 	// Check that the period has elapsed
 	auto p_itr = bank.period_t.find(period_id);
 	check(p_itr != bank.period_t.end(), "Cannot make payment. Period ID not found: " + std::to_string(period_id));
 	check(p_itr->end_date.sec_since_epoch() < current_block_time().to_time_point().sec_since_epoch(),
 		  "Cannot make payment. Period ID " + std::to_string(period_id) + " has not closed yet.");
 
-	// debug ( "Assignment created date : " + a_itr->created_date.to_string() + "; Seconds    : " + std::to_string(a_itr->created_date.sec_since_epoch()));
-	// debug ( "Period end              : " + p_itr->end_date.to_string() + ";  Seconds: " + std::to_string(p_itr->end_date.sec_since_epoch()));
-
-	// debug ( "Assignment created date Seconds    : " + std::to_string(a_itr->created_date.sec_since_epoch()));
-	// debug ( "Period end Seconds : " + std::to_string(p_itr->end_date.sec_since_epoch()));
-
-	// check that the creation date of the assignment is before the end of the period
+	// Check that the creation date of the assignment is before the end of the period
 	check(a_itr->created_date.sec_since_epoch() < p_itr->end_date.sec_since_epoch(),
 		  "Cannot make payment to assignment. Assignment was not approved before this period.");
 
-	// check that pay period is between (inclusive) the start and end period of the role and the assignment
+	// Check that pay period is between (inclusive) the start and end period of the role and the assignment
 	check(a_itr->ints.at("start_period") <= period_id && a_itr->ints.at("end_period") >= period_id, "For assignment, period ID must be between " +
 																										std::to_string(a_itr->ints.at("start_period")) + " and " + std::to_string(a_itr->ints.at("end_period")) + " (inclusive). You tried: " + std::to_string(period_id));
 
+	// We've disabled this check that confirms the period being claimed falls within a role's guidelines
+	// likely this will replaced with budgeting anyways
 	// check(r_itr->ints.at("start_period") <= period_id && r_itr->ints.at("end_period") >= period_id, "For role, period ID must be between " +
 	// 																									std::to_string(r_itr->ints.at("start_period")) + " and " + std::to_string(r_itr->ints.at("end_period")) + " (inclusive). You tried: " + std::to_string(period_id));
 
 	float first_phase_ratio_calc = 1; // pro-rate based on elapsed % of the first phase
 
-	// pro-rate the payout if the assignment was created
+	// Pro-rate the payment if the assignment was created during the period being claimed
 	if (a_itr->created_date.sec_since_epoch() > p_itr->start_date.sec_since_epoch())
 	{
 		first_phase_ratio_calc = (float)((float)p_itr->end_date.sec_since_epoch() - a_itr->created_date.sec_since_epoch()) /
 								 ((float)p_itr->end_date.sec_since_epoch() - p_itr->start_date.sec_since_epoch());
 	}
 
-	asset hypha_payment = adjust_asset(a_itr->assets.at("hypha_salary_per_phase"), first_phase_ratio_calc);
-	asset deferred_seeds_payment = adjust_asset(a_itr->assets.at("seeds_escrow_salary_per_phase"), first_phase_ratio_calc);
+	// If there is an explicit ESCROW SEEDS salary amount, support sending it; else it should be calculated
+	asset deferred_seeds_payment ;
+	if (a_itr->assets.find("seeds_escrow_salary_per_phase") != a_itr->assets.end()) {
+		deferred_seeds_payment = adjust_asset(a_itr->assets.at("seeds_escrow_salary_per_phase"), first_phase_ratio_calc);
+	} else if (a_itr->assets.find("usd_salary_value_per_phase") != a_itr->assets.end()) {
+		// Dynamically calculate the SEEDS amount based on the price at the end of the period being claimed
+		deferred_seeds_payment = adjust_asset(	get_seeds_amount (	a_itr->assets.at("usd_salary_value_per_phase"), 
+																	p_itr->end_date, 
+																	get_float(a_itr->ints, "time_share_x100"),
+																	get_float(a_itr->ints, "deferred_perc_x100")), 
+												first_phase_ratio_calc);
+	} else {
+		deferred_seeds_payment = asset {0, common::S_SEEDS};
+	}
+	
+	// If there is an explicity INSTANT SEEDS amount, support sending it, else it should be zero
 	asset instant_seeds_payment ;
 	if (a_itr->assets.find("seeds_instant_salary_per_phase") != a_itr->assets.end()) {
 		instant_seeds_payment = adjust_asset(a_itr->assets.at("seeds_instant_salary_per_phase"), first_phase_ratio_calc);
@@ -456,9 +464,12 @@ void hyphadao::payassign(const uint64_t &assignment_id, const uint64_t &period_i
 		instant_seeds_payment = asset {0, common::S_SEEDS};
 	}
 
+	// These values are calculated when the assignment is proposed, so simply pro-rate them if/as needed
 	asset husd_payment = adjust_asset(a_itr->assets.at("husd_salary_per_phase"), first_phase_ratio_calc);
 	asset voice_payment = adjust_asset(a_itr->assets.at("hvoice_salary_per_phase"), first_phase_ratio_calc);
+	asset hypha_payment = adjust_asset(a_itr->assets.at("hypha_salary_per_phase"), first_phase_ratio_calc);
 
+	// Record the payment as a whole (for the assignment/period combo); NOTE: bank also records individual payments per token
 	asspay_t.emplace(get_self(), [&](auto &a) {
 		a.ass_payment_id = asspay_t.available_primary_key();
 		a.assignment_id = assignment_id;
@@ -474,6 +485,14 @@ void hyphadao::payassign(const uint64_t &assignment_id, const uint64_t &period_i
 
 	string memo = "Payment for role " + std::to_string(a_itr->ints.at("role_id")) + "; Assignment ID: " + std::to_string(assignment_id) + "; Period ID: " + std::to_string(period_id);
 
+    debug("Processing payments: HYPHA: " + hypha_payment.to_string() +
+            ", DEFERRED: " + deferred_seeds_payment.to_string() +
+            ", INSTANT: " + instant_seeds_payment.to_string() +
+            ", HVOICE: " + voice_payment.to_string() +
+            ", HUSD: " + husd_payment.to_string());
+
+	// Make all payments to the assigned account; NOTE: the makepayment function simply returns if the amount is zero
+	// The bank knows how to send various payments/tokens
 	bank.makepayment(period_id, a_itr->names.at("assigned_account"), hypha_payment, memo, assignment_id, 1);
 	bank.makepayment(period_id, a_itr->names.at("assigned_account"), deferred_seeds_payment, memo, assignment_id, 0);
 	bank.makepayment(period_id, a_itr->names.at("assigned_account"), instant_seeds_payment, memo, assignment_id, 1);

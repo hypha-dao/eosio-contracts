@@ -84,27 +84,6 @@ namespace hyphaspace
                                      const_mem_fun<AssignmentPayout, uint64_t, &AssignmentPayout::by_recipient>>>
           asspay_table;
 
-      // // scope: get_self()
-      // struct [[eosio:;table, eosio::contract("hyphadao")]] CompletedChallenge
-      // {
-      //    uint64_t    cc_id             ;
-      //    name        completer         ;
-      //    uint64_t    challenge_id      ;
-      //    name        challenge_key     ;
-      //    time_point  completed_date    = current_time_point();
-
-      //    uint64_t    primary_key()     const { return cc_id; }
-      //    uint64_t    by_completer()    const { return completer.value; }
-      //    uint64_t    by_challengeid()  const { return challenge_id; }
-      //    uint64_t    by_completeddt()  const { return completed_date.sec_since_epoch(); }
-      // }
-
-      // typdef multi_index<"compchallngs"_n, CompletedChallenge,
-      //    indexed_by<"bycompleter"_n, const_mem_fun<CompletedChallenge, uint64_t, &CompletedChallenge::by_completer>>,
-      //    indexed_by<"bychallengid"_n, const_mem_fun<CompletedChallenge, uint64_t, &CompletedChallenge::by_challengeid>>,
-      //    indexed_by<"bycompletedt"_n, const_mem_fun<CompletedChallenge, uint64_t, &CompletedChallenge::by_completeddt>>
-      // > compchallenge_table;
-
       // scope: proposal, proparchive, role, assignment
       struct [[eosio::table, eosio::contract("hyphadao")]] Object
       {
@@ -162,6 +141,15 @@ namespace hyphaspace
       };
       typedef singleton<name("config"), configtable> configtables;
       typedef eosio::multi_index<name("config"), configtable> dump_for_config;
+
+      struct [[eosio::table, eosio::contract("hyphadao")]] price_history_table {
+         uint64_t id;
+         asset seeds_usd;
+         time_point date;
+
+         uint64_t primary_key()const { return id; }
+      };
+      typedef eosio::multi_index<name("pricehistory"), price_history_table> price_history_tables;
 
       const uint64_t MICROSECONDS_PER_HOUR = (uint64_t)60 * (uint64_t)60 * (uint64_t)1000000;
       const uint64_t MICROSECONDS_PER_YEAR = MICROSECONDS_PER_HOUR * (uint64_t)24 * (uint64_t)365;
@@ -280,6 +268,7 @@ namespace hyphaspace
       float get_float(const std::map<string, uint64_t> ints, string key);
 
       bool is_paused();
+      bool is_proposal_direct_assets (const map<string, asset> &assets);
 
       string get_string(const std::map<string, string> strings, string key);
       void checkx(const bool &condition, const string &message);
@@ -321,12 +310,15 @@ namespace hyphaspace
                             const map<string, uint64_t> &ints );
 
       map<string, asset> get_assets(const asset &usd_amount,
-                                        const float &deferred_perc);
+                                    const float &deferred_perc,
+                                    const time_point &price_time_point);
                                  
       map<string, asset> get_assets(const uint64_t &role_id, 
-                                        const float &deferred_perc, 
-                                        const float &time_share_perc);
+                                    const float &deferred_perc, 
+                                    const float &time_share_perc);
 
       float get_seeds_price_usd () ;
+      float get_seeds_price_usd (const time_point& price_time_point);
+      asset get_seeds_amount (const asset &usd_amount, const time_point &price_time_point, const float &time_share, const float &deferred_perc);
    };
 } // namespace hyphasapce

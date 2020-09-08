@@ -701,6 +701,24 @@
             ]
         },
         {
+            "name": "price_history_table",
+            "base": "",
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "seeds_usd",
+                    "type": "asset"
+                },
+                {
+                    "name": "date",
+                    "type": "time_point"
+                }
+            ]
+        },
+        {
             "name": "propdraft",
             "base": "",
             "fields": [
@@ -1278,6 +1296,13 @@
         {
             "name": "periods",
             "type": "Period",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "pricehistory",
+            "type": "price_history_table",
             "index_type": "i64",
             "key_names": [],
             "key_types": []
