@@ -31,37 +31,25 @@ cleos -u https://testnet.telos.caleos.io push action eosio updateauth '{
 }' -p kv.hypha@owner
 
 
-cleos -u https://test.telos.kitchen push action eosio updateauth '{
-    "account": "gba.hypha",
-    "permission": "active",
-    "parent": "owner",
+eosc -u https://test.telos.kitchen --vault-file ../eosc-testnet-vault.json tx create eosio updateauth '{
+    "account": "dao.hypha",
+    "permission": "alerts",
+    "parent": "active",
     "auth": {
-        "keys": [
-            {
-                "key": "EOS5zMiV5eBeytcLWxow7BCypMxWKsxvPARCQ9coHnCAEkXcR6fMr",
-                "weight": 1
-            }
-        ],
+        "keys": [],
         "threshold": 1,
         "accounts": [
             {
                 "permission": {
-                    "actor": "dao.gba",
-                    "permission": "eosio.code"
-                },
-                "weight": 1
-            },
-            {
-                "permission": {
-                    "actor": "max.gba",
+                    "actor": "thomashypha1",
                     "permission": "active"
                 },
                 "weight": 1
-            },
+            }
         ],
         "waits": []
     }
-}' -p dao.gba@owner
+}' -p dao.hypha@owner
 
 
 cleos -u https://api.telos.kitchen push action eosio updateauth '{

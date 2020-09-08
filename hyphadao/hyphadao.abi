@@ -701,6 +701,24 @@
             ]
         },
         {
+            "name": "price_history_table",
+            "base": "",
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "seeds_usd",
+                    "type": "asset"
+                },
+                {
+                    "name": "date",
+                    "type": "time_point"
+                }
+            ]
+        },
+        {
             "name": "propdraft",
             "base": "",
             "fields": [
@@ -743,12 +761,27 @@
             ]
         },
         {
+            "name": "remalert",
+            "base": "",
+            "fields": []
+        },
+        {
             "name": "remapply",
             "base": "",
             "fields": [
                 {
                     "name": "applicant",
                     "type": "name"
+                }
+            ]
+        },
+        {
+            "name": "remconfigatt",
+            "base": "",
+            "fields": [
+                {
+                    "name": "key",
+                    "type": "string"
                 }
             ]
         },
@@ -810,6 +843,20 @@
                 {
                     "name": "flexvalue",
                     "type": "flexvalue"
+                }
+            ]
+        },
+        {
+            "name": "setalert",
+            "base": "",
+            "fields": [
+                {
+                    "name": "level",
+                    "type": "name"
+                },
+                {
+                    "name": "content",
+                    "type": "string"
                 }
             ]
         },
@@ -931,6 +978,16 @@
                 {
                     "name": "delay_sec",
                     "type": "varuint32"
+                }
+            ]
+        },
+        {
+            "name": "updassassets",
+            "base": "",
+            "fields": [
+                {
+                    "name": "assignment_id",
+                    "type": "uint64"
                 }
             ]
         },
@@ -1089,8 +1146,18 @@
             "ricardian_contract": ""
         },
         {
+            "name": "remalert",
+            "type": "remalert",
+            "ricardian_contract": ""
+        },
+        {
             "name": "remapply",
             "type": "remapply",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "remconfigatt",
+            "type": "remconfigatt",
             "ricardian_contract": ""
         },
         {
@@ -1119,6 +1186,11 @@
             "ricardian_contract": ""
         },
         {
+            "name": "setalert",
+            "type": "setalert",
+            "ricardian_contract": ""
+        },
+        {
             "name": "setconfig",
             "type": "setconfig",
             "ricardian_contract": ""
@@ -1141,6 +1213,11 @@
         {
             "name": "togglepause",
             "type": "togglepause",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "updassassets",
+            "type": "updassassets",
             "ricardian_contract": ""
         },
         {
@@ -1219,6 +1296,13 @@
         {
             "name": "periods",
             "type": "Period",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "pricehistory",
+            "type": "price_history_table",
             "index_type": "i64",
             "key_names": [],
             "key_types": []
