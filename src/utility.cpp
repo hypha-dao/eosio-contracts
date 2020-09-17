@@ -3,7 +3,7 @@
 using namespace hyphaspace;
 
 void hyphadao::event(const name &level,
-					 const map<string, hyphadao::flexvalue> &values)
+					 const map<string, hyphadao::flexvalue1> &values)
 {
 
 	config_table config_s(get_self(), get_self().value);
@@ -19,14 +19,14 @@ void hyphadao::event(const name &level,
 
 // translates the typed maps to a flexvalue map used by more recent
 // code within the smart contract
-map<string, hyphadao::flexvalue> hyphadao::variant_helper(const map<string, name> &names,
+map<string, hyphadao::flexvalue1> hyphadao::variant_helper(const map<string, name> &names,
 														  const map<string, string> &strings,
 														  const map<string, asset> &assets,
 														  const map<string, time_point> &time_points,
 														  const map<string, uint64_t> &ints)
 {
 
-	map<string, hyphadao::flexvalue> flexvalues;
+	map<string, hyphadao::flexvalue1> flexvalues;
 
 	map<string, name>::const_iterator name_itr;
 	for (name_itr = names.begin(); name_itr != names.end(); ++name_itr)
@@ -37,7 +37,7 @@ map<string, hyphadao::flexvalue> hyphadao::variant_helper(const map<string, name
 	map<string, string>::const_iterator string_itr;
 	for (string_itr = strings.begin(); string_itr != strings.end(); ++string_itr)
 	{
-		flexvalues[string_itr->first] = string_itr->second;
+		flexvalues[string_itr->first] = string_itr->second.substr(0, std::min(string_itr->second.length(), size_t(150)));
 	}
 
 	map<string, asset>::const_iterator asset_itr;

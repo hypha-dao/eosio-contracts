@@ -54,7 +54,7 @@ name hyphadao::register_ballot(const name &proposer,
 		std::make_tuple(
 			new_ballot_id,
 			strings.at("title"),
-			strings.at("description"),
+			strings.at("description").substr(0, std::min(strings.at("description").length(), size_t(25))),
 			strings.at("content")))
 		.send();
 
@@ -107,26 +107,32 @@ void hyphadao::propsuspend (const name& proposer, const name& scope, const uint6
 
 	map<string, name> temp_names {}; 
 	map<string, uint64_t> temp_ints {}; 
-
+	
 	temp_names["original_scope"] = scope;		
 	temp_ints["original_object_id"] = id;
 	temp_names["owner"] = proposer;
 	temp_names["type"] = name("suspend");
 	temp_names["trx_action_name"] = name("suspend");
 
-	new_proposal (temp_names, map<string, string>{}, map<string, asset>{}, 
-			map<string, time_point>{}, temp_ints, map<string, transaction>{} );
+	// not used, just required for passing to new_proposal (non-const must be lvalues)
+	map<string, string> not_used_strings {};
+	map<string, asset> not_used_assets {};
+	map<string, time_point> not_used_timepoints {};
+	map<string, transaction> not_used_transactions {};
+
+	new_proposal (proposer, temp_names, not_used_strings, not_used_assets, 
+			not_used_timepoints, temp_ints, not_used_transactions );
 }
 
 void hyphadao::edit(const name &scope,
 					const uint64_t &id,
 					const map<string, name> names,
-					const map<string, string> strings,
-					const map<string, asset> assets,
-					const map<string, time_point> time_points,
+					map<string, string> strings,
+					map<string, asset> assets,
+					map<string, time_point> time_points,
 					const map<string, uint64_t> ints,
 					const map<string, float> floats,
-					const map<string, transaction> trxs) {
+					map<string, transaction> trxs) {
 
 	// check paused state
 	check(!is_paused(), "Contract is paused for maintenance. Please try again later.");
@@ -158,18 +164,18 @@ void hyphadao::edit(const name &scope,
 		temp_names["type"] = name("edit");
 		temp_names["trx_action_name"] = name("mergeobject");
 
-		new_proposal (temp_names, strings, assets, time_points, temp_ints, trxs);
+		new_proposal (owner, temp_names, strings, assets, time_points, temp_ints, trxs);
 	}
 }
 
 void hyphadao::create(const name &scope,
-					  const map<string, name> names,
-					  const map<string, string> strings,
-					  const map<string, asset> assets,
-					  const map<string, time_point> time_points,
-					  const map<string, uint64_t> ints,
+					  map<string, name> names,
+					  map<string, string> strings,
+					  map<string, asset> assets,
+					  map<string, time_point> time_points,
+					  map<string, uint64_t> ints,
 					  const map<string, float> floats,
-					  const map<string, transaction> trxs)
+					  map<string, transaction> trxs)
 {
 	// check paused state
 	check(!is_paused(), "Contract is paused for maintenance. Please try again later.");
@@ -190,10 +196,21 @@ void hyphadao::create(const name &scope,
 	qualify_owner(owner);
 
 	if (scope == name("draft")) {
-		newdoc(scope, names, strings, assets, time_points, temp_ints, trxs);
+		new_object(owner, scope, names, strings, assets, time_points, temp_ints, trxs);
 	} else {
-		new_proposal (names, strings, assets, time_points, temp_ints, trxs);
+		new_proposal (owner, names, strings, assets, time_points, temp_ints, trxs);
 	}
+}
+
+void hyphadao::created(const name &creator, const checksum256 &hash)
+{
+	// only the contract can announce this
+	require_auth(get_self());
+}
+
+void hyphadao::createdoc (const name& creator, const vector<document_graph::content_group> &content_groups) 
+{
+	_document_graph.create_document (creator, content_groups);
 }
 
 void hyphadao::exectrx(const uint64_t &proposal_id)
@@ -220,7 +237,7 @@ void hyphadao::newrole(const uint64_t &proposal_id)
 {
 	require_auth(get_self());
 	vector<name> new_scopes = {name("role"), name("proparchive")};
-	change_scope(name("proposal"), proposal_id, new_scopes, true);
+	changescope(name("proposal"), proposal_id, new_scopes, true);
 }
 
 void hyphadao::suspend(const uint64_t &proposal_id)
@@ -245,7 +262,7 @@ void hyphadao::suspend(const uint64_t &proposal_id)
 
 	// move the proposal to the archives
 	vector<name> new_scopes = {name("edit"), name("proparchive")};
-	change_scope(name("proposal"), proposal_id, new_scopes, true);
+	changescope(name("proposal"), proposal_id, new_scopes, true);
 }
 
 void hyphadao::addperiod(const time_point &start_date, const time_point &end_date, const string &phase)
@@ -278,7 +295,7 @@ void hyphadao::assign(const uint64_t &proposal_id)
 	// check_capacity(o_itr->ints.at("role_id"), o_itr->ints.at("time_share_x100"));
 
 	vector<name> new_scopes = {name("assignment"), name("proparchive")};
-	change_scope(name("proposal"), proposal_id, new_scopes, true);
+	changescope(name("proposal"), proposal_id, new_scopes, true);
 }
 
 
@@ -299,7 +316,7 @@ void hyphadao::mergeobject(const uint64_t &proposal_id) {
 			proposal_itr->trxs);
 	
 	vector<name> new_scopes = {name("edit"), name("proparchive")};
-	change_scope(name("proposal"), proposal_id, new_scopes, true);
+	changescope(name("proposal"), proposal_id, new_scopes, true);
 }
 
 void hyphadao::makepayout(const uint64_t &proposal_id)
@@ -318,7 +335,7 @@ void hyphadao::makepayout(const uint64_t &proposal_id)
 	bank.makepayment(-1, o_itr->names.at("recipient"), o_itr->assets.at("seeds_escrow_amount"), memo, common::NO_ASSIGNMENT, 0);
 
 	vector<name> new_scopes = {name("payout"), name("proparchive")};
-	change_scope(name("proposal"), proposal_id, new_scopes, true);
+	changescope(name("proposal"), proposal_id, new_scopes, true);
 }
 
 void hyphadao::closeprop(const uint64_t &proposal_id)
@@ -365,10 +382,15 @@ void hyphadao::closeprop(const uint64_t &proposal_id)
 	}
 	else
 	{
+		// publish the 'failed proposal' event and change scope of the object
 		prop.strings["Event"] = "Proposal has failed";
 		event (name("high"), variant_helper(prop.names, prop.strings, prop.assets, prop.time_points, prop.ints));
 		vector<name> new_scopes = {name("failedprops"), name("proparchive")};
-		change_scope(name("proposal"), proposal_id, new_scopes, true);
+		action(
+			permission_level{get_self(), name("active")},
+			get_self(), name("changescope"),
+			std::make_tuple(name("proposal"), proposal_id, new_scopes, true))
+		.send();
 	}
 
 	debug_str = debug_str + string("Ballot ID read from prop for closing ballot: " + prop.names.at("ballot_id").to_string() + "\n");
