@@ -5,9 +5,10 @@
 #include <eosio/multi_index.hpp>
 #include <eosio/transaction.hpp>
 
-#include "bank.hpp"
-#include "common.hpp"
-#include "trail.hpp"
+#include <bank.hpp>
+#include <common.hpp>
+#include <trail.hpp>
+#include <document_graph.hpp>
 
 using namespace eosio;
 using namespace std;
@@ -21,7 +22,7 @@ namespace hyphaspace
       ~hyphadao();
 
       // v2 data structure will use variants for more generic support
-      typedef std::variant<name, string, asset, time_point, uint64_t> flexvalue;
+      typedef std::variant<name, string, asset, time_point, uint64_t> flexvalue1;
 
       struct [[eosio::table, eosio::contract("hyphadao")]] Config
       {
@@ -111,7 +112,7 @@ namespace hyphaspace
          uint64_t by_updated() const { return updated_date.sec_since_epoch(); }
       };
 
-      typedef multi_index<name("objects"), Object,
+      typedef multi_index<name("objects"), Object,                                                             // index 1
                           indexed_by<name("bycreated"), const_mem_fun<Object, uint64_t, &Object::by_created>>, // index 2
                           indexed_by<name("byupdated"), const_mem_fun<Object, uint64_t, &Object::by_updated>>, // 3
                           indexed_by<name("byowner"), const_mem_fun<Object, uint64_t, &Object::by_owner>>,     // 4
@@ -151,27 +152,53 @@ namespace hyphaspace
       };
       typedef eosio::multi_index<name("pricehistory"), price_history_table> price_history_tables;
 
+      struct [[eosio::table, eosio::contract("hyphadao")]] document
+      {
+         uint64_t id;
+         checksum256 hash;
+         name creator;
+         vector<document_graph::content_group> content_groups;
+
+         vector<document_graph::certificate> certificates;
+         uint64_t primary_key() const { return id; }
+         uint64_t by_creator() const { return creator.value; }
+         checksum256 by_hash() const { return hash; }
+
+         time_point created_date = current_time_point();
+         uint64_t by_created() const { return created_date.sec_since_epoch(); }
+
+         EOSLIB_SERIALIZE(document, (id)(hash)(creator)(content_groups)(certificates)(created_date))
+      };
+
+      typedef multi_index<name("documents"), document,
+                          indexed_by<name("idhash"), const_mem_fun<document, checksum256, &document::by_hash>>,
+                          indexed_by<name("bycreator"), const_mem_fun<document, uint64_t, &document::by_creator>>,
+                          indexed_by<name("bycreated"), const_mem_fun<document, uint64_t, &document::by_created>>>
+          document_table;
+
       const uint64_t MICROSECONDS_PER_HOUR = (uint64_t)60 * (uint64_t)60 * (uint64_t)1000000;
       const uint64_t MICROSECONDS_PER_YEAR = MICROSECONDS_PER_HOUR * (uint64_t)24 * (uint64_t)365;
 
       ACTION create(const name &scope,
-                    const map<string, name> names,
-                    const map<string, string> strings,
-                    const map<string, asset> assets,
-                    const map<string, time_point> time_points,
-                    const map<string, uint64_t> ints,
-                    const map<string, float> floats,
-                    const map<string, transaction> trxs);
+                     map<string, name> names,
+                     map<string, string> strings,
+                     map<string, asset> assets,
+                     map<string, time_point> time_points,
+                     map<string, uint64_t> ints,
+                     const map<string, float> floats,
+                     map<string, transaction> trxs);
+
+      ACTION created(const name &creator, const checksum256 &hash);
 
       ACTION edit(const name &scope,
                   const uint64_t &id,
                   const map<string, name> names,
-                  const map<string, string> strings,
-                  const map<string, asset> assets,
-                  const map<string, time_point> time_points,
+                  map<string, string> strings,
+                  map<string, asset> assets,
+                  map<string, time_point> time_points,
                   const map<string, uint64_t> ints,
                   const map<string, float> floats,
-                  const map<string, transaction> trxs);
+                  map<string, transaction> trxs);
       
       ACTION copytodraft (const name& copier, const name &scope, const uint64_t &id);
       ACTION propdraft (const uint64_t& id);
@@ -198,13 +225,17 @@ namespace hyphaspace
       ACTION debugmsg(const string &message);
       ACTION updversion(const string &component, const string &version);
       ACTION updassets(const uint64_t &proposal_id);
-      ACTION changescope(const name &scope, const uint64_t &id, const name &new_scope);
-      ACTION set (const name &scope, const uint64_t &id, const string& key, const flexvalue& flexvalue);
+      ACTION fixseedsprec (const uint64_t &proposal_id);
+      ACTION changescope(const name &scope, const uint64_t &id, const vector<name> &new_scopes, const bool &remove_old);
+      ACTION set (const name &scope, const uint64_t &id, const string& key, const flexvalue1& flexvalue);
       ACTION updassassets (const uint64_t &assignment_id);
+
+      ACTION createdoc (const name& creator, const vector<document_graph::content_group> &content_groups);
+      ACTION transform(const name &creator, const name &scope, const uint64_t &id);
 
       // alerts Group
       ACTION setalert (const name &level, const string &content);
-      ACTION remalert ();
+      ACTION remalert (const string &notes);
 
       // ACTION backupobjs (const name& scope);
       // ACTION erasebackups (const name& scope);
@@ -218,7 +249,7 @@ namespace hyphaspace
                        const map<string, float> floats,
                        const map<string, transaction> trxs);
 
-      ACTION setconfigatt(const string& key, const hyphadao::flexvalue& value);
+      ACTION setconfigatt(const string& key, const hyphadao::flexvalue1& value);
       ACTION remconfigatt(const string& key);
 
       ACTION setlastballt(const name &last_ballot_id);
@@ -254,6 +285,7 @@ namespace hyphaspace
 
    private:
       Bank bank = Bank(get_self());
+      document_graph _document_graph = document_graph(get_self());
 
       void defcloseprop(const uint64_t &proposal_id);
       void qualify_owner(const name &proposer);
@@ -262,7 +294,7 @@ namespace hyphaspace
       uint64_t hash (std::string str); 
       uint64_t get_next_sender_id();
       void debug(const string &notes);
-      void change_scope(const name &current_scope, const uint64_t &id, const vector<name> &new_scopes, const bool &remove_old);
+      // void change_scope(const name &current_scope, const uint64_t &id, const vector<name> &new_scopes, const bool &remove_old);
      
       asset adjust_asset(const asset &original_asset, const float &adjustment);
       float get_float(const std::map<string, uint64_t> ints, string key);
@@ -276,34 +308,44 @@ namespace hyphaspace
 
       uint64_t get_last_period_id();
 
-      void newdoc (const name &scope,
-					  const map<string, name> names,
-					  const map<string, string> strings,
-					  const map<string, asset> assets,
-					  const map<string, time_point> time_points,
-					  const map<string, uint64_t> ints,
-					  const map<string, transaction> trxs);
+      void new_object (const name &creator,
+                        const name &scope,
+                        const map<string, name> names,
+                        const map<string, string> strings,
+                        const map<string, asset> assets,
+                        const map<string, time_point> time_points,
+                        const map<string, uint64_t> ints,
+                        const map<string, transaction> trxs);
 
-      void new_proposal (const map<string, name> &names,
-                           const map<string, string> &strings,
-                           const map<string, asset> &assets,
-                           const map<string, time_point> &time_points,
-                           const map<string, uint64_t> &ints,
-                           const map<string, transaction> &trxs) ;
+      void new_document (const name &creator,
+                        const name &scope, 
+                        const map<string, name> names,
+                        const map<string, string> strings,
+                        const map<string, asset> assets,
+                        const map<string, time_point> time_points,
+                        const map<string, uint64_t> ints);
+
+      void new_proposal(const name& owner,
+                        map<string, name> &names,
+                        map<string, string> &strings,
+                        map<string, asset> &assets,
+                        map<string, time_point> &time_points,
+                        map<string, uint64_t> &ints,
+                        map<string, transaction> &trxs) ;
 
       void merge (const name& scope, 
-					  const uint64_t& id, 
-					  const map<string, name> names,
-					  const map<string, string> strings,
-					  const map<string, asset> assets,
-					  const map<string, time_point> time_points,
-					  const map<string, uint64_t> ints,
-					  const map<string, transaction> trxs);
+                  const uint64_t& id, 
+                  const map<string, name> names,
+                  const map<string, string> strings,
+                  const map<string, asset> assets,
+                  const map<string, time_point> time_points,
+                  const map<string, uint64_t> ints,
+                  const map<string, transaction> trxs);
 
       void event (const name &level,
-                  const map<string, flexvalue> &values);
+                  const map<string, flexvalue1> &values);
 
-      map<string, flexvalue> variant_helper (const map<string, name> &names,
+      map<string, flexvalue1> variant_helper (const map<string, name> &names,
                             const map<string, string> &strings,
                             const map<string, asset> &assets,
                             const map<string, time_point> &time_points,

@@ -46,7 +46,7 @@ void hyphadao::setconfig(const map<string, name> names,
 	}
 }
 
-void hyphadao::setconfigatt(const string& key, const hyphadao::flexvalue& value)
+void hyphadao::setconfigatt(const string& key, const hyphadao::flexvalue1& value)
 {
 	require_auth(get_self());
 
@@ -114,8 +114,8 @@ void hyphadao::setalert (const name &level, const string &content)
 	// inline actions seem happiest when affixing types
 	string alert_level = string {"alert_level"};
 	string alert_content = string {"alert_content"};
-	hyphadao::flexvalue fv_level = level;
-	hyphadao::flexvalue fv_content = content;
+	hyphadao::flexvalue1 fv_level = level;
+	hyphadao::flexvalue1 fv_content = content;
 
 	action(
 		permission_level{get_self(), name("active")},
@@ -130,7 +130,7 @@ void hyphadao::setalert (const name &level, const string &content)
 	.send();
 }
 
-void hyphadao::remalert ()
+void hyphadao::remalert (const string &notes)
 {
 	// inline actions seem happiest when affixing types
 	string alert_level = string {"alert_level"};

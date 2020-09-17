@@ -30,8 +30,8 @@
   ],
   "assets": [
     {
-      "key": "usd_amount",
-      "value": "10000.00 USD"
+      "key": "seeds_escrow_amount",
+      "value": "10000.55 SEEDS"
     }
   ],
   "time_points": [

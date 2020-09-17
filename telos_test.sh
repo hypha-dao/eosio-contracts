@@ -20,11 +20,14 @@ ddd, eee, fff, ggg, hhh
 iii, jjj, lll
 
 
-eosc -u https://test.telos.kitchen --vault-file ../eosc-testnet-vault.json system newaccount hypha monitor.hypha --stake-cpu "1.0000 TLOS" --stake-net "1.0000 TLOS" --transfer --auth-key EOS5Y5MwfVEDUzRBJVBoWepYK3DBeQ75E8xnhAUjMv6JDuQCJ69UC
-eosc -u https://test.telos.kitchen --vault-file ../eosc-testnet-vault.json transfer dao.hypha publsh.hypha "100.0000 TLOS"
-eosc -u https://test.telos.kitchen --vault-file ../eosc-testnet-vault.json system buyrambytes publsh.hypha publsh.hypha 10000
+eosc -u https://test.telos.kitchen --vault-file ../eosc-testnet-vault.json system newaccount hypha msig.hypha --stake-cpu "1.0000 TLOS" --stake-net "1.0000 TLOS" --transfer --auth-key EOS7PJ3hWdozwGZPdTFvuZhAvPakuKTGy4SJfweLGB7Pgu9sU9aW7
+eosc -u https://test.telos.kitchen --vault-file ../../teloskitchen/tk-dev.json transfer teloskitchen msig.hypha "1000.0000 TLOS"
+eosc -u https://test.telos.kitchen --vault-file ../eosc-testnet-vault.json system buyrambytes msig.hypha msig.hypha 10000
 
-eosc -u https://test.telos.kitchen --vault-file ../../teloskitchen/tk-dev.json transfer teloskitchen publsh.hypha "1000.0000 TLOS"
+eosc -u https://test.telos.kitchen --vault-file ../eosc-testnet-vault.json system newaccount hypha test.hypha --stake-cpu "1.0000 TLOS" --stake-net "1.0000 TLOS" --transfer --auth-key EOS7PJ3hWdozwGZPdTFvuZhAvPakuKTGy4SJfweLGB7Pgu9sU9aW7
+eosc -u https://test.telos.kitchen --vault-file ../../teloskitchen/tk-dev.json transfer teloskitchen test.hypha "1000.0000 TLOS"
+eosc -u https://test.telos.kitchen --vault-file ../eosc-testnet-vault.json system buyrambytes test.hypha test.hypha 100000
+
 eosc -u https://api.telos.kitchen --vault-file dao.hypha.json system setcontract publsh.hypha ../monitor/monitor/monitor.wasm ../monitor/monitor/monitor.abi
 
 
@@ -264,22 +267,45 @@ cleos -u https://test.telos.kitchen push action hyphadaobali setconfig '["token.
 
 
 cleos -u https://api.telos.kitchen push action eosio updateauth '{
-    "account": "bank.hypha",
-    "permission": "owner",
-    "parent": "",
+    "account": "dao.hypha",
+    "permission": "enrollers",
+    "parent": "active",
     "auth": {
-        "keys": [
-            {
-                "key": "EOS5PEdGhBeDd4hSN79zv9GnwKRVUW6ZXwsTtTzkNJmt3NDrsWXhd",
-                "weight": 1
-            }
-        ],
+        "keys": [],
         "threshold": 1,
         "accounts": [
             {
                 "permission": {
-                    "actor": "bank.hypha",
-                    "permission": "eosio.code"
+                    "actor": "cometogether",
+                    "permission": "active"
+                },
+                "weight": 1
+            },
+             {
+                "permission": {
+                    "actor": "hyphanewyork",
+                    "permission": "active"
+                },
+                "weight": 1
+            },
+             {
+                "permission": {
+                    "actor": "joachimstroh",
+                    "permission": "active"
+                },
+                "weight": 1
+            },
+             {
+                "permission": {
+                    "actor": "illumination",
+                    "permission": "active"
+                },
+                "weight": 1
+            },
+             {
+                "permission": {
+                    "actor": "thealchemist",
+                    "permission": "active"
                 },
                 "weight": 1
             }

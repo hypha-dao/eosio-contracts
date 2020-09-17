@@ -31,7 +31,7 @@ void hyphadao::apply(const name &applicant,
 		});
 	}
 
-	map<string, hyphadao::flexvalue> event_data;
+	map<string, hyphadao::flexvalue1> event_data;
 	event_data["New Applicant"] = applicant;
 	event_data["Content"] = content;
 	event (name("medium"), event_data);
@@ -77,7 +77,7 @@ void hyphadao::enroll(const name &enroller,
 		m.member = applicant;
 	});
 
-	map<string, hyphadao::flexvalue> event_data;
+	map<string, hyphadao::flexvalue1> event_data;
 	event_data["New Member"] = applicant;
 	event_data["Enroller"] = enroller;
 	event_data["Content"] = content;

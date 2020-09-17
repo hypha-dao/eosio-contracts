@@ -3,7 +3,15 @@
     "version": "eosio::abi/1.1",
     "types": [
         {
+            "new_type_name": "content_group",
+            "type": "content[]"
+        },
+        {
             "new_type_name": "flexvalue",
+            "type": "variant_name_string_asset_time_point_int64_checksum256"
+        },
+        {
+            "new_type_name": "flexvalue1",
             "type": "variant_name_string_asset_time_point_uint64"
         }
     ],
@@ -299,6 +307,24 @@
             ]
         },
         {
+            "name": "certificate",
+            "base": "",
+            "fields": [
+                {
+                    "name": "certifier",
+                    "type": "name"
+                },
+                {
+                    "name": "notes",
+                    "type": "string"
+                },
+                {
+                    "name": "certification_date",
+                    "type": "time_point"
+                }
+            ]
+        },
+        {
             "name": "changescope",
             "base": "",
             "fields": [
@@ -311,8 +337,12 @@
                     "type": "uint64"
                 },
                 {
-                    "name": "new_scope",
-                    "type": "name"
+                    "name": "new_scopes",
+                    "type": "name[]"
+                },
+                {
+                    "name": "remove_old",
+                    "type": "bool"
                 }
             ]
         },
@@ -367,6 +397,20 @@
                 {
                     "name": "timestamp",
                     "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "content",
+            "base": "",
+            "fields": [
+                {
+                    "name": "label",
+                    "type": "string"
+                },
+                {
+                    "name": "value",
+                    "type": "flexvalue"
                 }
             ]
         },
@@ -427,12 +471,70 @@
             ]
         },
         {
+            "name": "created",
+            "base": "",
+            "fields": [
+                {
+                    "name": "creator",
+                    "type": "name"
+                },
+                {
+                    "name": "hash",
+                    "type": "checksum256"
+                }
+            ]
+        },
+        {
+            "name": "createdoc",
+            "base": "",
+            "fields": [
+                {
+                    "name": "creator",
+                    "type": "name"
+                },
+                {
+                    "name": "content_groups",
+                    "type": "content_group[]"
+                }
+            ]
+        },
+        {
             "name": "debugmsg",
             "base": "",
             "fields": [
                 {
                     "name": "message",
                     "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "document",
+            "base": "",
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "hash",
+                    "type": "checksum256"
+                },
+                {
+                    "name": "creator",
+                    "type": "name"
+                },
+                {
+                    "name": "content_groups",
+                    "type": "content_group[]"
+                },
+                {
+                    "name": "certificates",
+                    "type": "certificate[]"
+                },
+                {
+                    "name": "created_date",
+                    "type": "time_point"
                 }
             ]
         },
@@ -541,6 +643,16 @@
                 {
                     "name": "data",
                     "type": "bytes"
+                }
+            ]
+        },
+        {
+            "name": "fixseedsprec",
+            "base": "",
+            "fields": [
+                {
+                    "name": "proposal_id",
+                    "type": "uint64"
                 }
             ]
         },
@@ -763,7 +875,12 @@
         {
             "name": "remalert",
             "base": "",
-            "fields": []
+            "fields": [
+                {
+                    "name": "notes",
+                    "type": "string"
+                }
+            ]
         },
         {
             "name": "remapply",
@@ -842,7 +959,7 @@
                 },
                 {
                     "name": "flexvalue",
-                    "type": "flexvalue"
+                    "type": "flexvalue1"
                 }
             ]
         },
@@ -904,7 +1021,7 @@
                 },
                 {
                     "name": "value",
-                    "type": "flexvalue"
+                    "type": "flexvalue1"
                 }
             ]
         },
@@ -978,6 +1095,24 @@
                 {
                     "name": "delay_sec",
                     "type": "varuint32"
+                }
+            ]
+        },
+        {
+            "name": "transform",
+            "base": "",
+            "fields": [
+                {
+                    "name": "creator",
+                    "type": "name"
+                },
+                {
+                    "name": "scope",
+                    "type": "name"
+                },
+                {
+                    "name": "id",
+                    "type": "uint64"
                 }
             ]
         },
@@ -1081,6 +1216,16 @@
             "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Create Object\nsummary: 'Create an object in the contract'\nicon: https://eos.gyftie.org/statics/logos/mobile.png#54b516210a9fe709b1ccc8c075e16538d51e3664674f707f80630a7e53dbd2e7\n---\n\n{{$action.authorization.[0].actor}} applies"
         },
         {
+            "name": "created",
+            "type": "created",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "createdoc",
+            "type": "createdoc",
+            "ricardian_contract": ""
+        },
+        {
             "name": "debugmsg",
             "type": "debugmsg",
             "ricardian_contract": ""
@@ -1108,6 +1253,11 @@
         {
             "name": "exectrx",
             "type": "exectrx",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "fixseedsprec",
+            "type": "fixseedsprec",
             "ricardian_contract": ""
         },
         {
@@ -1216,6 +1366,11 @@
             "ricardian_contract": ""
         },
         {
+            "name": "transform",
+            "type": "transform",
+            "ricardian_contract": ""
+        },
+        {
             "name": "updassassets",
             "type": "updassassets",
             "ricardian_contract": ""
@@ -1273,6 +1428,13 @@
             "key_types": []
         },
         {
+            "name": "documents",
+            "type": "document",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
             "name": "members",
             "type": "Member",
             "index_type": "i64",
@@ -1310,6 +1472,10 @@
     ],
     "ricardian_clauses": [],
     "variants": [
+        {
+            "name": "variant_name_string_asset_time_point_int64_checksum256",
+            "types": ["name","string","asset","time_point","int64","checksum256"]
+        },
         {
             "name": "variant_name_string_asset_time_point_uint64",
             "types": ["name","string","asset","time_point","uint64"]
