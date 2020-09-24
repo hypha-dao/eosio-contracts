@@ -232,7 +232,9 @@ namespace hyphaspace
 
       ACTION createdoc (const name& creator, const vector<document_graph::content_group> &content_groups);
       ACTION transform(const name &creator, const name &scope, const uint64_t &id);
-
+      ACTION transscope (const name& creator, const name &scope, const uint64_t &starting_id, const uint64_t &batch_size);
+      ACTION erasedocs (const name &scope);
+      
       // alerts Group
       ACTION setalert (const name &level, const string &content);
       ACTION remalert (const string &notes);
