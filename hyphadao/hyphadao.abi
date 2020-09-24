@@ -613,6 +613,16 @@
             ]
         },
         {
+            "name": "erasedocs",
+            "base": "",
+            "fields": [
+                {
+                    "name": "scope",
+                    "type": "name"
+                }
+            ]
+        },
+        {
             "name": "erasedraft",
             "base": "",
             "fields": [
@@ -1117,6 +1127,28 @@
             ]
         },
         {
+            "name": "transscope",
+            "base": "",
+            "fields": [
+                {
+                    "name": "creator",
+                    "type": "name"
+                },
+                {
+                    "name": "scope",
+                    "type": "name"
+                },
+                {
+                    "name": "starting_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "batch_size",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
             "name": "updassassets",
             "base": "",
             "fields": [
@@ -1246,6 +1278,11 @@
             "ricardian_contract": ""
         },
         {
+            "name": "erasedocs",
+            "type": "erasedocs",
+            "ricardian_contract": ""
+        },
+        {
             "name": "erasedraft",
             "type": "erasedraft",
             "ricardian_contract": ""
@@ -1368,6 +1405,11 @@
         {
             "name": "transform",
             "type": "transform",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "transscope",
+            "type": "transscope",
             "ricardian_contract": ""
         },
         {
