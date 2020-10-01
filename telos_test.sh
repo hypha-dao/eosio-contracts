@@ -54,7 +54,7 @@ cleos -u https://test.telos.kitchen push action trailservice mint '["dao.hypha",
 cleos -u https://test.telos.kitchen push action trailservice regvoter '["johnnyhypha1", "2,HVOICE", null]' -p johnnyhypha1
 cleos -u https://test.telos.kitchen push action trailservice mint '["johnnyhypha1", "1.00 HVOICE", "original mint"]' -p dao.hypha
 
-cleos -u https://test.telos.kitchen push action trailservice castvote '["haydenhypha1", "hypha1......2", ["pass"]]' -p haydenhypha1
+cleos -u https://test.telos.kitchen push action trailservice castvote '["haydenhypha1", "hypha1......2", ["abstain"]]' -p haydenhypha1
 
 cleos -u https://test.telos.kitchen push action dao.hypha closeprop '["roles", 0'
 
@@ -314,14 +314,14 @@ cleos -u https://api.telos.kitchen push action eosio updateauth '{
     }
 }' -p bank.hypha@owner
 
-cleos -u https://api.telos.kitchen push action eosio updateauth '{
-    "account": "bank.hypha",
+cleos -u https://test.telos.kitchen push action eosio updateauth '{
+    "account": "varexrounds2",
     "permission": "active",
     "parent": "owner",
     "auth": {
         "keys": [
             {
-                "key": "EOS5PEdGhBeDd4hSN79zv9GnwKRVUW6ZXwsTtTzkNJmt3NDrsWXhd",
+                "key": "EOS8aoFkEXL9QDcBUvMzHLGgn5Epzz3tQ74q5aCs4CDvw3saccPTh",
                 "weight": 1
             }
         ],
@@ -329,7 +329,7 @@ cleos -u https://api.telos.kitchen push action eosio updateauth '{
         "accounts": [
             {
                 "permission": {
-                    "actor": "bank.hypha",
+                    "actor": "varexrounds2",
                     "permission": "eosio.code"
                 },
                 "weight": 1
@@ -337,7 +337,7 @@ cleos -u https://api.telos.kitchen push action eosio updateauth '{
         ],
         "waits": []
     }
-}' -p bank.hypha@owner
+}' -p varexrounds2@owner
 
 
 

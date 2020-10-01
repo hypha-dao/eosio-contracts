@@ -28,6 +28,7 @@ name hyphadao::register_ballot(const name &proposer,
 	vector<name> options;
 	options.push_back(name("pass"));
 	options.push_back(name("fail"));
+	options.push_back(name("abstain"));
 
 	action(
 		permission_level{get_self(), name("active")},
@@ -362,12 +363,14 @@ void hyphadao::closeprop(const uint64_t &proposal_id)
 	map<name, asset> votes = b_itr->options;
 	asset votes_pass = votes.at(name("pass"));
 	asset votes_fail = votes.at(name("fail"));
+	asset votes_abstain = votes.at(name("abstain"));
 
 	string debug_str = " Total Vote Weight: " + b_itr->total_raw_weight.to_string() + "\n";
 	debug_str = debug_str + " Total Supply: " + t_itr->supply.to_string() + "\n";
 	debug_str = debug_str + " Quorum Threshold: " + quorum_threshold.to_string() + "\n";
 	debug_str = debug_str + " Votes Passing: " + votes_pass.to_string() + "\n";
 	debug_str = debug_str + " Votes Failing: " + votes_fail.to_string() + "\n";
+	debug_str = debug_str + " Votes Abstain: " + votes_abstain.to_string() + "\n";
 
 	bool passed = false;
 	if (b_itr->total_raw_weight >= quorum_threshold && // must meet quorum
