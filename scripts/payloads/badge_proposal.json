@@ -1,0 +1,71 @@
+{
+    "proposer": "dao.hypha",
+    "proposal_type": "badge",
+    "content_groups": [
+        [
+            {
+                "label": "content_group_label",
+                "value": [
+                    "string",
+                    "proposal_details"
+                ]
+            },
+            {
+                "label": "title",
+                "value": [
+                    "string",
+                    "Badge Maker"
+                ]
+            },
+            {
+                "label": "badge_code",
+                "value": [
+                    "name",
+                    "badgecode33"
+                ]
+            },
+            {
+                "label": "description",
+                "value": [
+                    "string",
+                    "Holders of this badge have the ability to authorize/audit badges"
+                ]
+            },
+            {
+                "label": "approved_policy_document",
+                "value": [
+                    "checksum256",
+                    "7b5755ce318c42fc750a754b4734282d1fad08e52c0de04762cb5f159a253c24"
+                ]
+            },
+            {
+                "label": "icon",
+                "value": [
+                    "string",
+                    "https://images.app.goo.gl/yhZci6h65rUFp1gy5"
+                ]
+            },
+            {
+                "label": "husd_coefficient_x100",
+                "value": [
+                    "int64",
+                    102
+                ]
+            },
+            {
+                "label": "hvoice_coefficient_x100",
+                "value": [
+                    "int64",
+                    106
+                ]
+            },
+            {
+                "label": "hypha_coefficient_x100",
+                "value": [
+                    "int64",
+                    96
+                ]
+            }
+        ]
+    ]
+}

@@ -18,15 +18,17 @@ namespace hyphaspace
 
     document_graph::document document_graph::get_parent(const document &document)
     {
-        auto content_group = get_content_group(document, "system");
-        auto content_value = get_content(content_group, "parent");
+        auto content_group = get_content_group(document, "system", false);
+        auto content_value = get_content(content_group, "parent", false);
         check(std::holds_alternative<checksum256>(content_value), "fatal error: system::parent content item is not a checksum256");
         return get_document(std::get<checksum256>(content_value));
     }
 
-    document_graph::content_group document_graph::get_content_group(const document &document, const string &content_group_label)
+    document_graph::content_group document_graph::get_content_group(const vector<content_group> &content_groups, 
+                                                                    const string &content_group_label,
+                                                                    const bool &strict)
     {
-        for (const document_graph::content_group &content_group : document.content_groups)
+        for (const document_graph::content_group &content_group : content_groups)
         {
             for (const document_graph::content &content : content_group)
             {
@@ -40,19 +42,40 @@ namespace hyphaspace
                 }
             }
         }
+        check (!strict, "content_group_label required for at least one content_group: " + content_group_label);
         return document_graph::content_group{};
     }
 
+    document_graph::content_group document_graph::get_content_group(const document &document, 
+                                                                    const string &content_group_label,
+                                                                    const bool &strict)
+    {
+        return get_content_group (document.content_groups, content_group_label, strict);
+    }
+
     document_graph::flexvalue document_graph::get_content(const content_group &content_group,
-                                                          const string &content_label)
+                                                          const string &content_label,
+                                                          const bool &strict)
     {
         for (const document_graph::content &content : content_group)
         {
-            if (content.label == "content_label")
+            if (content.label == content_label)
             {
                 return content.value;
             }
         }
-        return nullptr;
+        check (!strict, "content_label required: " + content_label);
+        return DOES_NOT_EXIST;
     }
+
+    document_graph::flexvalue document_graph::get_content(const document &document,
+                                                          const string &content_group_label,
+                                                          const string &content_label,
+                                                          const bool &strict)
+    {
+        return get_content ( get_content_group (document, content_group_label, strict), 
+                             content_label,
+                             strict);
+    }
+
 } // namespace hyphaspace

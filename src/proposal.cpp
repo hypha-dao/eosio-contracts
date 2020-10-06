@@ -2,78 +2,6 @@
 
 using namespace hyphaspace;
 
-void hyphadao::fixseedsprec (const uint64_t &proposal_id) 
-{
-    require_auth(get_self());
-
-    object_table o_t(get_self(), name("proposal").value);
-    auto p_itr = o_t.find(proposal_id);
-    check(p_itr != o_t.end(), "Proposal ID does not exist: " + std::to_string(proposal_id));
-
-    std::map<string, asset>::const_iterator asset_itr;
-    for (asset_itr = p_itr->assets.begin(); asset_itr != p_itr->assets.end(); ++asset_itr)
-    {
-        if (asset_itr->first == "seeds_escrow_amount" && 
-            asset_itr->second.symbol.code().to_string() == "SEEDS" && 
-            asset_itr->second.symbol.precision() == 2) {
-                o_t.modify (p_itr, get_self(), [&](auto &o) {
-                    o.assets["seeds_escrow_amount"] = asset { asset_itr->second.amount * 100, common::S_SEEDS };
-                });
-        }
-    }
-}
-
-void hyphadao::updassets(const uint64_t &proposal_id)
-{
-    require_auth(get_self());
-
-    object_table o_t(get_self(), name("proposal").value);
-    auto p_itr = o_t.find(proposal_id);
-    check(p_itr != o_t.end(), "Proposal ID does not exist: " + std::to_string(proposal_id));
-
-    o_t.modify(p_itr, get_self(), [&](auto &p) {
-        // merge calculated assets into map
-        map<string, asset> calculated_assets = get_assets(p_itr->ints.at("role_id"), get_float(p_itr->ints, "deferred_perc_x100"), get_float(p_itr->ints, "time_share_x100"));
-        std::map<string, asset>::const_iterator asset_itr;
-        for (asset_itr = calculated_assets.begin(); asset_itr != calculated_assets.end(); ++asset_itr)
-        {
-            p.assets[asset_itr->first] = asset_itr->second;
-        }
-    });
-}
-
-void hyphadao::updassassets(const uint64_t &assignment_id)
-{
-    require_auth(get_self());
-
-    object_table o_t(get_self(), name("assignment").value);
-    auto a_itr = o_t.find(assignment_id);
-    check(a_itr != o_t.end(), "Assignment ID does not exist: " + std::to_string(assignment_id));
-
-    o_t.modify(a_itr, get_self(), [&](auto &a) {
-        auto instant_seeds_itr = a.assets.find("seeds_instant_salary_per_phase");
-        if (instant_seeds_itr != a.assets.end())
-        {
-            a.assets.erase(instant_seeds_itr);
-        }
-
-        auto escrow_seeds_itr = a.assets.find("seeds_escrow_salary_per_phase");
-        if (escrow_seeds_itr != a.assets.end())
-        {
-            a.assets.erase(escrow_seeds_itr);
-        }
-
-        // merge calculated assets into map
-        map<string, asset> calculated_assets = get_assets(a_itr->ints.at("role_id"), get_float(a_itr->ints, "deferred_perc_x100"), get_float(a_itr->ints, "time_share_x100"));
-        std::map<string, asset>::const_iterator asset_itr;
-        for (asset_itr = calculated_assets.begin(); asset_itr != calculated_assets.end(); ++asset_itr)
-        {
-            a.assets[asset_itr->first] = asset_itr->second;
-        }
-        a.updated_date = current_time_point();
-    });
-}
-
 void hyphadao::new_proposal(const name& owner,
                             map<string, name> &names,
                             map<string, string> &strings,
@@ -91,6 +19,8 @@ void hyphadao::new_proposal(const name& owner,
     check(names.find("type") != names.end(), "Name value with the key of 'type' is required for proposals.");
     name proposal_type = names.at("type");
 
+    name trx_action_name;
+
     names["ballot_id"] = register_ballot(names.at("owner"), strings);
 
     /* default trx_action_account to hyphadaomain */
@@ -101,13 +31,12 @@ void hyphadao::new_proposal(const name& owner,
 
     if (names.find("trx_action_name") != names.end())
     { // this transaction executes if the proposal passes
-        transaction trx(time_point_sec(current_time_point()) + (60 * 60 * 24 * 35));
-        trx.actions.emplace_back(
-            permission_level{get_self(), name("active")},
-            names.at("trx_action_contract"), names.at("trx_action_name"),
-            std::make_tuple(o_t.available_primary_key()));
-        trx.delay_sec = 0;
-        trxs["exec_on_approval"] = trx;
+        trx_action_name = names.at("trx_action_name");
+        check (trx_action_name == name("makepayout") ||
+                trx_action_name == name("mergeobject") ||
+                trx_action_name == name("assign") ||
+                trx_action_name == name("newrole") ||
+                trx_action_name == name("suspend"), "Unknown trx_action_name not allowed: " + trx_action_name.to_string());
     }
 
     // input cleaning and calculations for the various proposal types
@@ -211,6 +140,138 @@ void hyphadao::new_proposal(const name& owner,
             assets[asset_itr->first] = asset_itr->second;
         }
     }
+    // else if (proposal_type == name("badge"))
+    // {
+    //     // create a proposal for a new badge
+    //     check(strings.find("title") != strings.end(), "Badge title is required in strings array");
+    //     check(strings.find("description") != strings.end(), "Badge description is required in strings array");
+    //     check(strings.find("icon") != strings.end(), "Badge icon is required is strings array");
+    //     trx_action_name = name("newbadge");
+
+    //     if (names.find("badge_code") == names.end())
+    //     {
+    //         // add a default badge code
+    //         name badge_code = name(c.names.at("last_badge_code").value + 1);
+    //         c.names["last_badge_code"] = badge_code;
+    //         config_s.set(c, get_self());
+
+    //         names["badge_code"] = badge_code;
+    //     }        
+    // }
+    // else if (proposal_type == name("badgeass"))
+    // {
+    //     // create a proposal for a new badge assignment
+    //     check(names.find("assigned_account") != names.end(), "Assigned account is required in the names array for badge assignment proposals.");
+    //     check(ints.find("badge_id") != ints.end(), "Badge ID is required in the ints array for badge assignment proposals");
+    //     trx_action_name = name("assignbadge");
+    // }
+
+    transaction trx(time_point_sec(current_time_point()) + (60 * 60 * 24 * 35));
+    trx.actions.emplace_back(
+        permission_level{get_self(), name("active")},
+        names.at("trx_action_contract"), trx_action_name,
+        std::make_tuple(o_t.available_primary_key()));
+    trx.delay_sec = 0;
+    trxs["exec_on_approval"] = trx;
+
     new_object(owner, name("proposal"), names, strings, assets, time_points, ints, trxs);
     event(name("high"), variant_helper(names, strings, assets, time_points, ints));
+}
+
+void hyphadao::propsuspend (const name& proposer, const name& scope, const uint64_t& id) 
+{
+	// check paused state
+	check(!is_paused(), "Contract is paused for maintenance. Please try again later.");
+	require_auth (proposer);
+
+	// confirm that the object to be suspended exists
+	object_table original_t (get_self(), scope.value);
+	auto original_itr = original_t.find(id);
+	check(original_itr != original_t.end(), "Cannot suspend, original does not exist. Scope: " + scope.to_string() + 
+		"; Original Object ID: " + std::to_string(id) + " does not exist.");		
+
+	map<string, name> temp_names {}; 
+	map<string, uint64_t> temp_ints {}; 
+	
+	temp_names["original_scope"] = scope;		
+	temp_ints["original_object_id"] = id;
+	temp_names["owner"] = proposer;
+	temp_names["type"] = name("suspend");
+	temp_names["trx_action_name"] = name("suspend");
+
+	// not used, just required for passing to new_proposal (non-const must be lvalues)
+	map<string, string> not_used_strings {};
+	map<string, asset> not_used_assets {};
+	map<string, time_point> not_used_timepoints {};
+	map<string, transaction> not_used_transactions {};
+
+	new_proposal (proposer, temp_names, not_used_strings, not_used_assets, 
+			not_used_timepoints, temp_ints, not_used_transactions );
+}
+
+void hyphadao::check_coefficient (document_graph::content_group &content_group, const string &coefficient_key)
+{
+    document_graph::flexvalue coefficient_x100 = _document_graph.get_content (content_group, coefficient_key, false);
+    if (coefficient_x100 != _document_graph.DOES_NOT_EXIST)
+    {
+        check(std::holds_alternative<int64_t>(coefficient_x100), "fatal error: coefficient must be an int64_t type: " + coefficient_key);
+        check(std::get<int64_t>(coefficient_x100) >= 90 &&  
+                std::get<int64_t>(coefficient_x100) <= 110, "fatal error: coefficient_x100 must be between 90 and 110, inclusive: " + coefficient_key);
+    }   
+}
+
+void hyphadao::propose (const name& proposer, const name& proposal_type, std::vector<document_graph::content_group> &content_groups)
+{
+    // input cleansing
+    // switch/case on known types
+    // add system content_group
+
+    if (proposal_type == name ("badge")) 
+    {
+        // enforce required (strict) inputs 
+        document_graph::content_group proposal_details = _document_graph.get_content_group (content_groups, "proposal_details", true);
+        document_graph::flexvalue title = _document_graph.get_content (proposal_details, "title", true);
+        document_graph::flexvalue description = _document_graph.get_content (proposal_details, "description", true);
+        document_graph::flexvalue icon = _document_graph.get_content (proposal_details, "icon", true);
+
+        check_coefficient (proposal_details, "husd_coefficient_x100");
+        check_coefficient (proposal_details, "hypha_coefficient_x100");
+        check_coefficient (proposal_details, "hvoice_coefficient_x100");
+        check_coefficient (proposal_details, "seeds_coefficient_x100");
+
+        // create the system content_group
+        config_table config_s(get_self(), get_self().value);
+        Config c = config_s.get_or_create(get_self(), Config());
+        document_graph::content_group system_cg = document_graph::content_group {};
+        system_cg.push_back (_document_graph.new_content("content_group_label", "system"));
+        system_cg.push_back (_document_graph.new_content("client_version", get_string(c.strings, "client_version")));
+        system_cg.push_back (_document_graph.new_content("contract_version", get_string(c.strings, "contract_version")));
+        name ballot_id = register_ballot(proposer, std::get<string>(title), std::get<string>(description), std::get<string>(icon));
+        system_cg.push_back (_document_graph.new_content("ballot_id", ballot_id));
+        system_cg.push_back (_document_graph.new_content("proposer", proposer));
+
+        auto badge_code = _document_graph.get_content(proposal_details, "badge_code", false);
+        if (badge_code == _document_graph.DOES_NOT_EXIST) 
+        {
+            // add a default badge code
+            if (c.names.find("last_badge_code") == c.names.end()) 
+            {
+                badge_code = name("badge......1");
+            } else {
+                badge_code = name(c.names.at("last_badge_code").value + 1);
+            }
+            c.names["last_badge_code"] = std::get<name>(badge_code);
+            config_s.set(c, get_self());
+        }
+           
+        system_cg.push_back (_document_graph.new_content ("badge_code", badge_code));
+        content_groups.push_back (system_cg);
+    }
+
+    document_graph::document proposal_doc = _document_graph.create_document (proposer, content_groups);    
+    docindex_table d_t (get_self(), name("proposal").value);
+    d_t.emplace (get_self(), [&](auto &d) {
+        d.id = d_t.available_primary_key();
+        d.document_hash = proposal_doc.hash;
+    });
 }

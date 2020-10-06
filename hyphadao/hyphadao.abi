@@ -121,6 +121,24 @@
             ]
         },
         {
+            "name": "DocumentIndex",
+            "base": "",
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "document_hash",
+                    "type": "checksum256"
+                },
+                {
+                    "name": "created_date",
+                    "type": "time_point"
+                }
+            ]
+        },
+        {
             "name": "Member",
             "base": "",
             "fields": [
@@ -298,6 +316,16 @@
         },
         {
             "name": "assign",
+            "base": "",
+            "fields": [
+                {
+                    "name": "proposal_id",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "assignbadge",
             "base": "",
             "fields": [
                 {
@@ -687,6 +715,16 @@
             ]
         },
         {
+            "name": "newbadge",
+            "base": "",
+            "fields": [
+                {
+                    "name": "proposal_id",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
             "name": "newrole",
             "base": "",
             "fields": [
@@ -847,6 +885,24 @@
                 {
                     "name": "id",
                     "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "propose",
+            "base": "",
+            "fields": [
+                {
+                    "name": "proposer",
+                    "type": "name"
+                },
+                {
+                    "name": "proposal_type",
+                    "type": "name"
+                },
+                {
+                    "name": "content_groups",
+                    "type": "content_group[]"
                 }
             ]
         },
@@ -1223,6 +1279,11 @@
             "ricardian_contract": ""
         },
         {
+            "name": "assignbadge",
+            "type": "assignbadge",
+            "ricardian_contract": ""
+        },
+        {
             "name": "changescope",
             "type": "changescope",
             "ricardian_contract": ""
@@ -1308,6 +1369,11 @@
             "ricardian_contract": ""
         },
         {
+            "name": "newbadge",
+            "type": "newbadge",
+            "ricardian_contract": ""
+        },
+        {
             "name": "newrole",
             "type": "newrole",
             "ricardian_contract": ""
@@ -1320,6 +1386,11 @@
         {
             "name": "propdraft",
             "type": "propdraft",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "propose",
+            "type": "propose",
             "ricardian_contract": ""
         },
         {
@@ -1465,6 +1536,13 @@
         {
             "name": "debugs",
             "type": "Debug",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "docindex",
+            "type": "DocumentIndex",
             "index_type": "i64",
             "key_names": [],
             "key_types": []

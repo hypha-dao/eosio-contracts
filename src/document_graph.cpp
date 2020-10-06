@@ -80,6 +80,35 @@ namespace hyphaspace
         return document;
     }
 
+    // vector<content_group> document_graph::merge_content_groups (vector<content_group> group1, vector<content_group> group2)
+    // {
+    //     for (const document_graph::content_group &content_group : group1)
+    //     {
+    //         for (const document_graph::content &content : content_group)
+    //         {
+    //             content_group group2_group = _document_graph.get_content()
+
+    //             if (content.label == "content_group_label")
+    //             {
+    //                 check(std::holds_alternative<string>(content.value), "fatal error: content_group_label must be a string");
+    //                 if (std::get<string>(content.value) == content_group_label)
+    //                 {
+    //                     return content_group;
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
+
+    document_graph::document document_graph::fork_document(const checksum256 &hash, const name &creator, const content &content)
+    {
+        content_group cg = content_group {};
+        cg.push_back (content);
+        vector<content_group> content_groups = vector<content_group> {};
+        content_groups.push_back (cg);
+        return fork_document(hash, creator, content_groups);
+    }
+
     document_graph::document document_graph::fork_document(const checksum256 &hash, const name &creator, const vector<content_group> &content_groups)
     {
         require_auth(creator);
@@ -235,5 +264,11 @@ namespace hyphaspace
         for (auto i = 0; i < s; ++i)
             (r += to_hex[(c[i] >> 4)]) += to_hex[(c[i] & 0x0f)];
         return r;
+    }
+
+    std::string document_graph::readable_hash (const checksum256 &proposal_hash)
+    {
+        auto byte_arr = proposal_hash.extract_as_byte_array();
+        return document_graph::to_hex((const char *)byte_arr.data(), byte_arr.size());
     }
 } // namespace hyphaspace

@@ -7,7 +7,7 @@ hyphadao::hyphadao(name self, name code, datastream<const char*> ds) : contract(
 hyphadao::~hyphadao() {}
 
 name hyphadao::register_ballot(const name &proposer,
-							   const map<string, string> &strings)
+								const string &title, const string &description, const string &content)
 {
 	check(has_auth(proposer) || has_auth(get_self()), "Authentication failed. Must have authority from proposer: " +
 														  proposer.to_string() + "@active or " + get_self().to_string() + "@active.");
@@ -54,9 +54,9 @@ name hyphadao::register_ballot(const name &proposer,
 		c.names.at("telos_decide_contract"), name("editdetails"),
 		std::make_tuple(
 			new_ballot_id,
-			strings.at("title"),
-			strings.at("description").substr(0, std::min(strings.at("description").length(), size_t(25))),
-			strings.at("content")))
+			title,
+			description.substr(0, std::min(description.length(), size_t(25))),
+			content))
 		.send();
 
 	auto expiration = time_point_sec(current_time_point()) + c.ints.at("voting_duration_sec");
@@ -69,6 +69,12 @@ name hyphadao::register_ballot(const name &proposer,
 
 	// TODO: add a record to the seeds scheduler to close the proposal
 	return new_ballot_id;
+}
+
+name hyphadao::register_ballot(const name &proposer,
+							   const map<string, string> &strings)
+{
+	return register_ballot (proposer, strings.at("title"), strings.at("description"), strings.at("content"));
 }
 
 void hyphadao::withdraw (const name &withdrawer, const uint64_t &assignment_id, const string& notes) 
@@ -92,37 +98,6 @@ void hyphadao::withdraw (const name &withdrawer, const uint64_t &assignment_id, 
 		o.strings["withdrawal_notes"] = notes;
 		o.updated_date = current_time_point();
 	});
-}
-
-void hyphadao::propsuspend (const name& proposer, const name& scope, const uint64_t& id) 
-{
-	// check paused state
-	check(!is_paused(), "Contract is paused for maintenance. Please try again later.");
-	require_auth (proposer);
-
-	// confirm that the object to be suspended exists
-	object_table original_t (get_self(), scope.value);
-	auto original_itr = original_t.find(id);
-	check(original_itr != original_t.end(), "Cannot suspend, original does not exist. Scope: " + scope.to_string() + 
-		"; Original Object ID: " + std::to_string(id) + " does not exist.");		
-
-	map<string, name> temp_names {}; 
-	map<string, uint64_t> temp_ints {}; 
-	
-	temp_names["original_scope"] = scope;		
-	temp_ints["original_object_id"] = id;
-	temp_names["owner"] = proposer;
-	temp_names["type"] = name("suspend");
-	temp_names["trx_action_name"] = name("suspend");
-
-	// not used, just required for passing to new_proposal (non-const must be lvalues)
-	map<string, string> not_used_strings {};
-	map<string, asset> not_used_assets {};
-	map<string, time_point> not_used_timepoints {};
-	map<string, transaction> not_used_transactions {};
-
-	new_proposal (proposer, temp_names, not_used_strings, not_used_assets, 
-			not_used_timepoints, temp_ints, not_used_transactions );
 }
 
 void hyphadao::edit(const name &scope,
@@ -241,6 +216,21 @@ void hyphadao::newrole(const uint64_t &proposal_id)
 	changescope(name("proposal"), proposal_id, new_scopes, true);
 }
 
+void hyphadao::newbadge (const uint64_t &proposal_id)
+{
+	require_auth (get_self());
+	vector<name> new_scopes = {name("badge"), name("proparchive")};
+	changescope(name("badge"), proposal_id, new_scopes, true);
+}
+
+void hyphadao::assignbadge (const uint64_t &proposal_id)
+{
+	require_auth (get_self());
+
+	// TODO: add badge to the objects table for the user
+	// TODO: add user to the badges 
+}
+
 void hyphadao::suspend(const uint64_t &proposal_id)
 {
 	require_auth(get_self());
@@ -339,21 +329,14 @@ void hyphadao::makepayout(const uint64_t &proposal_id)
 	changescope(name("proposal"), proposal_id, new_scopes, true);
 }
 
-void hyphadao::closeprop(const uint64_t &proposal_id)
+bool hyphadao::did_pass (const name &ballot_id)
 {
-	check(!is_paused(), "Contract is paused for maintenance. Please try again later.");
-
-	object_table o_t(get_self(), name("proposal").value);
-	auto o_itr = o_t.find(proposal_id);
-	check(o_itr != o_t.end(), "Scope: " + name("proposal").to_string() + "; Object ID: " + std::to_string(proposal_id) + " does not exist.");
-	auto prop = *o_itr;
-
 	config_table config_s(get_self(), get_self().value);
 	Config c = config_s.get_or_create(get_self(), Config());
 
 	trailservice::trail::ballots_table b_t(c.names.at("telos_decide_contract"), c.names.at("telos_decide_contract").value);
-	auto b_itr = b_t.find(prop.names.at("ballot_id").value);
-	check(b_itr != b_t.end(), "ballot_id: " + prop.names.at("ballot_id").to_string() + " not found.");
+	auto b_itr = b_t.find(ballot_id.value);
+	check(b_itr != b_t.end(), "ballot_id: " + ballot_id.to_string() + " not found.");
 
 	trailservice::trail::treasuries_table t_t(c.names.at("telos_decide_contract"), c.names.at("telos_decide_contract").value);
 	auto t_itr = t_t.find(common::S_HVOICE.code().raw());
@@ -371,16 +354,35 @@ void hyphadao::closeprop(const uint64_t &proposal_id)
 	debug_str = debug_str + " Votes Passing: " + votes_pass.to_string() + "\n";
 	debug_str = debug_str + " Votes Failing: " + votes_fail.to_string() + "\n";
 	debug_str = debug_str + " Votes Abstain: " + votes_abstain.to_string() + "\n";
+	debug(debug_str);
 
 	bool passed = false;
-	if (b_itr->total_raw_weight >= quorum_threshold && // must meet quorum
-		adjust_asset(votes_pass, 0.2500000000) > votes_fail)
-	{ // must have 80% of the vote power
-		debug_str = debug_str + "Proposal passed. Executing transaction. ";
+	if (b_itr->total_raw_weight >= quorum_threshold && 			// must meet quorum
+		adjust_asset(votes_pass, 0.2500000000) > votes_fail)  	// must have 80% of the vote power
+	{
+		return true;
+	} else {
+		return false;
+	}
+}
+
+void hyphadao::closeprop(const uint64_t &proposal_id)
+{
+	check(!is_paused(), "Contract is paused for maintenance. Please try again later.");
+
+	object_table o_t(get_self(), name("proposal").value);
+	auto o_itr = o_t.find(proposal_id);
+	check(o_itr != o_t.end(), "Scope: " + name("proposal").to_string() + "; Object ID: " + std::to_string(proposal_id) + " does not exist.");
+	auto prop = *o_itr;
+
+	config_table config_s(get_self(), get_self().value);
+	Config c = config_s.get_or_create(get_self(), Config());
+
+	if (did_pass (prop.names.at("ballot_id")))
+	{ 
 		prop.strings["Event"] = "Proposal has passed";
 		event (name("high"), variant_helper(prop.names, prop.strings, prop.assets, prop.time_points, prop.ints));
 
-		passed = true;
 		prop.trxs.at("exec_on_approval").send(current_block_time().to_time_point().sec_since_epoch(), get_self());
 	}
 	else
@@ -396,14 +398,58 @@ void hyphadao::closeprop(const uint64_t &proposal_id)
 		.send();
 	}
 
-	debug_str = debug_str + string("Ballot ID read from prop for closing ballot: " + prop.names.at("ballot_id").to_string() + "\n");
 	action(
 		permission_level{get_self(), name("active")},
 		c.names.at("telos_decide_contract"), name("closevoting"),
 		std::make_tuple(prop.names.at("ballot_id"), true))
 		.send();
+}
 
-	debug(debug_str);
+void hyphadao::closedocprop (const checksum256 &proposal_hash)
+{
+	check(!is_paused(), "Contract is paused for maintenance. Please try again later.");
+
+	document_table d_t (get_self(), get_self().value);
+	auto d_t_by_hash = d_t.get_index<name("idhash")>();
+	auto d_itr = d_t_by_hash.find (proposal_hash);
+	check (d_itr != d_t_by_hash.end(), "Document with hash not found: " + document_graph::readable_hash (proposal_hash));
+	auto docprop = *d_itr;
+
+	name ballot_id = std::get<name>( _document_graph.get_content (docprop, "system", "ballot_id", true) );
+
+	// if (did_pass (ballot_id))
+	// { 
+	// 	docindex_table di_badges (get_self(), name("badge").value);
+	// 	di_badges.emplace (get_self(), [&](auto &d) {
+	// 		d.id = di_badges.available_primary_key();
+	// 		d.document_hash = proposal_hash;
+	// 	});
+	// }
+	// else
+	// {
+	// 	docindex_table di_failed (get_self(), name("failedprops").value);
+	// 	di_failed.emplace (get_self(), [&](auto &d) {
+	// 		d.id = di_failed.available_primary_key();
+	// 		d.document_hash = proposal_hash;
+	// 	});
+	// }
+
+	// docindex_table di_proposals (get_self(), name("proposal").value);
+	// auto di_t_by_hash = di_proposals.get_index<name("idhash")>();
+	// auto di_itr = di_t_by_hash.find (proposal_hash);
+	
+	// check (di_itr != di_t_by_hash.end(), "proposal_hash not found in docindex table, scope=proposal; hash=" + document_graph::readable_hash (proposal_hash));
+	// di_t_by_hash.erase (di_itr);
+
+	// config_table config_s(get_self(), get_self().value);
+	// Config c = config_s.get_or_create(get_self(), Config());
+
+	// action(
+	// 	permission_level{get_self(), name("active")},
+	// 	c.names.at("telos_decide_contract"), name("closevoting"),
+	// 	std::make_tuple(ballot_id, true))
+	// 	.send();
+
 }
 
 void hyphadao::qualify_owner(const name &proposer)

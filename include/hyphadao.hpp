@@ -9,6 +9,7 @@
 #include <common.hpp>
 #include <trail.hpp>
 #include <document_graph.hpp>
+#include <variant>
 
 using namespace eosio;
 using namespace std;
@@ -22,7 +23,7 @@ namespace hyphaspace
       ~hyphadao();
 
       // v2 data structure will use variants for more generic support
-      typedef std::variant<name, string, asset, time_point, uint64_t> flexvalue1;
+      typedef variant<name, string, asset, time_point, uint64_t> flexvalue1;
 
       struct [[eosio::table, eosio::contract("hyphadao")]] Config
       {
@@ -152,29 +153,49 @@ namespace hyphaspace
       };
       typedef eosio::multi_index<name("pricehistory"), price_history_table> price_history_tables;
 
-      struct [[eosio::table, eosio::contract("hyphadao")]] document
+      // struct [[eosio::table, eosio::contract("hyphadao")]] document
+      // {
+      //    uint64_t id;
+      //    checksum256 hash;
+      //    name creator;
+      //    vector<document_graph::content_group> content_groups;
+
+      //    vector<document_graph::certificate> certificates;
+      //    uint64_t primary_key() const { return id; }
+      //    uint64_t by_creator() const { return creator.value; }
+      //    checksum256 by_hash() const { return hash; }
+
+      //    time_point created_date = current_time_point();
+      //    uint64_t by_created() const { return created_date.sec_since_epoch(); }
+
+      //    EOSLIB_SERIALIZE(document, (id)(hash)(creator)(content_groups)(certificates)(created_date))
+      // };
+
+      typedef multi_index<name("documents"), document_graph::document,
+                          indexed_by<name("idhash"), const_mem_fun<document_graph::document, checksum256, &document_graph::document::by_hash>>,
+                          indexed_by<name("bycreator"), const_mem_fun<document_graph::document, uint64_t, &document_graph::document::by_creator>>,
+                          indexed_by<name("bycreated"), const_mem_fun<document_graph::document, uint64_t, &document_graph::document::by_created>>>
+          document_table;
+
+      // scopes: badges, roles, assignments, members, specific member name, etc. 
+      struct [[eosio::table, eosio::contract("hyphadao")]] DocumentIndex
       {
          uint64_t id;
-         checksum256 hash;
-         name creator;
-         vector<document_graph::content_group> content_groups;
 
-         vector<document_graph::certificate> certificates;
-         uint64_t primary_key() const { return id; }
-         uint64_t by_creator() const { return creator.value; }
-         checksum256 by_hash() const { return hash; }
+         checksum256 document_hash;
+         checksum256 by_hash() const { return document_hash; }
 
          time_point created_date = current_time_point();
          uint64_t by_created() const { return created_date.sec_since_epoch(); }
 
-         EOSLIB_SERIALIZE(document, (id)(hash)(creator)(content_groups)(certificates)(created_date))
+         uint64_t primary_key() const { return id; }
       };
 
-      typedef multi_index<name("documents"), document,
-                          indexed_by<name("idhash"), const_mem_fun<document, checksum256, &document::by_hash>>,
-                          indexed_by<name("bycreator"), const_mem_fun<document, uint64_t, &document::by_creator>>,
-                          indexed_by<name("bycreated"), const_mem_fun<document, uint64_t, &document::by_created>>>
-          document_table;
+      typedef multi_index<name("docindex"),DocumentIndex,
+                              indexed_by<name("idhash"), const_mem_fun<DocumentIndex, checksum256, &DocumentIndex::by_hash>>,
+                              indexed_by<name("bycreated"), const_mem_fun<DocumentIndex, uint64_t, &DocumentIndex::by_created>>>
+               docindex_table;
+
 
       const uint64_t MICROSECONDS_PER_HOUR = (uint64_t)60 * (uint64_t)60 * (uint64_t)1000000;
       const uint64_t MICROSECONDS_PER_YEAR = MICROSECONDS_PER_HOUR * (uint64_t)24 * (uint64_t)365;
@@ -199,6 +220,9 @@ namespace hyphaspace
                   const map<string, uint64_t> ints,
                   const map<string, float> floats,
                   map<string, transaction> trxs);
+
+      // ACTION propose (const name &proposal_type, std::vector<document_graph::content_group> &content_groups);
+      ACTION propose (const name& proposer, const name& proposal_type, std::vector<document_graph::content_group> &content_groups);
       
       ACTION copytodraft (const name& copier, const name &scope, const uint64_t &id);
       ACTION propdraft (const uint64_t& id);
@@ -274,9 +298,12 @@ namespace hyphaspace
       ACTION exectrx(const uint64_t &proposal_id);
       ACTION mergeobject(const uint64_t& proposal_id);
       ACTION suspend(const uint64_t &proposal_id);
+      ACTION newbadge (const uint64_t &proposal_id);
+      ACTION assignbadge (const uint64_t &proposal_id);
 
       // anyone can call closeprop, it executes the transaction if the voting passed
       ACTION closeprop(const uint64_t &proposal_id);
+      ACTION closedocprop (const checksum256 &proposal_hash);
 
       // users can claim their salary pay
       ACTION payassign(const uint64_t &assignment_id, const uint64_t &period_id);
@@ -291,8 +318,14 @@ namespace hyphaspace
 
       void defcloseprop(const uint64_t &proposal_id);
       void qualify_owner(const name &proposer);
+
+      bool did_pass (const name &ballot_id);
+
+      name register_ballot(const name &proposer,
+								const string &title, const string &description, const string &content);
       name register_ballot(const name &proposer,
                            const map<string, string> &strings);
+
       uint64_t hash (std::string str); 
       uint64_t get_next_sender_id();
       void debug(const string &notes);
@@ -307,6 +340,7 @@ namespace hyphaspace
       string get_string(const std::map<string, string> strings, string key);
       void checkx(const bool &condition, const string &message);
       void check_capacity(const uint64_t &role_id, const uint64_t &req_time_share_x100);
+      void check_coefficient (document_graph::content_group &content_group, const string &coefficient_key);
 
       uint64_t get_last_period_id();
 
