@@ -121,6 +121,24 @@
             ]
         },
         {
+            "name": "DocumentIndex",
+            "base": "",
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "document_hash",
+                    "type": "checksum256"
+                },
+                {
+                    "name": "created_date",
+                    "type": "time_point"
+                }
+            ]
+        },
+        {
             "name": "Member",
             "base": "",
             "fields": [
@@ -307,24 +325,6 @@
             ]
         },
         {
-            "name": "certificate",
-            "base": "",
-            "fields": [
-                {
-                    "name": "certifier",
-                    "type": "name"
-                },
-                {
-                    "name": "notes",
-                    "type": "string"
-                },
-                {
-                    "name": "certification_date",
-                    "type": "time_point"
-                }
-            ]
-        },
-        {
             "name": "changescope",
             "base": "",
             "fields": [
@@ -343,6 +343,16 @@
                 {
                     "name": "remove_old",
                     "type": "bool"
+                }
+            ]
+        },
+        {
+            "name": "closedocprop",
+            "base": "",
+            "fields": [
+                {
+                    "name": "proposal_hash",
+                    "type": "checksum256"
                 }
             ]
         },
@@ -505,36 +515,6 @@
                 {
                     "name": "message",
                     "type": "string"
-                }
-            ]
-        },
-        {
-            "name": "document",
-            "base": "",
-            "fields": [
-                {
-                    "name": "id",
-                    "type": "uint64"
-                },
-                {
-                    "name": "hash",
-                    "type": "checksum256"
-                },
-                {
-                    "name": "creator",
-                    "type": "name"
-                },
-                {
-                    "name": "content_groups",
-                    "type": "content_group[]"
-                },
-                {
-                    "name": "certificates",
-                    "type": "certificate[]"
-                },
-                {
-                    "name": "created_date",
-                    "type": "time_point"
                 }
             ]
         },
@@ -1228,6 +1208,11 @@
             "ricardian_contract": ""
         },
         {
+            "name": "closedocprop",
+            "type": "closedocprop",
+            "ricardian_contract": ""
+        },
+        {
             "name": "closeprop",
             "type": "closeprop",
             "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Close Proposal\nsummary: 'Close the Proposal after the Voting Period ends'\nicon: https://eos.gyftie.org/statics/logos/mobile.png#54b516210a9fe709b1ccc8c075e16538d51e3664674f707f80630a7e53dbd2e7\n---\n\n{{$action.authorization.[0].actor}} applies"
@@ -1470,8 +1455,8 @@
             "key_types": []
         },
         {
-            "name": "documents",
-            "type": "document",
+            "name": "docindex",
+            "type": "DocumentIndex",
             "index_type": "i64",
             "key_names": [],
             "key_types": []

@@ -21,6 +21,7 @@ namespace hyphaspace
         // flexvalue can any of these commonly used eosio data types
         // a checksum256 can be a link to another document, akin to an "edge" on a graph
         typedef std::variant<name, string, asset, time_point, int64_t, checksum256> flexvalue;
+        const flexvalue DOES_NOT_EXIST = -42069;  // arbitrary, lazy, hopefully never used value
 
         // a single labeled flexvalue
         struct content
@@ -74,6 +75,7 @@ namespace hyphaspace
         // Fork creates a new document (node in a graph) from an existing document.
         // The forked content should contain only new or updated entries to avoid data duplication. (lazily enforced?)
         document fork_document(const checksum256 &hash, const name &creator, const vector<content_group> &content_groups);
+        document fork_document(const checksum256 &hash, const name &creator, const content &content);
 
         // Creates a 'certificate' on a specific fork.
         // A certificate can be customized based on the document, but it represents
@@ -86,14 +88,27 @@ namespace hyphaspace
         // accessors
         document get_document (const checksum256 &hash);
         document get_parent (const document &document);
-        content_group get_content_group (const document &document, const string &content_group_label);
-        flexvalue get_content (const content_group &content_group, const string& content_label);
+       
+        content_group get_content_group(const vector<content_group> &content_groups, 
+                                        const string &content_group_label, 
+                                        const bool &strict);
+        
+        content_group get_content_group (const document &document, 
+                                            const string &content_group_label, 
+                                            const bool &strict);
+
+        flexvalue get_content (const content_group &content_group, const string& content_label, const bool &strict);
+        flexvalue get_content(const document &document,
+                                const string &content_group_label,
+                                const string &content_label,
+                                const bool &strict);
 
         std::string to_string(const vector<document_graph::content_group> &content_groups);
         std::string to_string(const document_graph::content_group &content_group);
         std::string to_string(const document_graph::content &content);
         std::string to_string(const document_graph::flexvalue &value);
 
-        static std::string to_hex(const char *d, uint32_t s);
+        std::string to_hex(const char *d, uint32_t s);
+        std::string readable_hash (const checksum256 &proposal_hash);
     };
 }; // namespace hyphaspace
