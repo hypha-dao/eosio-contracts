@@ -1,0 +1,50 @@
+{
+    "proposer": "dao.hypha",
+    "proposal_type": "badge",
+    "content_groups": [
+        [
+            {
+                "label": "content_group_label",
+                "value": [
+                    "string",
+                    "proposal_details"
+                ]
+            },
+            {
+                "label": "title",
+                "value": [
+                    "string",
+                    "Badge Librarian"
+                ]
+            },
+            {
+                "label": "badge_type",
+                "value": [
+                    "name",
+                    "admin"
+                ]
+            },
+            {
+                "label": "description",
+                "value": [
+                    "string",
+                    "Ensure that badges represent clear, clean, and useful distinctions for the organization"
+                ]
+            },
+            {
+                "label": "icon",
+                "value": [
+                    "string",
+                    "https://assets.hypha.earth/badges/badge_badge_librarian.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=minioadmin%2F20201007%2F%2Fs3%2Faws4_request&X-Amz-Date=20201007T153528Z&X-Amz-Expires=432000&X-Amz-SignedHeaders=host&X-Amz-Signature=bfb831160da3e5fbb71cce8b228b0ef4b7196183963f9bbbab60a1ff04cb4258"
+                ]
+            },
+            {
+                "label": "seeds_coefficient_x10000",
+                "value": [
+                    "int64",
+                    10100
+                ]
+            }
+        ]
+    ]
+}

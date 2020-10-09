@@ -207,6 +207,8 @@ namespace hyphaspace
                      map<string, uint64_t> ints,
                      const map<string, float> floats,
                      map<string, transaction> trxs);
+      
+      ACTION propose (const name& proposer, const name& proposal_type, std::vector<document_graph::content_group> &content_groups);
 
       ACTION created(const name &creator, const checksum256 &hash);
 
@@ -320,6 +322,8 @@ namespace hyphaspace
                            const string &title, const string &description, const string &content);
 
       bool did_pass (const name &ballot_id);
+
+      void check_coefficient (document_graph::content_group &content_group, const string &coefficient_key);
 
       uint64_t hash (std::string str); 
       uint64_t get_next_sender_id();

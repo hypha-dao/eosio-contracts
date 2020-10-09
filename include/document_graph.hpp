@@ -43,7 +43,8 @@ namespace hyphaspace
             EOSLIB_SERIALIZE(certificate, (certifier)(notes)(certification_date))
         };
 
-        struct [[eosio::table]] document
+        struct [[eosio::table, eosio::contract("hyphadao")]] document
+        // TABLE document
         {
             uint64_t id;
             checksum256 hash;

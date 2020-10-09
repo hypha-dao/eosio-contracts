@@ -214,3 +214,70 @@ void hyphadao::new_proposal(const name& owner,
     new_object(owner, name("proposal"), names, strings, assets, time_points, ints, trxs);
     event(name("high"), variant_helper(names, strings, assets, time_points, ints));
 }
+
+void hyphadao::check_coefficient (document_graph::content_group &content_group, const string &coefficient_key)
+{
+    document_graph::flexvalue coefficient_x10000 = _document_graph.get_content (content_group, coefficient_key, false);
+    if (coefficient_x10000 != _document_graph.DOES_NOT_EXIST)
+    {
+        check(std::holds_alternative<int64_t>(coefficient_x10000), "fatal error: coefficient must be an int64_t type: " + coefficient_key);
+        check(std::get<int64_t>(coefficient_x10000) >= 9000 &&  
+                std::get<int64_t>(coefficient_x10000) <= 11000, "fatal error: coefficient_x10000 must be between 9000 and 11000, inclusive: " + coefficient_key);
+    }   
+}
+
+void hyphadao::propose (const name& proposer, const name& proposal_type, std::vector<document_graph::content_group> &content_groups)
+{
+    // input cleansing
+    // switch/case on known types
+    // add system content_group
+
+    if (proposal_type == name ("badge")) 
+    {
+        // enforce required (strict) inputs 
+        document_graph::content_group proposal_details = _document_graph.get_content_group (content_groups, "proposal_details", true);
+        document_graph::flexvalue title = _document_graph.get_content (proposal_details, "title", true);
+        document_graph::flexvalue description = _document_graph.get_content (proposal_details, "description", true);
+        document_graph::flexvalue icon = _document_graph.get_content (proposal_details, "icon", true);
+
+        check_coefficient (proposal_details, "husd_coefficient_x10000");
+        check_coefficient (proposal_details, "hypha_coefficient_x10000");
+        check_coefficient (proposal_details, "hvoice_coefficient_x10000");
+        check_coefficient (proposal_details, "seeds_coefficient_x10000");
+
+        // create the system content_group
+        config_table config_s(get_self(), get_self().value);
+        Config c = config_s.get_or_create(get_self(), Config());
+        document_graph::content_group system_cg = document_graph::content_group {};
+        system_cg.push_back (_document_graph.new_content("content_group_label", "system"));
+        system_cg.push_back (_document_graph.new_content("client_version", get_string(c.strings, "client_version")));
+        system_cg.push_back (_document_graph.new_content("contract_version", get_string(c.strings, "contract_version")));
+        name ballot_id = register_ballot(proposer, std::get<string>(title), std::get<string>(description), std::get<string>(icon));
+        system_cg.push_back (_document_graph.new_content("ballot_id", ballot_id));
+        system_cg.push_back (_document_graph.new_content("proposer", proposer));
+
+        auto badge_code = _document_graph.get_content(proposal_details, "badge_code", false);
+        if (badge_code == _document_graph.DOES_NOT_EXIST) 
+        {
+            // add a default badge code
+            if (c.names.find("last_badge_code") == c.names.end()) 
+            {
+                badge_code = name("badge......1");
+            } else {
+                badge_code = name(c.names.at("last_badge_code").value + 1);
+            }
+            c.names["last_badge_code"] = std::get<name>(badge_code);
+            config_s.set(c, get_self());
+        }
+           
+        system_cg.push_back (_document_graph.new_content ("badge_code", badge_code));
+        content_groups.push_back (system_cg);
+    }
+
+    document_graph::document proposal_doc = _document_graph.create_document (proposer, content_groups);    
+    docindex_table d_t (get_self(), name("proposal").value);
+    d_t.emplace (get_self(), [&](auto &d) {
+        d.id = d_t.available_primary_key();
+        d.document_hash = proposal_doc.hash;
+    });
+}

@@ -325,6 +325,24 @@
             ]
         },
         {
+            "name": "certificate",
+            "base": "",
+            "fields": [
+                {
+                    "name": "certifier",
+                    "type": "name"
+                },
+                {
+                    "name": "notes",
+                    "type": "string"
+                },
+                {
+                    "name": "certification_date",
+                    "type": "time_point"
+                }
+            ]
+        },
+        {
             "name": "changescope",
             "base": "",
             "fields": [
@@ -515,6 +533,36 @@
                 {
                     "name": "message",
                     "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "document",
+            "base": "",
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "hash",
+                    "type": "checksum256"
+                },
+                {
+                    "name": "creator",
+                    "type": "name"
+                },
+                {
+                    "name": "content_groups",
+                    "type": "content_group[]"
+                },
+                {
+                    "name": "certificates",
+                    "type": "certificate[]"
+                },
+                {
+                    "name": "created_date",
+                    "type": "time_point"
                 }
             ]
         },
@@ -827,6 +875,24 @@
                 {
                     "name": "id",
                     "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "propose",
+            "base": "",
+            "fields": [
+                {
+                    "name": "proposer",
+                    "type": "name"
+                },
+                {
+                    "name": "proposal_type",
+                    "type": "name"
+                },
+                {
+                    "name": "content_groups",
+                    "type": "content_group[]"
                 }
             ]
         },
@@ -1308,6 +1374,11 @@
             "ricardian_contract": ""
         },
         {
+            "name": "propose",
+            "type": "propose",
+            "ricardian_contract": ""
+        },
+        {
             "name": "propsuspend",
             "type": "propsuspend",
             "ricardian_contract": ""
@@ -1457,6 +1528,13 @@
         {
             "name": "docindex",
             "type": "DocumentIndex",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "documents",
+            "type": "document",
             "index_type": "i64",
             "key_names": [],
             "key_types": []
