@@ -44,7 +44,7 @@ void hyphadao::enroll(const name &enroller,
 
 	check(!is_paused(), "Contract is paused for maintenance. Please try again later.");
 
-	// this action is linked to the hyphadaomain@enrollers permission
+	// this action is linked to the dao.hypha@enrollers permission
 	applicant_table a_t(get_self(), get_self().value);
 	auto a_itr = a_t.find(applicant.value);
 	check(a_itr != a_t.end(), "Applicant not found: " + applicant.to_string());
