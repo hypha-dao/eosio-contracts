@@ -1,0 +1,25 @@
+{
+  "expiration": "2020-10-16T23:15:17",
+  "ref_block_num": 40597,
+  "ref_block_prefix": 2050993626,
+  "max_net_usage_words": 0,
+  "max_cpu_usage_ms": 0,
+  "delay_sec": 0,
+  "context_free_actions": [],
+  "actions": [
+    {
+      "account": "token.seeds",
+      "name": "transfer",
+      "authorization": [
+        {
+          "actor": "hypha.seeds",
+          "permission": "active"
+        }
+      ],
+      "data": "0070520a03d3aa6f000030adfa06a84900d0ed902e0000000453454544530000167265706c656e6973686d656e74207472616e73666572"
+    }
+  ],
+  "transaction_extensions": [],
+  "signatures": [],
+  "context_free_data": []
+,"chain_id":"4667b205c6838ef70ff7988f6e8257e8be0e1284a2f59699054a018f743b1d11"}

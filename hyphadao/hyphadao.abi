@@ -567,6 +567,32 @@
             ]
         },
         {
+            "name": "edge",
+            "base": "",
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "from_node",
+                    "type": "checksum256"
+                },
+                {
+                    "name": "to_node",
+                    "type": "checksum256"
+                },
+                {
+                    "name": "edge_name",
+                    "type": "name"
+                },
+                {
+                    "name": "created_date",
+                    "type": "time_point"
+                }
+            ]
+        },
+        {
             "name": "edit",
             "base": "",
             "fields": [
@@ -1535,6 +1561,13 @@
         {
             "name": "documents",
             "type": "document",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "edges",
+            "type": "edge",
             "index_type": "i64",
             "key_names": [],
             "key_types": []

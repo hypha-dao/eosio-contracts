@@ -25,107 +25,8 @@ namespace hyphaspace
         check (h_itr != hash_index.end(), "Cannot erase document; does not exist: " + readable_hash);
         
         hash_index.erase (h_itr);
-    }
 
-    document_graph::document document_graph::create_document(const name &creator, const vector<content_group> &content_groups)
-    {
-        require_auth(creator);
-
-        // TODO: error out if content is empty
-        // TODO: ensure that the creator is authorized/member
-        document document;
-        document_table d_t(contract, contract.value);
-        d_t.emplace(contract, [&](auto &d) {
-            d.id = d_t.available_primary_key();
-            d.creator = creator;
-            d.content_groups = content_groups;
-
-            // fingerprint the content object
-            string string_data = document_graph::to_string(content_groups);
-
-            // stamp document with string_data used for hash
-            // -- helpful when debugging
-            // content c;
-            // c.label = "fingerprint";
-            // c.value = string_data;
-            // content_group cg;
-            // cg.push_back (c);
-            // d.contents.push_back(cg);
-
-            checksum256 content_hash = eosio::sha256(const_cast<char *>(string_data.c_str()), string_data.length());
-
-            auto hash_index = d_t.get_index<name("idhash")>();
-            auto h_itr = hash_index.find(content_hash);
-
-            auto byte_arr = content_hash.extract_as_byte_array();
-            string readable_hash = document_graph::to_hex((const char *)byte_arr.data(), byte_arr.size());
-
-            // if this content exists already, error out and send back the hash of the existing document
-            if (h_itr != hash_index.end())
-            {
-                check(false, "document exists already: " + readable_hash);
-            }
-
-            // write a 'free' created receipt to the blockchain history logs
-            action(
-                permission_level{contract, name("active")},
-                contract, name("created"),
-                std::make_tuple(d.creator, content_hash))
-                // std::make_tuple(d.hash, d.id, d.creator, d.content))  // TODO: troubleshoot "Error: inline action too big"
-            .send();
-
-            d.hash = content_hash;
-            document = d;
-        });
-        return document;
-    }
-
-    document_graph::document document_graph::fork_document(const checksum256 &hash, const name &creator, const content &content)
-    {
-        content_group cg = content_group {};
-        cg.push_back (content);
-        vector<content_group> content_groups = vector<content_group> {};
-        content_groups.push_back (cg);
-        return fork_document(hash, creator, content_groups);
-    }
-
-    document_graph::document document_graph::fork_document(const checksum256 &hash, const name &creator, const vector<content_group> &content_groups)
-    {
-        require_auth(creator);
-
-        document document;
-        document_table d_t(contract, contract.value);
-        auto hash_index = d_t.get_index<name("idhash")>();
-        auto h_itr = hash_index.find(hash);
-        check(h_itr != hash_index.end(), "document not found: " + document_graph::to_string(hash));
-
-        // TODO: error out if content is empty
-        // TODO: error out if content does not provide new/updated data to the forked object
-
-        d_t.emplace(contract, [&](auto &d) {
-            d.id = d_t.available_primary_key();
-            d.creator = contract;
-
-            d.content_groups = content_groups;
-
-            // TODO: where should the parent hash go?
-            content_group cg {};
-            cg.push_back(document_graph::new_content("content_group_label", "system"));
-            cg.push_back(document_graph::new_content("parent", hash));
-            d.content_groups.push_back(cg);
-
-            string string_data = document_graph::to_string(content_groups);
-            d.hash = eosio::sha256(const_cast<char *>(string_data.c_str()), string_data.length());
-
-            document = d;
-            // write a 'free' created receipt to the blockchain history logs
-            action(
-                permission_level{contract, name("active")},
-                contract, name("created"),
-                std::make_tuple(d.creator, d.hash))
-                .send();
-        });
-        return document;
+        remove_edges (document_hash, false);
     }
 
     void document_graph::certify_document(const name &certifier, const checksum256 &hash, const string &notes)
@@ -251,4 +152,30 @@ namespace hyphaspace
         auto byte_arr = proposal_hash.extract_as_byte_array();
         return document_graph::to_hex((const char *)byte_arr.data(), byte_arr.size());
     }
+
+    // converts a checksum256 to a uint64 type
+    // uint64_t document_graph::to_uint64 (const checksum256 &document_hash) 
+    // {
+    //     uint64_t id = 0;
+    //     auto hbytes = document_hash.extract_as_byte_array();
+    //     for(int i=0; i<4; i++) {
+    //         id <<=8;
+    //         id |= hbytes[i];
+    //     }
+    //     return id;
+    // }
+
+    uint64_t document_graph::edge_id(checksum256 from_node, checksum256 to_node, name edge_name)
+    {
+        std::string fingerprint = readable_hash(from_node) + readable_hash(to_node) + edge_name.to_string();
+        uint64_t id = 0;
+        checksum256 h = sha256(const_cast<char*>(fingerprint.c_str()), fingerprint.size());
+        auto hbytes = h.extract_as_byte_array();
+        for(int i=0; i<4; i++) {
+            id <<=8;
+            id |= hbytes[i];
+        }
+        return id;
+    }
+
 } // namespace hyphaspace

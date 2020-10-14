@@ -19,6 +19,11 @@ namespace common {
 
     // 49.36 phases per annum, so each phase is 2.026% of the total
     static const float          PHASE_TO_YEAR_RATIO             = 0.02026009582;
+
+    // object, document, and proposal types
+    static const name           BADGE                           = name ("badge");
+    static const name           ASSIGN_BADGE                    = name ("assignbadge");
+    static const name           PROPOSAL                        = name ("proposal");
    
     static const uint64_t       NO_ASSIGNMENT                   = -1;         
 };

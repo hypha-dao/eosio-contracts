@@ -87,6 +87,11 @@ void hyphadao::enroll(const name &enroller,
 	a_t.erase(a_itr);
 }
 
+document_graph::document hyphadao::get_member_doc (const name& member)
+{
+	return _document_graph.get_or_create (member, _document_graph.new_content("member", member));
+}
+
 void hyphadao::remapply(const name &applicant)
 {
 	require_auth(get_self());

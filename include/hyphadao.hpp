@@ -195,6 +195,12 @@ namespace hyphaspace
                               indexed_by<name("bycreated"), const_mem_fun<DocumentIndex, uint64_t, &DocumentIndex::by_created>>>
                docindex_table;
 
+      typedef multi_index<name("edges"), document_graph::edge,
+                              indexed_by<name("fromnode"), const_mem_fun<document_graph::edge, checksum256, &document_graph::edge::by_from>>,
+                              indexed_by<name("tonode"), const_mem_fun<document_graph::edge, checksum256, &document_graph::edge::by_to>>,
+                              indexed_by<name("edgename"), const_mem_fun<document_graph::edge, uint64_t, &document_graph::edge::by_edge_name>>,
+                              indexed_by<name("bycreated"), const_mem_fun<document_graph::edge, uint64_t, &document_graph::edge::by_created>>>
+               edge_table;
 
       const uint64_t MICROSECONDS_PER_HOUR = (uint64_t)60 * (uint64_t)60 * (uint64_t)1000000;
       const uint64_t MICROSECONDS_PER_YEAR = MICROSECONDS_PER_HOUR * (uint64_t)24 * (uint64_t)365;
@@ -324,6 +330,11 @@ namespace hyphaspace
       bool did_pass (const name &ballot_id);
 
       void check_coefficient (document_graph::content_group &content_group, const string &coefficient_key);
+
+      document_graph::document propose_badge (const name& proposer, std::vector<document_graph::content_group> &content_groups);
+      document_graph::document propose_badge_assignment (const name& proposer, std::vector<document_graph::content_group> &content_groups);
+      document_graph::content_group create_system_group (const name& proposer, const name& proposal_type, std::vector<document_graph::content_group> &content_groups);
+      document_graph::document get_member_doc (const name& member);
 
       uint64_t hash (std::string str); 
       uint64_t get_next_sender_id();
