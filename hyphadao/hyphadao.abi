@@ -527,6 +527,16 @@
             ]
         },
         {
+            "name": "createroot",
+            "base": "",
+            "fields": [
+                {
+                    "name": "notes",
+                    "type": "string"
+                }
+            ]
+        },
+        {
             "name": "debugmsg",
             "base": "",
             "fields": [
@@ -653,6 +663,16 @@
             ]
         },
         {
+            "name": "erasealldocs",
+            "base": "",
+            "fields": [
+                {
+                    "name": "notes",
+                    "type": "string"
+                }
+            ]
+        },
+        {
             "name": "erasedoc",
             "base": "",
             "fields": [
@@ -663,6 +683,16 @@
                 {
                     "name": "id",
                     "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "erasedochash",
+            "base": "",
+            "fields": [
+                {
+                    "name": "doc",
+                    "type": "checksum256"
                 }
             ]
         },
@@ -683,6 +713,16 @@
                 {
                     "name": "id",
                     "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "eraseedges",
+            "base": "",
+            "fields": [
+                {
+                    "name": "notes",
+                    "type": "string"
                 }
             ]
         },
@@ -717,6 +757,16 @@
                 {
                     "name": "proposal_id",
                     "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "makememdocs",
+            "base": "",
+            "fields": [
+                {
+                    "name": "notes",
+                    "type": "string"
                 }
             ]
         },
@@ -1335,6 +1385,11 @@
             "ricardian_contract": ""
         },
         {
+            "name": "createroot",
+            "type": "createroot",
+            "ricardian_contract": ""
+        },
+        {
             "name": "debugmsg",
             "type": "debugmsg",
             "ricardian_contract": ""
@@ -1350,8 +1405,18 @@
             "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Enroll\nsummary: 'Enroll a member in the organization'\nicon: https://eos.gyftie.org/statics/logos/mobile.png#54b516210a9fe709b1ccc8c075e16538d51e3664674f707f80630a7e53dbd2e7\n---\n\n{{$action.authorization.[0].actor}} enrolls the existing applicant {{applicant}} with the content {{content}} to Hypha DAO.\""
         },
         {
+            "name": "erasealldocs",
+            "type": "erasealldocs",
+            "ricardian_contract": ""
+        },
+        {
             "name": "erasedoc",
             "type": "erasedoc",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "erasedochash",
+            "type": "erasedochash",
             "ricardian_contract": ""
         },
         {
@@ -1365,6 +1430,11 @@
             "ricardian_contract": ""
         },
         {
+            "name": "eraseedges",
+            "type": "eraseedges",
+            "ricardian_contract": ""
+        },
+        {
             "name": "exectrx",
             "type": "exectrx",
             "ricardian_contract": ""
@@ -1372,6 +1442,11 @@
         {
             "name": "fixseedsprec",
             "type": "fixseedsprec",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "makememdocs",
+            "type": "makememdocs",
             "ricardian_contract": ""
         },
         {

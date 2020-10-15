@@ -21,9 +21,28 @@ namespace common {
     static const float          PHASE_TO_YEAR_RATIO             = 0.02026009582;
 
     // object, document, and proposal types
-    static const name           BADGE                           = name ("badge");
-    static const name           ASSIGN_BADGE                    = name ("assignbadge");
-    static const name           PROPOSAL                        = name ("proposal");
-   
+    static constexpr name       BADGE_NAME              = name ("badge");
+    static const string         BADGE_STRING            = string ("badge");
+
+    static constexpr name       ASSIGN_BADGE                    = name ("assignbadge");
+    static const string         DETAILS                         = string ("details");
+    static const string         TYPE                            = string ("type");
+    static const string         ASSIGNEE                        = string ("assignee");
+    static const string         MEMBER_STRING                   = string ("member");
+
+
+    // graph edge names
+    static constexpr name       HOLDS_BADGE                 = name ("holdsbadge");
+    static constexpr name       HELD_BY                     = name ("heldby");
+    static constexpr name       PROPOSED_BY                 = name ("proposedby");
+    static constexpr name       OWNS                        = name ("owns");
+    static constexpr name       MEMBER_OF                   = name ("memberof");
+
+
+    // graph edges hanging off of primary DHO node
+    static constexpr name       PROPOSAL                    = name ("proposal");
+    static constexpr name       FAILED_PROPS                = name ("failedprops");
+    static constexpr name       MEMBER                      = name ("member");
+
     static const uint64_t       NO_ASSIGNMENT                   = -1;         
 };

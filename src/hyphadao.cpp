@@ -350,43 +350,6 @@ void hyphadao::closeprop(const uint64_t &proposal_id)
 		.send();
 }
 
-void hyphadao::closedocprop (const checksum256 &proposal_hash)
-{
-	check(!is_paused(), "Contract is paused for maintenance. Please try again later.");
-
-	document_table d_t (get_self(), get_self().value);
-	auto d_t_by_hash = d_t.get_index<name("idhash")>();
-	auto d_itr = d_t_by_hash.find (proposal_hash);
-	check (d_itr != d_t_by_hash.end(), "Document with hash not found: " + _document_graph.readable_hash (proposal_hash));
-	document_graph::document docprop = *d_itr;
-
-	document_graph::flexvalue ballot_id_flex = _document_graph.get_content (docprop, string("system"), string("ballot_id"), true);
-	name ballot_id = std::get<name>(  ballot_id_flex );
-
-	checksum256 self_hash = get_member_doc(get_self()).hash;
-
-	if (did_pass (ballot_id))
-	{ 
-		_document_graph.remove_edge (self_hash, proposal_hash, name("proposal"), true);
-        _document_graph.create_edge (self_hash, proposal_hash, name("badge"));
-	}
-	else
-	{
-		_document_graph.remove_edge (self_hash, proposal_hash, name("proposal"), true);
-        _document_graph.create_edge (self_hash, proposal_hash, name("failedprops"));
-	}
-
-	config_table config_s(get_self(), get_self().value);
-	Config c = config_s.get_or_create(get_self(), Config());
-
-	action(
-		permission_level{get_self(), name("active")},
-		c.names.at("telos_decide_contract"), name("closevoting"),
-		std::make_tuple(ballot_id, true))
-	.send();
-
-}
-
 void hyphadao::qualify_owner(const name &proposer)
 {
 	// Should we require that users hold Hypha before they are allowed to propose?  Disabled for now.

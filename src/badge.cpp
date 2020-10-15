@@ -17,7 +17,7 @@ void hyphadao::check_coefficient (document_graph::content_group &content_group, 
 document_graph::content_group hyphadao::create_system_group (const name& proposer, const name& proposal_type, std::vector<document_graph::content_group> &content_groups)
 {
     // grab the proposal details - enforce required (strict) inputs 
-    document_graph::content_group proposal_details = _document_graph.get_content_group (content_groups, "proposal_details", true);
+    document_graph::content_group proposal_details = _document_graph.get_content_group (content_groups, "details", true);
     // register the ballot with the title, desc, and icon (strictly required, for now?)
     document_graph::flexvalue title = _document_graph.get_content (proposal_details, "title", true);
     document_graph::flexvalue description = _document_graph.get_content (proposal_details, "description", true);
@@ -33,14 +33,14 @@ document_graph::content_group hyphadao::create_system_group (const name& propose
     system_cg.push_back (_document_graph.new_content("contract_version", get_string(c.strings, "contract_version")));
     system_cg.push_back (_document_graph.new_content("ballot_id", ballot_id));
     system_cg.push_back (_document_graph.new_content("proposer", proposer));
-    system_cg.push_back (_document_graph.new_content("proposal_type", proposal_type));
+    system_cg.push_back (_document_graph.new_content(common::TYPE, proposal_type));
     return system_cg;
 }
 
 document_graph::document hyphadao::propose_badge (const name& proposer, std::vector<document_graph::content_group> &content_groups)
 {
     // grab the proposal details - enforce required (strict) inputs 
-    document_graph::content_group proposal_details = _document_graph.get_content_group (content_groups, "proposal_details", true);
+    document_graph::content_group proposal_details = _document_graph.get_content_group (content_groups, common::DETAILS, true);
     
     // check coefficients 
     // TODO: move coeffecient thresholds to be configuration values
@@ -48,16 +48,19 @@ document_graph::document hyphadao::propose_badge (const name& proposer, std::vec
     check_coefficient (proposal_details, "hypha_coefficient_x10000");
     check_coefficient (proposal_details, "hvoice_coefficient_x10000");
     check_coefficient (proposal_details, "seeds_coefficient_x10000");
-    
-    content_groups.push_back (create_system_group (proposer, common::BADGE, content_groups));
 
+    // TODO: apply time-frame for expiration of badge
+    
+    content_groups.push_back (create_system_group (proposer, common::BADGE_NAME, content_groups));
+
+    // creates the document, or the graph NODE
     document_graph::document proposal_doc = _document_graph.create_document (proposer, content_groups);
 
-    // the proposer OWNS the proposal on the graph 
-    _document_graph.create_edge (get_member_doc(proposer).hash, proposal_doc.hash, name("owns"));
+    // the proposer OWNS the proposal, this creates the graph EDGE 
+    _document_graph.create_edge (get_member_doc(proposer).hash, proposal_doc.hash, common::OWNS);
 
-    // the DHO also OWNS the proposal on the graph
-    _document_graph.create_edge (get_member_doc(get_self()).hash, proposal_doc.hash, name("proposal"));
+    // the DHO also links to the document as a proposal, another graph EDGE
+    _document_graph.create_edge (get_member_doc(get_self()).hash, proposal_doc.hash, common::PROPOSED_BY);
            
     return proposal_doc;
 }
@@ -65,6 +68,31 @@ document_graph::document hyphadao::propose_badge (const name& proposer, std::vec
 document_graph::document hyphadao::propose_badge_assignment (const name& proposer, std::vector<document_graph::content_group> &content_groups)
 {
     // grab the proposal details - enforce required (strict) inputs 
+    document_graph::content_group details = _document_graph.get_content_group (content_groups, common::DETAILS, true);
+
+    // badge assignee must exist
+    // TODO: badge assignee must be a DHO member
+    check ( std::holds_alternative<name>(_document_graph.get_content (details, common::ASSIGNEE, true)), 
+        "badge assignment proposal must have an assignee content item in the details content group");
+    
+    // badge assignment proposal must link to a valid badge
+    document_graph::document badge = _document_graph.get_document (std::get<checksum256>(_document_graph.get_content (details, common::BADGE_STRING, true)));
+
+    // badge in the proposal must be of type: badge
+    check ( std::get<name>(_document_graph.get_content (details, common::TYPE, true)) == common::BADGE_NAME, 
+        "badge document hash provided in assignment proposal is not of type badge");
+
     content_groups.push_back(create_system_group (proposer, common::ASSIGN_BADGE, content_groups));
     return _document_graph.create_document (proposer, content_groups);
 }
+
+void hyphadao::assign_badge (const document_graph::document &badge, const name &assignee)
+{
+    // update graph edges
+    // the assignee has EARNED this badge
+    _document_graph.create_edge (get_member_doc(assignee).hash, badge.hash, common::HOLDS_BADGE);
+
+    // the badge also links back to the assignee
+    _document_graph.create_edge (badge.hash, get_member_doc(assignee).hash, common::HELD_BY);
+}
+

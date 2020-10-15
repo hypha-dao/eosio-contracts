@@ -262,6 +262,12 @@ namespace hyphaspace
       ACTION transform(const name &creator, const name &scope, const uint64_t &id);
       ACTION transscope (const name& creator, const name &scope, const uint64_t &starting_id, const uint64_t &batch_size);
       ACTION erasedocs (const name &scope);
+
+      // document_graph
+      ACTION erasedochash (const checksum256 &doc);
+      ACTION erasealldocs (const string &notes);
+      ACTION eraseedges (const string &notes); 
+
       
       // alerts Group
       ACTION setalert (const name &level, const string &content);
@@ -314,9 +320,15 @@ namespace hyphaspace
       ACTION removemember(const name &member_to_remove);
       ACTION addmember(const name &member);
 
+      // create the initial rootnode document
+      ACTION createroot (const string &notes);
+      ACTION makememdocs (const string &notes);
+
    private:
       Bank bank = Bank(get_self());
       document_graph _document_graph = document_graph(get_self());
+
+      checksum256 get_root();
 
       void defcloseprop(const uint64_t &proposal_id);
       void qualify_owner(const name &proposer);
@@ -331,10 +343,14 @@ namespace hyphaspace
 
       void check_coefficient (document_graph::content_group &content_group, const string &coefficient_key);
 
+      // badge-related functions
       document_graph::document propose_badge (const name& proposer, std::vector<document_graph::content_group> &content_groups);
       document_graph::document propose_badge_assignment (const name& proposer, std::vector<document_graph::content_group> &content_groups);
+      void assign_badge (const document_graph::document &badge, const name &assignee);
+
       document_graph::content_group create_system_group (const name& proposer, const name& proposal_type, std::vector<document_graph::content_group> &content_groups);
       document_graph::document get_member_doc (const name& member);
+      document_graph::document get_member_doc (const name &creator, const name& member);
 
       uint64_t hash (std::string str); 
       uint64_t get_next_sender_id();

@@ -13,7 +13,6 @@ namespace hyphaspace
 
     // unsure how erasing documents should be handled, re: approvals 
     // for now, permissions should be handled in the contract action rather than this class
-    // TODO: come back to this in the future
     void document_graph::erase_document(const checksum256 &document_hash) 
     {
         document_table d_t(contract, contract.value);
@@ -23,10 +22,9 @@ namespace hyphaspace
         auto byte_arr = document_hash.extract_as_byte_array();
         string readable_hash = document_graph::to_hex((const char *)byte_arr.data(), byte_arr.size());
         check (h_itr != hash_index.end(), "Cannot erase document; does not exist: " + readable_hash);
-        
-        hash_index.erase (h_itr);
 
-        remove_edges (document_hash, false);
+        remove_edges (document_hash, false);      
+        hash_index.erase (h_itr);
     }
 
     void document_graph::certify_document(const name &certifier, const checksum256 &hash, const string &notes)
@@ -90,7 +88,7 @@ namespace hyphaspace
 
     std::string document_graph::to_string(const document_graph::content &content)
     {
-        return "{" + string(content.label + "=" + to_string(content.value)) + "}";
+        return  "{" + string(content.label) + "=" + to_string(content.value) + "}";
     }
 
     std::string document_graph::to_string(const document_graph::content_group &content_group)
