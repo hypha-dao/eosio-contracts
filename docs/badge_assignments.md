@@ -1,19 +1,20 @@
-# Badges
-## Retrieve list of badges from chain
-To retrieve badges directly from the blockchain, you can query the 'badge' edge name, which is reserved for approved badges.  To be sure, each record should have the from_node as the root node, but we cannot verify this in the query because we only have one index to use.
+# Badge Assignments
+## Retrieve list of active badge assignments from chain
+To retrieve badge assignments directly from the blockchain, you can query the 'assignbadge' edge name, which is reserved for badge assignments.  To be sure, each record should have the from_node as the root node, but we cannot verify this in the query because we only have one index to use.
 
 ``` json
-cleos -u https://test.telos.kitchen get table -l 100 --index 4 --key-type i64 -L badge -U badge dao.hypha dao.hypha edges
+cleos -u https://test.telos.kitchen get table -l 100 --index 4 --key-type i64 -L assignbadge -U assignbadge dao.hypha dao.hypha edges
 ```
 
 > NOTE: the preferred query for data will come from DGraph of course
 
-## Badge Lifecycle
-### Step 1: Propose a new badge
+## Badge Assignment Lifecycle
+### Step 1: Propose a new badge assignment
 ``` json
-eosc -u https://testnet.telos.caleos.io --vault-file ../eosc-testnet-vault.json tx create dao.hypha propose '{                                                                                                          
+eosc -u https://testnet.telos.caleos.io --vault-file ../eosc-testnet-vault.json tx create dao.hypha propose '
+{                                                                                                          
     "proposer": "johnnyhypha1",
-    "proposal_type": "badge",
+    "proposal_type": "assignbadge",
     "content_groups": [
         [
             {
@@ -27,48 +28,42 @@ eosc -u https://testnet.telos.caleos.io --vault-file ../eosc-testnet-vault.json 
                 "label": "title",
                 "value": [
                     "string",
-                    "Healer"
+                    "Healer assignment"
                 ]
             },
             {
                 "label": "description",
                 "value": [
                     "string",
-                    "Holder of indigenous wisdom ready to transfer the knowledge to others willing to receive"
+                    "Assign Healer badge to johnnyhypha1"
                 ]
             },
             {
-                "label": "icon",
+                "label": "assignee",
                 "value": [
-                    "string",
-                    "https://assets.hypha.earth/badges/badge_explorer.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=minioadmin%2F20201007%2F%2Fs3%2Faws4_request&X-Amz-Date=20201007T153744Z&X-Amz-Expires=432000&X-Amz-SignedHeaders=host&X-Amz-Signature=78194bf2d97352305f9dd4f1214da5cba13e39289965143b44f31325f228992d"
+                    "name",
+                    "johnnyhypha1"
                 ]
             },
             {
-                "label": "seeds_coefficient_x10000",
+                "label": "badge",
                 "value": [
-                    "int64",
-                    10010
+                    "checksum256",
+                    "f66712bc5bbcb11c00a6547e646b18b49d00e83897224982fb2d8e55e7a85256"
                 ]
             },
             {
-                "label": "hypha_coefficient_x10000",
+                "label": "start_period",
                 "value": [
                     "int64",
-                    10015
+                    "61"
                 ]
             },
             {
-                "label": "hvoice_coefficient_x10000",
+                "label": "end_period",
                 "value": [
                     "int64",
-                    10000
-                ]
-            }, {
-                "label": "husd_coefficient_x10000",
-                "value": [
-                    "int64",
-                    10100
+                    "74"
                 ]
             }
         ]
@@ -82,8 +77,8 @@ To verify that the proposal document was created, retrieve the last created docu
 cleos -u https://test.telos.kitchen get table -r -l 1 dao.hypha dao.hypha documents
 {
   "rows": [{
-      "id": 37,
-      "hash": "84df671b9d033e407630fd00575542e8ab78dd4eb525d88a90c7c9bb12339472",
+      "id": 45,
+      "hash": "132bec60bec672fb8c1a5efda9e8289348d5ff64ae7acb4c59727a9da8541ae8",
       "creator": "johnnyhypha1",
       "content_groups": [[{
             "label": "content_group_label",
@@ -92,7 +87,7 @@ cleos -u https://test.telos.kitchen get table -r -l 1 dao.hypha dao.hypha docume
 
     <...snip...>
 ```
-The hash above (84df671b9d033e407630fd00575542e8ab78dd4eb525d88a90c7c9bb12339472) is the unique identifier for this newly created **badge proposal**.  
+The hash above (132bec60bec672fb8c1a5efda9e8289348d5ff64ae7acb4c59727a9da8541ae8) is the unique identifier for this newly created **badge assignment proposal**.  
 
 > NOTE: your hash will be different. The document contains the ballot_id, which changes with each proposal, so the hash is always different.
 
@@ -106,20 +101,20 @@ When a proposal is created, it will create 3 edges:
 
 You can check edges #1 and #2 by using the index 3 ("to_node") on the edges table and the proposal document hash:
 ``` json
-cleos -u https://test.telos.kitchen get table -r -l 2 --index 3 --key-type sha256 -L 84df671b9d033e407630fd00575542e8ab78dd4eb525d88a90c7c9bb12339472 -U 84df671b9d033e407630fd00575542e8ab78dd4eb525d88a90c7c9bb12339472 dao.hypha dao.hypha edges
+cleos -u https://test.telos.kitchen get table -r -l 2 --index 3 --key-type sha256 -L 132bec60bec672fb8c1a5efda9e8289348d5ff64ae7acb4c59727a9da8541ae8 -U 132bec60bec672fb8c1a5efda9e8289348d5ff64ae7acb4c59727a9da8541ae8 dao.hypha dao.hypha edges
 {
   "rows": [{
-      "id": 339435351,
-      "from_node": "d4ec74355830056924c83f20ffb1a22ad0c5145a96daddf6301897a092de951e",
-      "to_node": "84df671b9d033e407630fd00575542e8ab78dd4eb525d88a90c7c9bb12339472",
-      "edge_name": "proposal",
-      "created_date": "2020-10-16T14:13:58.500"
-    },{
-      "id": 122727512,
+      "id": 1856858742,
       "from_node": "71836b83d367ab992b58d3704efd7e9d4d36b28e90bd89ecee82415f7ca34528",
-      "to_node": "84df671b9d033e407630fd00575542e8ab78dd4eb525d88a90c7c9bb12339472",
+      "to_node": "132bec60bec672fb8c1a5efda9e8289348d5ff64ae7acb4c59727a9da8541ae8",
       "edge_name": "owns",
-      "created_date": "2020-10-16T14:13:58.500"
+      "created_date": "2020-10-16T16:56:42.000"
+    },{
+      "id": 594031207,
+      "from_node": "d4ec74355830056924c83f20ffb1a22ad0c5145a96daddf6301897a092de951e",
+      "to_node": "132bec60bec672fb8c1a5efda9e8289348d5ff64ae7acb4c59727a9da8541ae8",
+      "edge_name": "proposal",
+      "created_date": "2020-10-16T16:56:42.000"
     }
   ],
   "more": false,
@@ -129,14 +124,14 @@ cleos -u https://test.telos.kitchen get table -r -l 2 --index 3 --key-type sha25
 
 You can check edge #3 by using index #2 ("from_node") on the document hash:
 ``` json
-❯ cleos -u https://test.telos.kitchen get table -r -l 2 --index 2 --key-type sha256 -L 84df671b9d033e407630fd00575542e8ab78dd4eb525d88a90c7c9bb12339472 -U 84df671b9d033e407630fd00575542e8ab78dd4eb525d88a90c7c9bb12339472 dao.hypha dao.hypha edges                     
+❯ cleos -u https://test.telos.kitchen get table -r -l 2 --index 2 --key-type sha256 -L 132bec60bec672fb8c1a5efda9e8289348d5ff64ae7acb4c59727a9da8541ae8 -U 132bec60bec672fb8c1a5efda9e8289348d5ff64ae7acb4c59727a9da8541ae8 dao.hypha dao.hypha edges                     
 {
   "rows": [{
-      "id": 2879480055,
-      "from_node": "84df671b9d033e407630fd00575542e8ab78dd4eb525d88a90c7c9bb12339472",
+      "id": 2467891235,
+      "from_node": "132bec60bec672fb8c1a5efda9e8289348d5ff64ae7acb4c59727a9da8541ae8",
       "to_node": "71836b83d367ab992b58d3704efd7e9d4d36b28e90bd89ecee82415f7ca34528",
       "edge_name": "ownedby",
-      "created_date": "2020-10-16T14:13:58.500"
+      "created_date": "2020-10-16T16:56:42.000"
     }
   ],
   "more": false,
@@ -156,52 +151,43 @@ Close the proposal using the ```closedocprop``` action.
 > NOTE: this action is different than ```closeprop```, which is used for object proposals (to be replaced)
 
 ``` json
-eosc -u https://test.telos.kitchen --vault-file ../eosc-testnet-vault.json tx create dao.hypha closedocprop '{"proposal_hash":"84df671b9d033e407630fd00575542e8ab78dd4eb525d88a90c7c9bb12339472"}' -p johnnyhypha1
+eosc -u https://test.telos.kitchen --vault-file ../eosc-testnet-vault.json tx create dao.hypha closedocprop '{"proposal_hash":"132bec60bec672fb8c1a5efda9e8289348d5ff64ae7acb4c59727a9da8541ae8"}' -p johnnyhypha1
 ```
 
 ### Step 3.1: Re-check the graph edges
-After the proposal passes, edges that point to the badge document will be:
-1. from the DHO root node to the badge (edge_name=badge)
-2. from the badge proposer to the badge (edge_name=owns)
-3. from the badge back to the its proposer (edge_name=owned_by)
+After the proposal passes, the following edges will be created:
+1. from the badge document to the badge assignee document (edge_name=heldby)
+2. from the badge assignee to the badge (edge_name=owns)
 
-Edges #1 and #2, pointing to the badge:
+Edges #1, pointing from the badge (document starting ```f66...```) to the assignee (```7183...```)
 ``` json
-cleos -u https://test.telos.kitchen get table -r -l 2 --index 3 --key-type sha256 -L 84df671b9d033e407630fd00575542e8ab78dd4eb525d88a90c7c9bb12339472 -U 84df671b9d033e407630fd00575542e8ab78dd4eb525d88a90c7c9bb12339472 dao.hypha dao.hypha edges
+cleos -u https://test.telos.kitchen get table --index 2 --key-type sha256 -L f66712bc5bbcb11c00a6547e646b18b49d00e83897224982fb2d8e55e7a85256 -U f66712bc5bbcb11c00a6547e646b18b49d00e83897224982fb2d8e55e7a85256 dao.hypha dao.hypha edges 
 {
   "rows": [{
-      "id": 339435351,
-      "from_node": "d4ec74355830056924c83f20ffb1a22ad0c5145a96daddf6301897a092de951e",
-      "to_node": "84df671b9d033e407630fd00575542e8ab78dd4eb525d88a90c7c9bb12339472",
-      "edge_name": "badge",
-      "created_date": "2020-10-16T14:13:58.500"
-    },{
-      "id": 122727512,
-      "from_node": "71836b83d367ab992b58d3704efd7e9d4d36b28e90bd89ecee82415f7ca34528",
-      "to_node": "84df671b9d033e407630fd00575542e8ab78dd4eb525d88a90c7c9bb12339472",
-      "edge_name": "owns",
-      "created_date": "2020-10-16T14:13:58.500"
+      "id": 4069812146,
+      "from_node": "f66712bc5bbcb11c00a6547e646b18b49d00e83897224982fb2d8e55e7a85256",
+      "to_node": "71836b83d367ab992b58d3704efd7e9d4d36b28e90bd89ecee82415f7ca34528",
+      "edge_name": "heldby",
+      "created_date": "2020-10-16T16:58:48.500"
     }
-  ],
-  "more": false,
-  "next_key": ""
+
+    <... snip ...>
 }
 ```
 
-Edge #3 pointing from the badge back to its proposer.
+Edge #2 pointing from the badge holder (assignee) to the badge document.
 ``` json
-❯ cleos -u https://test.telos.kitchen get table -r -l 2 --index 2 --key-type sha256 -L 84df671b9d033e407630fd00575542e8ab78dd4eb525d88a90c7c9bb12339472 -U 84df671b9d033e407630fd00575542e8ab78dd4eb525d88a90c7c9bb12339472 dao.hypha dao.hypha edges                     
+❯ cleos -u https://test.telos.kitchen get table --index 2 --key-type sha256 -L f66712bc5bbcb11c00a6547e646b18b49d00e83897224982fb2d8e55e7a85256 -U f66712bc5bbcb11c00a6547e646b18b49d00e83897224982fb2d8e55e7a85256 dao.hypha dao.hypha edges                     
 {
   "rows": [{
-      "id": 2879480055,
-      "from_node": "84df671b9d033e407630fd00575542e8ab78dd4eb525d88a90c7c9bb12339472",
-      "to_node": "71836b83d367ab992b58d3704efd7e9d4d36b28e90bd89ecee82415f7ca34528",
-      "edge_name": "ownedby",
-      "created_date": "2020-10-16T14:13:58.500"
+      "id": 304393774,
+      "from_node": "71836b83d367ab992b58d3704efd7e9d4d36b28e90bd89ecee82415f7ca34528",
+      "to_node": "f66712bc5bbcb11c00a6547e646b18b49d00e83897224982fb2d8e55e7a85256",
+      "edge_name": "holdsbadge",
+      "created_date": "2020-10-16T16:58:48.500"
     }
-  ],
-  "more": false,
-  "next_key": ""
+
+    <...snip...>
 }
 ```
 

@@ -12,9 +12,12 @@ void hyphadao::createroot (const string &notes)
 
 checksum256 hyphadao::get_root ()
 {
-	config_table config_s(get_self(), get_self().value);
-	Config c = config_s.get_or_create(get_self(), Config());
-	return c.strings["root_node"];
+	auto ctnt = _document_graph.new_content("root_node", get_self());
+	document_graph::content_group cg; 
+	cg.push_back(ctnt);
+	vector<document_graph::content_group> cgs;
+	cgs.push_back(cg);
+	return document_graph::hash_document(cgs);
 }
 
 void hyphadao::setconfig(const map<string, name> names,

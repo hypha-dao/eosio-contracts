@@ -99,17 +99,17 @@ document_graph::document hyphadao::get_member_doc (const name& creator, const na
 
 void hyphadao::makememdocs (const string &notes)
 {
-	document_graph::document root = get_root();
+	checksum256 root = get_root();
 
 	member_table m_t(get_self(), get_self().value);
 	auto m_itr = m_t.begin();
 	while (m_itr != m_t.end()) {
 		auto member = get_member_doc (get_self(), m_itr->member); 
 		// the root node holds the member as on a member EDGE
-		_document_graph.create_edge (root.hash, member.hash, common::MEMBER);
+		_document_graph.create_edge (root, member.hash, common::MEMBER);
 
 		// the member is a member of EDGE the root
-		_document_graph.create_edge (member.hash, root.hash, common::MEMBER_OF);
+		_document_graph.create_edge (member.hash, root, common::MEMBER_OF);
    
 		m_itr++;
 	}

@@ -241,21 +241,20 @@ void hyphadao::closedocprop(const checksum256 &proposal_hash)
     check(d_itr != d_t_by_hash.end(), "Document with hash not found: " + _document_graph.readable_hash(proposal_hash));
     document_graph::document docprop = *d_itr;
 
-    document_graph::flexvalue ballot_id_flex = _document_graph.get_content(docprop, string("system"), string("ballot_id"), true);
-    name ballot_id = std::get<name>(ballot_id_flex);
+    name ballot_id = std::get<name>(_document_graph.get_content(docprop, common::SYSTEM, common::BALLOT_ID, true));
 
-    checksum256 self_hash = get_member_doc(get_self()).hash;
+    checksum256 self_hash = get_root();
     _document_graph.remove_edge(self_hash, proposal_hash, common::PROPOSAL, true);
 
     if (did_pass(ballot_id))
     {
-        name proposal_type = std::get<name>(_document_graph.get_content(docprop, string("system"), string("ballot_id"), true));
+        name proposal_type = std::get<name>(_document_graph.get_content(docprop, common::SYSTEM, common::TYPE, true));
         switch (proposal_type.value)
         {
-        case name("badge").value:
+        case common::BADGE_NAME.value:
             _document_graph.create_edge(self_hash, proposal_hash, common::BADGE_NAME);
-            break;
-        case name("assignbadge").value:
+
+        case common::ASSIGN_BADGE.value: {
 
             document_graph::content_group details = _document_graph.get_content_group(docprop, common::DETAILS, true);
 
@@ -266,11 +265,16 @@ void hyphadao::closedocprop(const checksum256 &proposal_hash)
             name assignee = std::get<name>(_document_graph.get_content(details, common::ASSIGNEE, true));
 
             assign_badge(badge, assignee);
-            break;
+        }
+
+        default:
+            // if proposal passes, create an edge for PASSED_PROPS
+            _document_graph.create_edge(self_hash, proposal_hash, common::PASSED_PROPS);
         }
     }
     else
     {
+        // create edge for FAILED_PROPS
         _document_graph.create_edge(self_hash, proposal_hash, common::FAILED_PROPS);
     }
 

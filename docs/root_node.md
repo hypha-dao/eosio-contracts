@@ -17,12 +17,12 @@ cleos -u https://test.telos.kitchen get table dao.hypha dao.hypha config
 
 ### Check the document contents
 ```
-cleos -u https://test.telos.kitchen get table -l 1 --index 2 --key-type sha256 -L 19d212d1cfec20561334884c556757914b1a31e9af93e8e4029f5209981784aa dao.hypha dao.hypha documents
+cleos -u https://test.telos.kitchen get table -l 1 --index 2 --key-type sha256 -L d4ec74355830056924c83f20ffb1a22ad0c5145a96daddf6301897a092de951e dao.hypha dao.hypha documents
 ```
 
 Or use the JS utility:
 ```
-node ../document/js/index.js --get --hash b1ba4f3a5294212fc68d83ec0cac1873f7dea380dec19a15994d63b16c52b49d --contract dao.hypha
+node ../document/js/index.js --get --hash d4ec74355830056924c83f20ffb1a22ad0c5145a96daddf6301897a092de951e --contract dao.hypha
 ```
 
 # Member nodes
@@ -34,13 +34,24 @@ If the DHO has existing members in the members table, there needs to be a docume
 
 ## Checking 
 
-# Erasing docs 
+# Erasing docs
 In test environments, there is an action to remove the entire graph, including all documents and edges.
-```
+``` json
  eosc -u https://test.telos.kitchen --vault-file ../eosc-testnet-vault.json tx create dao.hypha erasealldocs '{"notes":"erasing all docs"}' -p dao.hypha
 ```
 
 You can also erase docs one by one via hash:
 ```
 eosc -u https://test.telos.kitchen --vault-file ../eosc-testnet-vault.json tx create dao.hypha erasedochash '{"doc":"41e04c97bfd074751f356f7927cfe9a7db35ae783455f78841ea1be9cb94fc3c"}' -p dao.hypha
+```
+
+# Reset graph
+Combine erasing the graph with creating the root and member docs by combining the 3 commands:
+```
+eosc -u https://test.telos.kitchen --vault-file ../eosc-testnet-vault.json tx create dao.hypha erasealldocs '{"notes":"erasing all docs"}' -p dao.hypha
+
+eosc -u https://testnet.telos.caleos.io --vault-file ../eosc-testnet-vault.json tx create dao.hypha createroot '{"notes":"creating the root node"}' -p dao.hypha
+
+eosc -u https://testnet.telos.caleos.io --vault-file ../eosc-testnet-vault.json tx create dao.hypha makememdocs '{"notes":"making mem docs"}' -p dao.hypha
+
 ```

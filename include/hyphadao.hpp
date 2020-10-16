@@ -348,7 +348,12 @@ namespace hyphaspace
       document_graph::document propose_badge_assignment (const name& proposer, std::vector<document_graph::content_group> &content_groups);
       void assign_badge (const document_graph::document &badge, const name &assignee);
 
-      document_graph::content_group create_system_group (const name& proposer, const name& proposal_type, std::vector<document_graph::content_group> &content_groups);
+      document_graph::content_group create_system_group (const name& proposer, 
+                                                         const name& proposal_type, 
+                                                         const string& decide_title,
+                                                         const string& decide_desc,
+                                                         const string& decide_content);
+
       document_graph::document get_member_doc (const name& member);
       document_graph::document get_member_doc (const name &creator, const name& member);
 
