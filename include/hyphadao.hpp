@@ -152,29 +152,55 @@ namespace hyphaspace
       };
       typedef eosio::multi_index<name("pricehistory"), price_history_table> price_history_tables;
 
-      struct [[eosio::table, eosio::contract("hyphadao")]] document
+      // struct [[eosio::table, eosio::contract("hyphadao")]] document
+      // {
+      //    uint64_t id;
+      //    checksum256 hash;
+      //    name creator;
+      //    vector<document_graph::content_group> content_groups;
+
+      //    vector<document_graph::certificate> certificates;
+      //    uint64_t primary_key() const { return id; }
+      //    uint64_t by_creator() const { return creator.value; }
+      //    checksum256 by_hash() const { return hash; }
+
+      //    time_point created_date = current_time_point();
+      //    uint64_t by_created() const { return created_date.sec_since_epoch(); }
+
+      //    EOSLIB_SERIALIZE(document, (id)(hash)(creator)(content_groups)(certificates)(created_date))
+      // };
+
+      typedef multi_index<name("documents"), document_graph::document,
+                          indexed_by<name("idhash"), const_mem_fun<document_graph::document, checksum256, &document_graph::document::by_hash>>,
+                          indexed_by<name("bycreator"), const_mem_fun<document_graph::document, uint64_t, &document_graph::document::by_creator>>,
+                          indexed_by<name("bycreated"), const_mem_fun<document_graph::document, uint64_t, &document_graph::document::by_created>>>
+          document_table;
+
+      // scopes: badges, roles, assignments, members, specific member name, etc. 
+      struct [[eosio::table, eosio::contract("hyphadao")]] DocumentIndex
       {
          uint64_t id;
-         checksum256 hash;
-         name creator;
-         vector<document_graph::content_group> content_groups;
 
-         vector<document_graph::certificate> certificates;
-         uint64_t primary_key() const { return id; }
-         uint64_t by_creator() const { return creator.value; }
-         checksum256 by_hash() const { return hash; }
+         checksum256 document_hash;
+         checksum256 by_hash() const { return document_hash; }
 
          time_point created_date = current_time_point();
          uint64_t by_created() const { return created_date.sec_since_epoch(); }
 
-         EOSLIB_SERIALIZE(document, (id)(hash)(creator)(content_groups)(certificates)(created_date))
+         uint64_t primary_key() const { return id; }
       };
 
-      typedef multi_index<name("documents"), document,
-                          indexed_by<name("idhash"), const_mem_fun<document, checksum256, &document::by_hash>>,
-                          indexed_by<name("bycreator"), const_mem_fun<document, uint64_t, &document::by_creator>>,
-                          indexed_by<name("bycreated"), const_mem_fun<document, uint64_t, &document::by_created>>>
-          document_table;
+      typedef multi_index<name("docindex"),DocumentIndex,
+                              indexed_by<name("idhash"), const_mem_fun<DocumentIndex, checksum256, &DocumentIndex::by_hash>>,
+                              indexed_by<name("bycreated"), const_mem_fun<DocumentIndex, uint64_t, &DocumentIndex::by_created>>>
+               docindex_table;
+
+      typedef multi_index<name("edges"), document_graph::edge,
+                              indexed_by<name("fromnode"), const_mem_fun<document_graph::edge, checksum256, &document_graph::edge::by_from>>,
+                              indexed_by<name("tonode"), const_mem_fun<document_graph::edge, checksum256, &document_graph::edge::by_to>>,
+                              indexed_by<name("edgename"), const_mem_fun<document_graph::edge, uint64_t, &document_graph::edge::by_edge_name>>,
+                              indexed_by<name("bycreated"), const_mem_fun<document_graph::edge, uint64_t, &document_graph::edge::by_created>>>
+               edge_table;
 
       const uint64_t MICROSECONDS_PER_HOUR = (uint64_t)60 * (uint64_t)60 * (uint64_t)1000000;
       const uint64_t MICROSECONDS_PER_YEAR = MICROSECONDS_PER_HOUR * (uint64_t)24 * (uint64_t)365;
@@ -187,6 +213,8 @@ namespace hyphaspace
                      map<string, uint64_t> ints,
                      const map<string, float> floats,
                      map<string, transaction> trxs);
+      
+      ACTION propose (const name& proposer, const name& proposal_type, std::vector<document_graph::content_group> &content_groups);
 
       ACTION created(const name &creator, const checksum256 &hash);
 
@@ -234,6 +262,12 @@ namespace hyphaspace
       ACTION transform(const name &creator, const name &scope, const uint64_t &id);
       ACTION transscope (const name& creator, const name &scope, const uint64_t &starting_id, const uint64_t &batch_size);
       ACTION erasedocs (const name &scope);
+
+      // document_graph
+      ACTION erasedochash (const checksum256 &doc);
+      ACTION erasealldocs (const string &notes);
+      ACTION eraseedges (const string &notes); 
+
       
       // alerts Group
       ACTION setalert (const name &level, const string &content);
@@ -277,6 +311,7 @@ namespace hyphaspace
 
       // anyone can call closeprop, it executes the transaction if the voting passed
       ACTION closeprop(const uint64_t &proposal_id);
+      ACTION closedocprop (const checksum256 &proposal_hash);
 
       // users can claim their salary pay
       ACTION payassign(const uint64_t &assignment_id, const uint64_t &period_id);
@@ -285,14 +320,43 @@ namespace hyphaspace
       ACTION removemember(const name &member_to_remove);
       ACTION addmember(const name &member);
 
+      // create the initial rootnode document
+      ACTION createroot (const string &notes);
+      ACTION makememdocs (const string &notes);
+
    private:
       Bank bank = Bank(get_self());
       document_graph _document_graph = document_graph(get_self());
 
+      checksum256 get_root();
+
       void defcloseprop(const uint64_t &proposal_id);
       void qualify_owner(const name &proposer);
+
       name register_ballot(const name &proposer,
-                           const map<string, string> &strings);
+							      const map<string, string> &strings);
+
+      name register_ballot(const name &proposer,
+                           const string &title, const string &description, const string &content);
+
+      bool did_pass (const name &ballot_id);
+
+      void check_coefficient (document_graph::content_group &content_group, const string &coefficient_key);
+
+      // badge-related functions
+      document_graph::document propose_badge (const name& proposer, std::vector<document_graph::content_group> &content_groups);
+      document_graph::document propose_badge_assignment (const name& proposer, std::vector<document_graph::content_group> &content_groups);
+      void assign_badge (const document_graph::document &badge, const name &assignee);
+
+      document_graph::content_group create_system_group (const name& proposer, 
+                                                         const name& proposal_type, 
+                                                         const string& decide_title,
+                                                         const string& decide_desc,
+                                                         const string& decide_content);
+
+      document_graph::document get_member_doc (const name& member);
+      document_graph::document get_member_doc (const name &creator, const name& member);
+
       uint64_t hash (std::string str); 
       uint64_t get_next_sender_id();
       void debug(const string &notes);

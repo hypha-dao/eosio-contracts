@@ -1,0 +1,50 @@
+{
+    "proposer": "dao.hypha",
+    "proposal_type": "badge",
+    "content_groups": [
+        [
+            {
+                "label": "content_group_label",
+                "value": [
+                    "string",
+                    "proposal_details"
+                ]
+            },
+            {
+                "label": "title",
+                "value": [
+                    "string",
+                    "Healer"
+                ]
+            },
+            {
+                "label": "badge_type",
+                "value": [
+                    "name",
+                    "bioregion"
+                ]
+            },
+            {
+                "label": "description",
+                "value": [
+                    "string",
+                    "Holder of indigenous wisdom ready to transfer the knowledge to others willing to receive"
+                ]
+            },
+            {
+                "label": "icon",
+                "value": [
+                    "string",
+                    "https://assets.hypha.earth/badges/badge_explorer.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=minioadmin%2F20201007%2F%2Fs3%2Faws4_request&X-Amz-Date=20201007T153744Z&X-Amz-Expires=432000&X-Amz-SignedHeaders=host&X-Amz-Signature=78194bf2d97352305f9dd4f1214da5cba13e39289965143b44f31325f228992d"
+                ]
+            },
+            {
+                "label": "seeds_coefficient_x10000",
+                "value": [
+                    "int64",
+                    10100
+                ]
+            }
+        ]
+    ]
+}

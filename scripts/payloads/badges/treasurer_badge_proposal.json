@@ -1,0 +1,57 @@
+{
+    "proposer": "dao.hypha",
+    "proposal_type": "badge",
+    "content_groups": [
+        [
+            {
+                "label": "content_group_label",
+                "value": [
+                    "string",
+                    "proposal_details"
+                ]
+            },
+            {
+                "label": "title",
+                "value": [
+                    "string",
+                    "Treasurer"
+                ]
+            },
+            {
+                "label": "badge_type",
+                "value": [
+                    "name",
+                    "admin"
+                ]
+            },
+            {
+                "label": "description",
+                "value": [
+                    "string",
+                    "Treasurers are part of a finance multi-signature group to authorize key transactions on behalf of the organization"
+                ]
+            },
+            {
+                "label": "icon",
+                "value": [
+                    "string",
+                    "https://assets.hypha.earth/badges/badge_treasurer.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=minioadmin%2F20201007%2F%2Fs3%2Faws4_request&X-Amz-Date=20201007T153647Z&X-Amz-Expires=432000&X-Amz-SignedHeaders=host&X-Amz-Signature=dcfb601b09f8c7f3f098cc0f85a90335d0ae5e9d2c9189e10e19d159844549da"
+                ]
+            },
+            {
+                "label": "seeds_coefficient_x100",
+                "value": [
+                    "int64",
+                    10100
+                ]
+            },
+            {
+                "label": "hypha_coefficient_x100",
+                "value": [
+                    "int64",
+                    10100
+                ]
+            }
+        ]
+    ]
+}

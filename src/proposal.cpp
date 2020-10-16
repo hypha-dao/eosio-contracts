@@ -2,7 +2,7 @@
 
 using namespace hyphaspace;
 
-void hyphadao::fixseedsprec (const uint64_t &proposal_id) 
+void hyphadao::fixseedsprec(const uint64_t &proposal_id)
 {
     require_auth(get_self());
 
@@ -13,12 +13,13 @@ void hyphadao::fixseedsprec (const uint64_t &proposal_id)
     std::map<string, asset>::const_iterator asset_itr;
     for (asset_itr = p_itr->assets.begin(); asset_itr != p_itr->assets.end(); ++asset_itr)
     {
-        if (asset_itr->first == "seeds_escrow_amount" && 
-            asset_itr->second.symbol.code().to_string() == "SEEDS" && 
-            asset_itr->second.symbol.precision() == 2) {
-                o_t.modify (p_itr, get_self(), [&](auto &o) {
-                    o.assets["seeds_escrow_amount"] = asset { asset_itr->second.amount * 100, common::S_SEEDS };
-                });
+        if (asset_itr->first == "seeds_escrow_amount" &&
+            asset_itr->second.symbol.code().to_string() == "SEEDS" &&
+            asset_itr->second.symbol.precision() == 2)
+        {
+            o_t.modify(p_itr, get_self(), [&](auto &o) {
+                o.assets["seeds_escrow_amount"] = asset{asset_itr->second.amount * 100, common::S_SEEDS};
+            });
         }
     }
 }
@@ -74,7 +75,7 @@ void hyphadao::updassassets(const uint64_t &assignment_id)
     });
 }
 
-void hyphadao::new_proposal(const name& owner,
+void hyphadao::new_proposal(const name &owner,
                             map<string, name> &names,
                             map<string, string> &strings,
                             map<string, asset> &assets,
@@ -213,4 +214,76 @@ void hyphadao::new_proposal(const name& owner,
     }
     new_object(owner, name("proposal"), names, strings, assets, time_points, ints, trxs);
     event(name("high"), variant_helper(names, strings, assets, time_points, ints));
+}
+
+void hyphadao::propose(const name &proposer,
+                       const name &proposal_type,
+                       std::vector<document_graph::content_group> &content_groups)
+{
+    switch (proposal_type.value)
+    {
+    case common::BADGE_NAME.value:
+        propose_badge(proposer, content_groups);
+        break;
+    case common::ASSIGN_BADGE.value:
+        propose_badge_assignment(proposer, content_groups);
+        break;
+    }
+}
+
+void hyphadao::closedocprop(const checksum256 &proposal_hash)
+{
+    check(!is_paused(), "Contract is paused for maintenance. Please try again later.");
+
+    document_table d_t(get_self(), get_self().value);
+    auto d_t_by_hash = d_t.get_index<name("idhash")>();
+    auto d_itr = d_t_by_hash.find(proposal_hash);
+    check(d_itr != d_t_by_hash.end(), "Document with hash not found: " + _document_graph.readable_hash(proposal_hash));
+    document_graph::document docprop = *d_itr;
+
+    name ballot_id = std::get<name>(_document_graph.get_content(docprop, common::SYSTEM, common::BALLOT_ID, true));
+
+    checksum256 self_hash = get_root();
+    _document_graph.remove_edge(self_hash, proposal_hash, common::PROPOSAL, true);
+
+    if (did_pass(ballot_id))
+    {
+        name proposal_type = std::get<name>(_document_graph.get_content(docprop, common::SYSTEM, common::TYPE, true));
+        switch (proposal_type.value)
+        {
+        case common::BADGE_NAME.value:
+            _document_graph.create_edge(self_hash, proposal_hash, common::BADGE_NAME);
+
+        case common::ASSIGN_BADGE.value: {
+
+            document_graph::content_group details = _document_graph.get_content_group(docprop, common::DETAILS, true);
+
+            document_graph::document badge = _document_graph.get_document(
+                std::get<checksum256>(_document_graph.get_content(
+                    details, common::BADGE_STRING, true)));
+
+            name assignee = std::get<name>(_document_graph.get_content(details, common::ASSIGNEE, true));
+
+            assign_badge(badge, assignee);
+        }
+
+        default:
+            // if proposal passes, create an edge for PASSED_PROPS
+            _document_graph.create_edge(self_hash, proposal_hash, common::PASSED_PROPS);
+        }
+    }
+    else
+    {
+        // create edge for FAILED_PROPS
+        _document_graph.create_edge(self_hash, proposal_hash, common::FAILED_PROPS);
+    }
+
+    config_table config_s(get_self(), get_self().value);
+    Config c = config_s.get_or_create(get_self(), Config());
+
+    action(
+        permission_level{get_self(), name("active")},
+        c.names.at("telos_decide_contract"), name("closevoting"),
+        std::make_tuple(ballot_id, true))
+        .send();
 }

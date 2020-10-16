@@ -2,6 +2,24 @@
 
 using namespace hyphaspace;
 
+void hyphadao::createroot (const string &notes)
+{
+	require_auth (get_self());
+
+	document_graph::document root = _document_graph.get_or_create (get_self(), _document_graph.new_content("root_node", get_self()));
+	setconfigatt("root_node", _document_graph.readable_hash(root.hash));
+}
+
+checksum256 hyphadao::get_root ()
+{
+	auto ctnt = _document_graph.new_content("root_node", get_self());
+	document_graph::content_group cg; 
+	cg.push_back(ctnt);
+	vector<document_graph::content_group> cgs;
+	cgs.push_back(cg);
+	return document_graph::hash_document(cgs);
+}
+
 void hyphadao::setconfig(const map<string, name> names,
 						 const map<string, string> strings,
 						 const map<string, asset> assets,

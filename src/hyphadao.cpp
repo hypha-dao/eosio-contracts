@@ -6,71 +6,6 @@ hyphadao::hyphadao(name self, name code, datastream<const char*> ds) : contract(
 
 hyphadao::~hyphadao() {}
 
-name hyphadao::register_ballot(const name &proposer,
-							   const map<string, string> &strings)
-{
-	check(has_auth(proposer) || has_auth(get_self()), "Authentication failed. Must have authority from proposer: " +
-														  proposer.to_string() + "@active or " + get_self().to_string() + "@active.");
-	qualify_owner(proposer);
-
-	config_table config_s(get_self(), get_self().value);
-	Config c = config_s.get_or_create(get_self(), Config());
-
-	// increment the ballot_id
-	name new_ballot_id = name(c.names.at("last_ballot_id").value + 1);
-	c.names["last_ballot_id"] = new_ballot_id;
-	config_s.set(c, get_self());
-
-	trailservice::trail::ballots_table b_t(c.names.at("telos_decide_contract"), c.names.at("telos_decide_contract").value);
-	auto b_itr = b_t.find(new_ballot_id.value);
-	check(b_itr == b_t.end(), "ballot_id: " + new_ballot_id.to_string() + " has already been used.");
-
-	vector<name> options;
-	options.push_back(name("pass"));
-	options.push_back(name("fail"));
-	options.push_back(name("abstain"));
-
-	action(
-		permission_level{get_self(), name("active")},
-		c.names.at("telos_decide_contract"), name("newballot"),
-		std::make_tuple(
-			new_ballot_id,
-			name("poll"),
-			get_self(),
-			common::S_HVOICE,
-			name("1token1vote"),
-			options))
-		.send();
-
-	//	  // default is to vote all tokens, not just staked tokens
-	//    action (
-	//       permission_level{get_self(), "active"_n},
-	//       c.telos_decide_contract, "togglebal"_n,
-	//       std::make_tuple(new_ballot_id, "votestake"_n))
-	//    .send();
-
-	action(
-		permission_level{get_self(), name("active")},
-		c.names.at("telos_decide_contract"), name("editdetails"),
-		std::make_tuple(
-			new_ballot_id,
-			strings.at("title"),
-			strings.at("description").substr(0, std::min(strings.at("description").length(), size_t(25))),
-			strings.at("content")))
-		.send();
-
-	auto expiration = time_point_sec(current_time_point()) + c.ints.at("voting_duration_sec");
-
-	action(
-		permission_level{get_self(), name("active")},
-		c.names.at("telos_decide_contract"), name("openvoting"),
-		std::make_tuple(new_ballot_id, expiration))
-		.send();
-
-	// TODO: add a record to the seeds scheduler to close the proposal
-	return new_ballot_id;
-}
-
 void hyphadao::withdraw (const name &withdrawer, const uint64_t &assignment_id, const string& notes) 
 {
 	// check paused state
@@ -339,21 +274,14 @@ void hyphadao::makepayout(const uint64_t &proposal_id)
 	changescope(name("proposal"), proposal_id, new_scopes, true);
 }
 
-void hyphadao::closeprop(const uint64_t &proposal_id)
+bool hyphadao::did_pass (const name &ballot_id)
 {
-	check(!is_paused(), "Contract is paused for maintenance. Please try again later.");
-
-	object_table o_t(get_self(), name("proposal").value);
-	auto o_itr = o_t.find(proposal_id);
-	check(o_itr != o_t.end(), "Scope: " + name("proposal").to_string() + "; Object ID: " + std::to_string(proposal_id) + " does not exist.");
-	auto prop = *o_itr;
-
 	config_table config_s(get_self(), get_self().value);
 	Config c = config_s.get_or_create(get_self(), Config());
 
 	trailservice::trail::ballots_table b_t(c.names.at("telos_decide_contract"), c.names.at("telos_decide_contract").value);
-	auto b_itr = b_t.find(prop.names.at("ballot_id").value);
-	check(b_itr != b_t.end(), "ballot_id: " + prop.names.at("ballot_id").to_string() + " not found.");
+	auto b_itr = b_t.find(ballot_id.value);
+	check(b_itr != b_t.end(), "ballot_id: " + ballot_id.to_string() + " not found.");
 
 	trailservice::trail::treasuries_table t_t(c.names.at("telos_decide_contract"), c.names.at("telos_decide_contract").value);
 	auto t_itr = t_t.find(common::S_HVOICE.code().raw());
@@ -371,16 +299,35 @@ void hyphadao::closeprop(const uint64_t &proposal_id)
 	debug_str = debug_str + " Votes Passing: " + votes_pass.to_string() + "\n";
 	debug_str = debug_str + " Votes Failing: " + votes_fail.to_string() + "\n";
 	debug_str = debug_str + " Votes Abstain: " + votes_abstain.to_string() + "\n";
+	debug(debug_str);
 
 	bool passed = false;
-	if (b_itr->total_raw_weight >= quorum_threshold && // must meet quorum
-		adjust_asset(votes_pass, 0.2500000000) > votes_fail)
-	{ // must have 80% of the vote power
-		debug_str = debug_str + "Proposal passed. Executing transaction. ";
+	if (b_itr->total_raw_weight >= quorum_threshold && 			// must meet quorum
+		adjust_asset(votes_pass, 0.2500000000) > votes_fail)  	// must have 80% of the vote power
+	{
+		return true;
+	} else {
+		return false;
+	}
+}
+
+void hyphadao::closeprop(const uint64_t &proposal_id)
+{
+	check(!is_paused(), "Contract is paused for maintenance. Please try again later.");
+
+	object_table o_t(get_self(), name("proposal").value);
+	auto o_itr = o_t.find(proposal_id);
+	check(o_itr != o_t.end(), "Scope: " + name("proposal").to_string() + "; Object ID: " + std::to_string(proposal_id) + " does not exist.");
+	auto prop = *o_itr;
+
+	config_table config_s(get_self(), get_self().value);
+	Config c = config_s.get_or_create(get_self(), Config());
+
+	if (did_pass (prop.names.at("ballot_id")))
+	{ 
 		prop.strings["Event"] = "Proposal has passed";
 		event (name("high"), variant_helper(prop.names, prop.strings, prop.assets, prop.time_points, prop.ints));
 
-		passed = true;
 		prop.trxs.at("exec_on_approval").send(current_block_time().to_time_point().sec_since_epoch(), get_self());
 	}
 	else
@@ -396,14 +343,11 @@ void hyphadao::closeprop(const uint64_t &proposal_id)
 		.send();
 	}
 
-	debug_str = debug_str + string("Ballot ID read from prop for closing ballot: " + prop.names.at("ballot_id").to_string() + "\n");
 	action(
 		permission_level{get_self(), name("active")},
 		c.names.at("telos_decide_contract"), name("closevoting"),
 		std::make_tuple(prop.names.at("ballot_id"), true))
 		.send();
-
-	debug(debug_str);
 }
 
 void hyphadao::qualify_owner(const name &proposer)

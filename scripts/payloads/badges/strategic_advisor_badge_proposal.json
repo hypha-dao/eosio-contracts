@@ -1,0 +1,64 @@
+{
+    "proposer": "dao.hypha",
+    "proposal_type": "badge",
+    "content_groups": [
+        [
+            {
+                "label": "content_group_label",
+                "value": [
+                    "string",
+                    "proposal_details"
+                ]
+            },
+            {
+                "label": "title",
+                "value": [
+                    "string",
+                    "Strategic Advisor"
+                ]
+            },
+            {
+                "label": "badge_type",
+                "value": [
+                    "name",
+                    "accell"
+                ]
+            },
+            {
+                "label": "description",
+                "value": [
+                    "string",
+                    "Provide high caliber strategic advice at complexity level seven for the organization"
+                ]
+            },
+            {
+                "label": "icon",
+                "value": [
+                    "string",
+                    "https://assets.hypha.earth/badges/badge_strategic_advisor.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=minioadmin%2F20201007%2F%2Fs3%2Faws4_request&X-Amz-Date=20201007T153735Z&X-Amz-Expires=432000&X-Amz-SignedHeaders=host&X-Amz-Signature=3c602181bcca85566e3b2783fe20935774dc592c289507a9dd5e6aac276a6e18"
+                ]
+            },
+            {
+                "label": "seeds_coefficient_x100",
+                "value": [
+                    "int64",
+                    10100
+                ]
+            },
+            {
+                "label": "hypha_coefficient_x100",
+                "value": [
+                    "int64",
+                    10100
+                ]
+            },
+            {
+                "label": "hvoice_coefficient_x100",
+                "value": [
+                    "int64",
+                    10100
+                ]
+            }
+        ]
+    ]
+}

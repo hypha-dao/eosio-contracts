@@ -194,6 +194,39 @@ void hyphadao::check_capacity(const uint64_t &role_id, const uint64_t &req_time_
 																		 " and consumed capacity (x100) is " + to_string(consumed_capacity) + "; proposal requests time share (x100) of: " + to_string(req_time_share_x100));
 }
 
+void hyphadao::erasedochash (const checksum256 &doc) 
+{
+	require_auth (get_self());
+	_document_graph.erase_document(doc);
+}
+
+void hyphadao::eraseedges (const string &notes) 
+{
+	require_auth (get_self());
+	edge_table e_t (get_self(), get_self().value);
+	auto e_itr = e_t.begin();
+	while (e_itr != e_t.end()) {
+		e_itr = e_t.erase (e_itr);
+	}
+}
+void hyphadao::erasealldocs (const string &notes)
+{
+	require_auth(get_self());
+	document_table d_t (get_self(), get_self().value);
+	auto d_itr = d_t.begin ();
+	while (d_itr != d_t.end()) {
+
+		eosio::transaction out{};
+		out.actions.emplace_back(permission_level{get_self(), name("active")},
+								get_self(), name("erasedochash"),
+			std::make_tuple(d_itr->hash));
+		out.delay_sec = 1;
+		out.send(get_next_sender_id(), get_self());
+
+		d_itr++;
+	}
+}
+
 // void hyphadao::reset()
 // {
 // 	// bank.reset_config ();

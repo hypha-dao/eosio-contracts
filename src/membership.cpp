@@ -44,7 +44,7 @@ void hyphadao::enroll(const name &enroller,
 
 	check(!is_paused(), "Contract is paused for maintenance. Please try again later.");
 
-	// this action is linked to the hyphadaomain@enrollers permission
+	// this action is linked to the dao.hypha@enrollers permission
 	applicant_table a_t(get_self(), get_self().value);
 	auto a_itr = a_t.find(applicant.value);
 	check(a_itr != a_t.end(), "Applicant not found: " + applicant.to_string());
@@ -86,6 +86,34 @@ void hyphadao::enroll(const name &enroller,
 
 	a_t.erase(a_itr);
 }
+
+document_graph::document hyphadao::get_member_doc (const name& member)
+{
+	return _document_graph.get_or_create (member, _document_graph.new_content(common::MEMBER_STRING, member));
+}
+
+document_graph::document hyphadao::get_member_doc (const name& creator, const name& member)
+{
+	return _document_graph.get_or_create (creator, _document_graph.new_content(common::MEMBER_STRING, member));
+}
+
+void hyphadao::makememdocs (const string &notes)
+{
+	checksum256 root = get_root();
+
+	member_table m_t(get_self(), get_self().value);
+	auto m_itr = m_t.begin();
+	while (m_itr != m_t.end()) {
+		auto member = get_member_doc (get_self(), m_itr->member); 
+		// the root node holds the member as on a member EDGE
+		_document_graph.create_edge (root, member.hash, common::MEMBER);
+
+		// the member is a member of EDGE the root
+		_document_graph.create_edge (member.hash, root, common::MEMBER_OF);
+   
+		m_itr++;
+	}
+};
 
 void hyphadao::remapply(const name &applicant)
 {
