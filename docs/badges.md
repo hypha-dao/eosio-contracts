@@ -70,6 +70,12 @@ eosc -u https://testnet.telos.caleos.io --vault-file ../eosc-testnet-vault.json 
                     "int64",
                     10100
                 ]
+            }, {
+                "label": "max_cycles",
+                "value": [
+                    "int64",
+                    3
+                ]
             }
         ]
     ]

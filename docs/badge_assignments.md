@@ -85,7 +85,7 @@ cleos -u https://test.telos.kitchen get table -r -l 1 dao.hypha dao.hypha docume
             "value": [
               "string",
 
-    <...snip...>
+    ...snip...
 ```
 The hash above (132bec60bec672fb8c1a5efda9e8289348d5ff64ae7acb4c59727a9da8541ae8) is the unique identifier for this newly created **badge assignment proposal**.  
 
@@ -171,7 +171,7 @@ cleos -u https://test.telos.kitchen get table --index 2 --key-type sha256 -L f66
       "created_date": "2020-10-16T16:58:48.500"
     }
 
-    <... snip ...>
+    ...snip...
 }
 ```
 
@@ -187,7 +187,7 @@ Edge #2 pointing from the badge holder (assignee) to the badge document.
       "created_date": "2020-10-16T16:58:48.500"
     }
 
-    <...snip...>
+    ...snip...
 }
 ```
 

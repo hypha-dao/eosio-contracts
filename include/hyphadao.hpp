@@ -339,6 +339,8 @@ namespace hyphaspace
       name register_ballot(const name &proposer,
                            const string &title, const string &description, const string &content);
 
+      document_graph::document create_tally_document(const name &proposer);
+
       bool did_pass (const name &ballot_id);
 
       void check_coefficient (document_graph::content_group &content_group, const string &coefficient_key);

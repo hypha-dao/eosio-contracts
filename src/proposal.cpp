@@ -216,17 +216,35 @@ void hyphadao::new_proposal(const name &owner,
     event(name("high"), variant_helper(names, strings, assets, time_points, ints));
 }
 
+document_graph::document hyphadao::create_tally_document (const name &proposer)
+{
+    document_graph::content_group pass_cg = document_graph::content_group {};
+    pass_cg.push_back (_document_graph.new_content("vote_power", asset{0, common::S_HVOICE}));
+    pass_cg.push_back (_document_graph.new_content("option", string("pass")));
+
+    document_graph::content_group fail_cg = document_graph::content_group {};
+    fail_cg.push_back (_document_graph.new_content("vote_power", asset{0, common::S_HVOICE}));
+    fail_cg.push_back (_document_graph.new_content("option", string("fail")));
+
+    std::vector<document_graph::content_group> cgs;
+    cgs.push_back (pass_cg);
+    cgs.push_back (fail_cg);
+
+    return _document_graph.create_document(proposer, cgs);
+}
+
 void hyphadao::propose(const name &proposer,
                        const name &proposal_type,
                        std::vector<document_graph::content_group> &content_groups)
 {
+    document_graph::document proposal;
     switch (proposal_type.value)
     {
     case common::BADGE_NAME.value:
-        propose_badge(proposer, content_groups);
+        proposal = propose_badge(proposer, content_groups);
         break;
     case common::ASSIGN_BADGE.value:
-        propose_badge_assignment(proposer, content_groups);
+        proposal = propose_badge_assignment(proposer, content_groups);
         break;
     }
 }
