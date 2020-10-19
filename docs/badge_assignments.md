@@ -191,7 +191,9 @@ Edge #2 pointing from the badge holder (assignee) to the badge document.
 }
 ```
 
-# Step 4: Retrieve the badge
+# Step 4: Retrieve the badge assignment
+
+# TODO: NEEDS UPDATING
 Of course, reading from the DHO edges named ```badge```, we can then use the hash to retrieve the details of this badge.
 
 ``` json

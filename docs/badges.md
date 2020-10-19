@@ -76,6 +76,18 @@ eosc -u https://testnet.telos.caleos.io --vault-file ../eosc-testnet-vault.json 
                     "int64",
                     3
                 ]
+            }, {
+                "label": "start_period",
+                "value": [
+                    "int64",
+                    60
+                ]
+            }, {
+                "label": "end_period",
+                "value": [
+                    "int64",
+                    250
+                ]
             }
         ]
     ]
@@ -269,6 +281,24 @@ cleos -u https://test.telos.kitchen get table -r -l 2 --index 2 --key-type sha25
               "int64",
               10100
             ]
+          },{
+              "label": "max_cycles",
+              "value": [
+                  "int64",
+                  3
+              ]
+          }, {
+              "label": "start_period",
+              "value": [
+                  "int64",
+                  60
+              ]
+          }, {
+              "label": "end_period",
+              "value": [
+                  "int64",
+                  250
+              ]
           }
         ],[{
             "label": "content_group_label",
