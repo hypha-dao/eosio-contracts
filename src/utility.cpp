@@ -200,6 +200,15 @@ void hyphadao::erasedochash (const checksum256 &doc)
 	_document_graph.erase_document(doc);
 }
 
+void hyphadao::erasedocbyid (const uint64_t &id) 
+{
+	require_auth (get_self());
+	document_table d_t (get_self(), get_self().value);
+	auto d_itr = d_t.find (id);
+	check (d_itr != d_t.end(), "Document with ID is not found: " + std::to_string(id));
+	d_t.erase (d_itr);
+}
+
 void hyphadao::eraseedges (const string &notes) 
 {
 	require_auth (get_self());

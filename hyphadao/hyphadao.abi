@@ -687,6 +687,16 @@
             ]
         },
         {
+            "name": "erasedocbyid",
+            "base": "",
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
             "name": "erasedochash",
             "base": "",
             "fields": [
@@ -1412,6 +1422,11 @@
         {
             "name": "erasedoc",
             "type": "erasedoc",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "erasedocbyid",
+            "type": "erasedocbyid",
             "ricardian_contract": ""
         },
         {

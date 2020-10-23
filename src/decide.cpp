@@ -72,3 +72,5 @@ name hyphadao::register_ballot(const name &proposer,
 {
 	return register_ballot (proposer, strings.at("title"), strings.at("description"), strings.at("content"));
 }
+
+// checksum256 hyphadao::castvote (const checksum256 &ballot )

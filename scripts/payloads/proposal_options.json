@@ -1,0 +1,50 @@
+{
+    "content_groups": [
+        [
+            {
+                "label": "content_group_type",
+                "value": [
+                    "name",
+                    "option"
+                ]
+            },
+            {
+                "label": "option_key",
+                "value": [
+                    "string",
+                    "Pass"
+                ]
+            },
+            {
+                "label": "description",
+                "value": [
+                    "string",
+                    "Voting for this option is a vote to pass/approve the proposal"
+                ]
+            }
+        ],
+        [
+            {
+                "label": "content_group_type",
+                "value": [
+                    "name",
+                    "option"
+                ]
+            },
+            {
+                "label": "option_key",
+                "value": [
+                    "string",
+                    "Fail"
+                ]
+            },
+            {
+                "label": "description",
+                "value": [
+                    "string",
+                    "Voting for this option is a vote to fail/disapprove the proposal"
+                ]
+            }
+        ]
+    ]
+}

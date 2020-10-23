@@ -1,13 +1,11 @@
 {
-    "proposer": "dao.hypha",
-    "proposal_type": "badge",
     "content_groups": [
         [
             {
                 "label": "content_group_label",
                 "value": [
                     "string",
-                    "proposal_details"
+                    "details"
                 ]
             },
             {
@@ -15,13 +13,6 @@
                 "value": [
                     "string",
                     "Lamp Lighter"
-                ]
-            },
-            {
-                "label": "badge_type",
-                "value": [
-                    "name",
-                    "accell"
                 ]
             },
             {
@@ -35,7 +26,7 @@
                 "label": "icon",
                 "value": [
                     "string",
-                    "https://assets.hypha.earth/badges/badge_lamp_lighter.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=minioadmin%2F20201007%2F%2Fs3%2Faws4_request&X-Amz-Date=20201007T153714Z&X-Amz-Expires=432000&X-Amz-SignedHeaders=host&X-Amz-Signature=a4515df70204c39c5071486c9d9c3e9f25469c1bbdbdd1278c65f5f8a2b1a0ad"
+                    "https://gallery.yopriceville.com/var/resizes/Free-Clipart-Pictures/Badges-and-Labels-PNG/Gold_Badge_Transparent_PNG_Image.png"
                 ]
             },
             {

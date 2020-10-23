@@ -144,6 +144,10 @@ namespace hyphaspace
                                             const string &content_group_label, 
                                             const bool &strict);
 
+        std::vector<content_group> get_content_groups_of_type(const vector<content_group> &content_groups, 
+                                                const name &content_group_type,
+                                                const bool &strict);
+
         flexvalue get_content (const content_group &content_group, const string& content_label, const bool &strict);
         flexvalue get_content(const document &document,
                                 const string &content_group_label,

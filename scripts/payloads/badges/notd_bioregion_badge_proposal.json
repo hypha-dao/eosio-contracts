@@ -1,0 +1,94 @@
+{
+    "content_groups": [
+        [
+            {
+                "label": "content_group_label",
+                "value": [
+                    "string",
+                    "details"
+                ]
+            },
+            {
+                "label": "title",
+                "value": [
+                    "string",
+                    "Healer"
+                ]
+            },
+            {
+                "label": "description",
+                "value": [
+                    "string",
+                    "Holder of indigenous wisdom ready to transfer the knowledge to others willing to receive"
+                ]
+            },
+            {
+                "label": "icon",
+                "value": [
+                    "string",
+                    "https://gallery.yopriceville.com/var/resizes/Free-Clipart-Pictures/Badges-and-Labels-PNG/Gold_Badge_Transparent_PNG_Image.png"
+                ]
+            },
+            {
+                "label": "seeds_coefficient_x10000",
+                "value": [
+                    "int64",
+                    10100
+                ]
+            },
+            {
+                "label": "ballot_type",
+                "value": [
+                    "name",
+                    "options"
+                ]
+            }
+        ],
+        [
+            {
+                "label": "content_group_type",
+                "value": [
+                    "name",
+                    "option"
+                ]
+            },
+            {
+                "label": "option_key",
+                "value": [
+                    "string",
+                    "Pass"
+                ]
+            },
+            {
+                "label": "description",
+                "value": [
+                    "string",
+                    "Voting for this option is a vote to pass/approve the proposal"
+                ]
+            }
+        ],
+        [
+            {
+                "label": "content_group_type",
+                "value": [
+                    "name",
+                    "option"
+                ]
+            },
+            {
+                "label": "option_key",
+                "value": [
+                    "string",
+                    "Fail"
+                ]
+            },
+            {
+                "label": "description",
+                "value": [
+                    "string",
+                    "Voting for this option is a vote to fail/disapprove the proposal"
+                ]
+            }
+        ]
+    ]
+}

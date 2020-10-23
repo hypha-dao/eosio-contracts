@@ -267,6 +267,7 @@ namespace hyphaspace
       ACTION erasedochash (const checksum256 &doc);
       ACTION erasealldocs (const string &notes);
       ACTION eraseedges (const string &notes); 
+      ACTION erasedocbyid (const uint64_t &id);
 
       
       // alerts Group
@@ -339,7 +340,7 @@ namespace hyphaspace
       name register_ballot(const name &proposer,
                            const string &title, const string &description, const string &content);
 
-      document_graph::document create_tally_document(const name &proposer);
+      document_graph::document create_votetally_doc (const name& proposer, std::vector<document_graph::content_group> &content_groups);
 
       bool did_pass (const name &ballot_id);
 

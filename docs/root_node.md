@@ -42,7 +42,7 @@ In test environments, there is an action to remove the entire graph, including a
 
 You can also erase docs one by one via hash:
 ```
-eosc -u https://test.telos.kitchen --vault-file ../eosc-testnet-vault.json tx create dao.hypha erasedochash '{"doc":"41e04c97bfd074751f356f7927cfe9a7db35ae783455f78841ea1be9cb94fc3c"}' -p dao.hypha
+eosc -u https://testnet.telos.caleos.io --vault-file ../eosc-testnet-vault.json tx create dao.hypha erasedochash '{"doc":"28609e9521b876774db84753c37cca088b4015b21153666e0720d6b9043d0fca"}' -p dao.hypha
 ```
 
 # Reset graph

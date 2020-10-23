@@ -216,23 +216,6 @@ void hyphadao::new_proposal(const name &owner,
     event(name("high"), variant_helper(names, strings, assets, time_points, ints));
 }
 
-document_graph::document hyphadao::create_tally_document (const name &proposer)
-{
-    document_graph::content_group pass_cg = document_graph::content_group {};
-    pass_cg.push_back (_document_graph.new_content("vote_power", asset{0, common::S_HVOICE}));
-    pass_cg.push_back (_document_graph.new_content("option", string("pass")));
-
-    document_graph::content_group fail_cg = document_graph::content_group {};
-    fail_cg.push_back (_document_graph.new_content("vote_power", asset{0, common::S_HVOICE}));
-    fail_cg.push_back (_document_graph.new_content("option", string("fail")));
-
-    std::vector<document_graph::content_group> cgs;
-    cgs.push_back (pass_cg);
-    cgs.push_back (fail_cg);
-
-    return _document_graph.create_document(proposer, cgs);
-}
-
 void hyphadao::propose(const name &proposer,
                        const name &proposal_type,
                        std::vector<document_graph::content_group> &content_groups)
@@ -271,6 +254,7 @@ void hyphadao::closedocprop(const checksum256 &proposal_hash)
         {
         case common::BADGE_NAME.value:
             _document_graph.create_edge(self_hash, proposal_hash, common::BADGE_NAME);
+            break;
 
         case common::ASSIGN_BADGE.value: {
 
@@ -283,12 +267,13 @@ void hyphadao::closedocprop(const checksum256 &proposal_hash)
             name assignee = std::get<name>(_document_graph.get_content(details, common::ASSIGNEE, true));
 
             assign_badge(badge, assignee);
+            break;
         }
-
         default:
-            // if proposal passes, create an edge for PASSED_PROPS
-            _document_graph.create_edge(self_hash, proposal_hash, common::PASSED_PROPS);
+            check (false, "Unknown proposal type: " + proposal_type.to_string());
         }
+        // if proposal passes, create an edge for PASSED_PROPS
+        _document_graph.create_edge(self_hash, proposal_hash, common::PASSED_PROPS);
     }
     else
     {

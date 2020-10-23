@@ -1,13 +1,11 @@
 {
-    "proposer": "dao.hypha",
-    "proposal_type": "badge",
     "content_groups": [
         [
             {
                 "label": "content_group_label",
                 "value": [
                     "string",
-                    "proposal_details"
+                    "details"
                 ]
             },
             {
@@ -15,13 +13,6 @@
                 "value": [
                     "string",
                     "Strategic Advisor"
-                ]
-            },
-            {
-                "label": "badge_type",
-                "value": [
-                    "name",
-                    "accell"
                 ]
             },
             {
@@ -35,7 +26,7 @@
                 "label": "icon",
                 "value": [
                     "string",
-                    "https://assets.hypha.earth/badges/badge_strategic_advisor.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=minioadmin%2F20201007%2F%2Fs3%2Faws4_request&X-Amz-Date=20201007T153735Z&X-Amz-Expires=432000&X-Amz-SignedHeaders=host&X-Amz-Signature=3c602181bcca85566e3b2783fe20935774dc592c289507a9dd5e6aac276a6e18"
+                    "https://gallery.yopriceville.com/var/resizes/Free-Clipart-Pictures/Badges-and-Labels-PNG/Gold_Badge_Transparent_PNG_Image.png"
                 ]
             },
             {

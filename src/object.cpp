@@ -325,66 +325,66 @@ void hyphadao::new_document(const name &creator,
 							const map<string, time_point> time_points,
 							const map<string, uint64_t> ints)
 {
-	vector<document_graph::content_group> content_groups;
-	document_graph::content_group cg{};
+	// vector<document_graph::content_group> content_groups;
+	// document_graph::content_group cg{};
 
-	document_graph::content c{};
-	c.label = "scope";
-	c.value = scope;
-	cg.push_back(c);
+	// document_graph::content c{};
+	// c.label = "scope";
+	// c.value = scope;
+	// cg.push_back(c);
 
-	std::map<string, name>::const_iterator name_itr;
-	for (name_itr = names.begin(); name_itr != names.end(); ++name_itr)
-	{
-		document_graph::content c{};
-		c.label = name_itr->first;
-		c.value = name_itr->second;
-		cg.push_back(c);
-	}
+	// std::map<string, name>::const_iterator name_itr;
+	// for (name_itr = names.begin(); name_itr != names.end(); ++name_itr)
+	// {
+	// 	document_graph::content c{};
+	// 	c.label = name_itr->first;
+	// 	c.value = name_itr->second;
+	// 	cg.push_back(c);
+	// }
 
-	std::map<string, asset>::const_iterator asset_itr;
-	for (asset_itr = assets.begin(); asset_itr != assets.end(); ++asset_itr)
-	{
-		document_graph::content c{};
-		c.label = asset_itr->first;
-		c.value = asset_itr->second;
-		cg.push_back(c);
-	}
+	// std::map<string, asset>::const_iterator asset_itr;
+	// for (asset_itr = assets.begin(); asset_itr != assets.end(); ++asset_itr)
+	// {
+	// 	document_graph::content c{};
+	// 	c.label = asset_itr->first;
+	// 	c.value = asset_itr->second;
+	// 	cg.push_back(c);
+	// }
 
-	std::map<string, string>::const_iterator string_itr;
-	for (string_itr = strings.begin(); string_itr != strings.end(); ++string_itr)
-	{
-		document_graph::content c{};
-		c.label = string_itr->first;
-		c.value = string_itr->second;
-		cg.push_back(c);
-	}
+	// std::map<string, string>::const_iterator string_itr;
+	// for (string_itr = strings.begin(); string_itr != strings.end(); ++string_itr)
+	// {
+	// 	document_graph::content c{};
+	// 	c.label = string_itr->first;
+	// 	c.value = string_itr->second;
+	// 	cg.push_back(c);
+	// }
 
-	std::map<string, uint64_t>::const_iterator int_itr;
-	for (int_itr = ints.begin(); int_itr != ints.end(); ++int_itr)
-	{
-		document_graph::content c{};
-		c.label = int_itr->first;
-		c.value = int_itr->second;
-		cg.push_back(c);
-	}
+	// std::map<string, uint64_t>::const_iterator int_itr;
+	// for (int_itr = ints.begin(); int_itr != ints.end(); ++int_itr)
+	// {
+	// 	document_graph::content c{};
+	// 	c.label = int_itr->first;
+	// 	c.value = int_itr->second;
+	// 	cg.push_back(c);
+	// }
 
-	std::map<string, time_point>::const_iterator time_point_itr;
-	for (time_point_itr = time_points.begin(); time_point_itr != time_points.end(); ++time_point_itr)
-	{
-		document_graph::content c{};
-		c.label = time_point_itr->first;
-		c.value = time_point_itr->second;
-		cg.push_back(c);
-	}
+	// std::map<string, time_point>::const_iterator time_point_itr;
+	// for (time_point_itr = time_points.begin(); time_point_itr != time_points.end(); ++time_point_itr)
+	// {
+	// 	document_graph::content c{};
+	// 	c.label = time_point_itr->first;
+	// 	c.value = time_point_itr->second;
+	// 	cg.push_back(c);
+	// }
 
-	content_groups.push_back(cg);
+	// content_groups.push_back(cg);
 
-	// needs to be inline action to use the get_self() permission
-	// action(
-	// 	permission_level{get_self(), name("active")},
-	// 	contract, name("createdoc"),
-	// 	std::make_tuple(get_self(), content_groups))
-	// .send();
-	_document_graph.create_document(creator, content_groups);
+	// // needs to be inline action to use the get_self() permission
+	// // action(
+	// // 	permission_level{get_self(), name("active")},
+	// // 	contract, name("createdoc"),
+	// // 	std::make_tuple(get_self(), content_groups))
+	// // .send();
+	// _document_graph.create_document(creator, content_groups);
 }

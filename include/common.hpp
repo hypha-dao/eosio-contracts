@@ -21,10 +21,10 @@ namespace common {
     static const float          PHASE_TO_YEAR_RATIO             = 0.02026009582;
 
     // content keys
-    static const string         TITLE                     = string ("title");
-    static const string         DESCRIPTION                        = string ("description");
-    static const string         CONTENT                    = string ("content");
-    static const string         ICON                    = string ("icon");
+    static const string         TITLE                       = string ("title");
+    static const string         DESCRIPTION                 = string ("description");
+    static const string         CONTENT                     = string ("content");
+    static const string         ICON                        = string ("icon");
 
 
     static const string         BADGE_STRING                = string ("badge");
@@ -34,6 +34,8 @@ namespace common {
     static const string         MEMBER_STRING               = string ("member");
     static const string         SYSTEM                      = string ("system");
     static const string         BALLOT_ID                   = string ("ballot_id");
+    static const string         BALLOT_TYPE                 = string ("ballot_type");
+
     
     // graph edge names
     static constexpr name       HOLDS_BADGE                 = name ("holdsbadge");
@@ -43,13 +45,20 @@ namespace common {
     static constexpr name       MEMBER_OF                   = name ("memberof");
 
     static constexpr name       ASSIGN_BADGE                = name ("assignbadge");
-
+    static constexpr name       VOTE_TALLY                  = name ("votetally");
+    
     // graph edges hanging off of primary DHO node
     static constexpr name       BADGE_NAME                  = name ("badge");
     static constexpr name       PROPOSAL                    = name ("proposal");
     static constexpr name       FAILED_PROPS                = name ("failedprops");
     static constexpr name       PASSED_PROPS                = name ("passedprops");
     static constexpr name       MEMBER                      = name ("member");
+
+    static constexpr name       BALLOT_TYPE_OPTIONS         = name ("options");
+    static constexpr name       BALLOT_TYPE_TELOS_DECIDE    = name ("telosdecide");
+
+    static constexpr name       GROUP_TYPE_OPTION           = name ("option");
+
 
     static const uint64_t       NO_ASSIGNMENT                   = -1;         
 };
