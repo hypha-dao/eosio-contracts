@@ -220,6 +220,8 @@ void hyphadao::propose(const name &proposer,
                        const name &proposal_type,
                        std::vector<document_graph::content_group> &content_groups)
 {
+    verify_membership (proposer) ;
+
     document_graph::document proposal;
     switch (proposal_type.value)
     {

@@ -60,6 +60,8 @@ type Environment struct {
 	SeedsEscrow   eos.AccountName
 	SeedsExchange eos.AccountName
 	Events        eos.AccountName
+	TelosDecide   eos.AccountName
+	Whale         eos.AccountName
 
 	Members []eos.AccountName
 }
@@ -86,6 +88,8 @@ func (e *Environment) String() string {
 	kvs["Bank"] = string(e.Bank)
 	kvs["Escrow"] = string(e.SeedsEscrow)
 	kvs["Exchange"] = string(e.SeedsExchange)
+	kvs["Telos Decide"] = string(e.TelosDecide)
+	kvs["Whale"] = string(e.Whale)
 
 	for key, value := range kvs {
 		r := []*simpletable.Cell{
@@ -205,10 +209,6 @@ func setConfig(ctx context.Context, api *eos.API, contract *eos.AccountName, con
 	return eostest.ExecTrx(ctx, api, actions)
 }
 
-type appVersion struct {
-	AppVersion string
-}
-
 type addPeriod struct {
 	StartTime eos.TimePoint `json:"start_time"`
 	EndTime   eos.TimePoint `json:"end_time"`
@@ -232,6 +232,50 @@ func apply(ctx context.Context, api *eos.API, contract *eos.AccountName, applica
 				Applicant: applicant,
 				Notes:     string("apply to dao"),
 			}),
+		}}
+	return eostest.ExecTrx(ctx, api, actions)
+}
+
+type enrollParm struct {
+	Enroller  eos.AccountName
+	Applicant eos.AccountName
+	Content   string
+}
+
+func enroll(ctx context.Context, api *eos.API, contract *eos.AccountName, enroller, applicant eos.AccountName) (string, error) {
+	actions := []*eos.Action{
+		{
+			Account: *contract,
+			Name:    toActionName("enroll", "enroll to DAO"),
+			Authorization: []eos.PermissionLevel{
+				{Actor: enroller, Permission: eos.PN("active")},
+			},
+			ActionData: eos.NewActionData(enrollParm{
+				Enroller:  enroller,
+				Applicant: applicant,
+				Content:   string("enroll in dao"),
+			}),
+		}}
+	return eostest.ExecTrx(ctx, api, actions)
+}
+
+func createRoot(ctx context.Context, api *eos.API, contract *eos.AccountName) (string, error) {
+	actionData := make(map[string]interface{})
+	actionData["notes"] = "notes"
+
+	actionBinary, err := api.ABIJSONToBin(ctx, *contract, eos.Name("createroot"), actionData)
+	if err != nil {
+		return "abi error", err
+	}
+
+	actions := []*eos.Action{
+		{
+			Account: *contract,
+			Name:    eos.ActN("createroot"),
+			Authorization: []eos.PermissionLevel{
+				{Actor: *contract, Permission: eos.PN("active")},
+			},
+			ActionData: eos.NewActionDataFromHexData([]byte(actionBinary)),
 		}}
 	return eostest.ExecTrx(ctx, api, actions)
 }
@@ -283,22 +327,54 @@ func SetupEnvironment(t *testing.T) Environment {
 
 	env.api.SetSigner(keyBag)
 
-	accounts, err := eostest.CreateRandoms(env.ctx, &env.api, 10)
-	assert.NoError(t, err)
+	// accounts, err := eostest.CreateRandoms(env.ctx, &env.api, 15)
+	// assert.NoError(t, err)
+	// env.DAO = accounts[0]
+	// env.HusdToken = accounts[1]
+	// env.HvoiceToken = accounts[2]
+	// env.HyphaToken = accounts[3]
+	// env.SeedsToken = accounts[4]
+	// env.Bank = accounts[5]
+	// env.SeedsEscrow = accounts[6]
+	// env.SeedsExchange = accounts[7]
+	// env.Events = accounts[8]
+	// env.TelosDecide = accounts[9]
+	// env.Whale = accounts[10]
 
-	env.DAO = accounts[0]
-	env.HusdToken = accounts[1]
-	env.HvoiceToken = accounts[2]
-	env.HyphaToken = accounts[3]
-	env.SeedsToken = accounts[4]
+	env.DAO, _ = eostest.CreateAccountFromString(env.ctx, &env.api, "dao.hypha")
+	env.Bank, _ = eostest.CreateAccountFromString(env.ctx, &env.api, "bank.hypha")
+	env.HusdToken, _ = eostest.CreateAccountFromString(env.ctx, &env.api, "husd.hypha")
+	env.HvoiceToken, _ = eostest.CreateAccountFromString(env.ctx, &env.api, "hvoice.hypha")
+	env.HyphaToken, _ = eostest.CreateAccountFromString(env.ctx, &env.api, "token.hypha")
+	env.Events, _ = eostest.CreateAccountFromString(env.ctx, &env.api, "publsh.hypha")
 
-	env.Bank = accounts[5]
-	env.SeedsEscrow = accounts[6]
-	env.SeedsExchange = accounts[7]
-	env.Events = accounts[8]
+	env.SeedsToken, _ = eostest.CreateAccountFromString(env.ctx, &env.api, "seeds.token")
+	env.SeedsEscrow, _ = eostest.CreateAccountFromString(env.ctx, &env.api, "escrow.seeds")
+	env.SeedsExchange, _ = eostest.CreateAccountFromString(env.ctx, &env.api, "tlosto.seeds")
 
-	env.Members, err = eostest.CreateRandoms(env.ctx, &env.api, 10)
-	assert.NoError(T, err)
+	env.TelosDecide, _ = eostest.CreateAccountFromString(env.ctx, &env.api, "telos.decide")
+	env.Whale, _ = eostest.CreateAccountFromString(env.ctx, &env.api, "whale")
+
+	env.Members = make([]eos.AccountName, 5)
+	env.Members[0], _ = eostest.CreateAccountFromString(env.ctx, &env.api, "member1")
+	env.Members[1], _ = eostest.CreateAccountFromString(env.ctx, &env.api, "member2")
+	env.Members[2], _ = eostest.CreateAccountFromString(env.ctx, &env.api, "member3")
+	env.Members[3], _ = eostest.CreateAccountFromString(env.ctx, &env.api, "member4")
+	env.Members[4], _ = eostest.CreateAccountFromString(env.ctx, &env.api, "member5")
+
+	// env.HvoiceToken = accounts[2]
+	// env.HyphaToken = accounts[3]
+	// env.SeedsToken = accounts[4]
+
+	// env.Bank = accounts[5]
+	// env.SeedsEscrow = accounts[6]
+	// env.SeedsExchange = accounts[7]
+	// env.Events = accounts[8]
+	// env.TelosDecide = accounts[9]
+	// env.Whale = accounts[10]
+
+	// env.Members, err = eostest.CreateRandoms(env.ctx, &env.api, 5)
+	// assert.NoError(T, err)
 
 	_, err = eostest.SetContract(env.ctx, &env.api, &env.DAO, daoWasm, daoAbi)
 	assert.NoError(T, err)
@@ -313,6 +389,9 @@ func SetupEnvironment(t *testing.T) Environment {
 	assert.NoError(T, err)
 
 	_, err = eostest.SetContract(env.ctx, &env.api, &env.Events, monitorWasm, monitorAbi)
+	assert.NoError(T, err)
+
+	_, err = createRoot(env.ctx, &env.api, &env.DAO)
 	assert.NoError(T, err)
 
 	husdMaxSupply, _ := eos.NewAssetFromString("1000000000.00 HUSD")
@@ -370,12 +449,26 @@ func SetupEnvironment(t *testing.T) Environment {
 	// TODO: deploy/configure escrow contract
 	setNameConfig(env.ctx, &env.api, &env.DAO, "seeds_escrow_contract", env.SeedsEscrow)
 	setNameConfig(env.ctx, &env.api, &env.DAO, "publisher_contract", env.Events)
+	setNameConfig(env.ctx, &env.api, &env.DAO, "telos_decide_contract", env.TelosDecide)
 
 	fiveMins, _ := time.ParseDuration("5m")
 	_, err = addPeriods(env.ctx, &env.api, env.DAO, 10, fiveMins)
 	assert.NoError(T, err)
 
-	apply(env.ctx, &env.api, &env.DAO, env.Members[0])
-	apply(env.ctx, &env.api, &env.DAO, env.Members[1])
+	_, err = SetupTelosDecide(T, &env)
+	assert.NoError(T, err)
+
+	for _, member := range env.Members {
+
+		_, err = Regvoter(env.ctx, &env.api, &env.TelosDecide, &member)
+		assert.NoError(T, err)
+
+		_, err = apply(env.ctx, &env.api, &env.DAO, member)
+		assert.NoError(T, err)
+
+		_, err = enroll(env.ctx, &env.api, &env.DAO, env.DAO, member)
+		assert.NoError(T, err)
+	}
+
 	return env
 }

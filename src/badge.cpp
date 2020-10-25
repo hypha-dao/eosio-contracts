@@ -1,4 +1,3 @@
-
 #include <hyphadao.hpp>
 
 using namespace hyphaspace;

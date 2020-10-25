@@ -41,7 +41,6 @@ void hyphadao::enroll(const name &enroller,
 					  const name &applicant,
 					  const string &content)
 {
-
 	check(!is_paused(), "Contract is paused for maintenance. Please try again later.");
 
 	// this action is linked to the dao.hypha@enrollers permission
@@ -77,6 +76,13 @@ void hyphadao::enroll(const name &enroller,
 		m.member = applicant;
 	});
 
+	// update the graph
+	checksum256 root_hash = get_root();
+	document_graph::document member_doc = get_member_doc(enroller, applicant);
+	_document_graph.create_edge(root_hash, member_doc.hash, common::MEMBER);
+	_document_graph.create_edge(member_doc.hash, root_hash, common::MEMBER_OF);
+
+	// broadcast event
 	map<string, hyphadao::flexvalue1> event_data;
 	event_data["New Member"] = applicant;
 	event_data["Enroller"] = enroller;
@@ -95,6 +101,26 @@ document_graph::document hyphadao::get_member_doc (const name& member)
 document_graph::document hyphadao::get_member_doc (const name& creator, const name& member)
 {
 	return _document_graph.get_or_create (creator, _document_graph.new_content(common::MEMBER_STRING, member));
+}
+
+void hyphadao::verify_membership (const name& member) 
+{
+	// create hash to represent this member account
+	std::vector<document_graph::content_group> member_cgs;
+	document_graph::content_group member_cg = document_graph::content_group{};
+	member_cg.push_back(_document_graph.new_content("member", member));
+	member_cgs.push_back(member_cg);
+	checksum256 member_hash = _document_graph.hash_document(member_cgs);
+
+	// check to see if this member has a document saved
+	document_graph::document member_doc = _document_graph.get_document(member_hash);
+
+	checksum256 root_hash = get_root();
+	// verify that the member_hash is a MEMBER of the root_hash
+	edge_table e_t (get_self(), get_self().value);
+    auto itr = e_t.find (_document_graph.edge_id (root_hash, member_hash, common::MEMBER));
+
+	check (itr != e_t.end(), "account: " + member.to_string() + " is not a member of " + _document_graph.readable_hash(root_hash));
 }
 
 void hyphadao::makememdocs (const string &notes)

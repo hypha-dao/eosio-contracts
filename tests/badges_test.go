@@ -1,4 +1,4 @@
-package testnet
+package local_test
 
 import (
 	"context"

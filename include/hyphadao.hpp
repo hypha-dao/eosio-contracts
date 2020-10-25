@@ -343,13 +343,13 @@ namespace hyphaspace
       document_graph::document create_votetally_doc (const name& proposer, std::vector<document_graph::content_group> &content_groups);
 
       bool did_pass (const name &ballot_id);
-
-      void check_coefficient (document_graph::content_group &content_group, const string &coefficient_key);
-
+      void verify_membership (const name& member) ;
+      
       // badge-related functions
       document_graph::document propose_badge (const name& proposer, std::vector<document_graph::content_group> &content_groups);
       document_graph::document propose_badge_assignment (const name& proposer, std::vector<document_graph::content_group> &content_groups);
       void assign_badge (const document_graph::document &badge, const name &assignee);
+      void check_coefficient (document_graph::content_group &content_group, const string &coefficient_key);
 
       document_graph::content_group create_system_group (const name& proposer, 
                                                          const name& proposal_type, 
