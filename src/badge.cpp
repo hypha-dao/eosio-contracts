@@ -142,6 +142,7 @@ document_graph::document hyphadao::propose_badge_assignment(const name &proposer
 
     // TODO: Additional input cleansing
     // badge assignee must be a DHO member
+    verify_membership (assignee);
     // start_period and end_period must be valid, no more than X periods in between
 
     // badge assignment proposal must link to a valid badge

@@ -1,0 +1,48 @@
+{
+    "content_groups": [
+        [
+            {
+                "label": "content_group_label",
+                "value": [
+                    "string",
+                    "details"
+                ]
+            },
+            {
+                "label": "title",
+                "value": [
+                    "string",
+                    "Enroller Badge Assignment"
+                ]
+            },
+            {
+                "label": "description",
+                "value": [
+                    "string",
+                    "Enrollers authorize new membership and hold administative duties of the Hypha organization"
+                ]
+            },
+            {
+                "label": "assignee",
+                "value": [
+                    "name",
+                    "member1"
+                ]
+            },
+            {
+                "label": "start_period",
+                "value": [
+                    "int64",
+                    45
+                ]
+            },
+            {
+                "label": "end_period",
+                "value": [
+                    "int64",
+                    75
+                ]
+            }
+        ]
+    ]
+}

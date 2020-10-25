@@ -1,30 +1,18 @@
-package local_test
+package dao_test
 
 import (
 	"encoding/json"
 	"io/ioutil"
-	"log"
 	"os"
 	"os/exec"
 	"testing"
 	"time"
 
-	eostest "github.com/digital-scarcity/eos-go-test"
 	"github.com/eoscanada/eos-go"
+	"github.com/hypha-dao/dao-go"
 	"github.com/hypha-dao/document/docgraph"
 	"gotest.tools/assert"
 )
-
-type CloseDocProp struct {
-	ProposalHash eos.Checksum256 `json:"proposal_hash"`
-}
-
-// Vote represents a set of options being cast as a vote to Telos Decide
-type Vote struct {
-	Voter      eos.Name   `json:"voter"`
-	BallotName eos.Name   `json:"ballot_name"`
-	Options    []eos.Name `json:"options"`
-}
 
 func setupTestCase(t *testing.T) func(t *testing.T) {
 	t.Log("(Re)starting Nodeos")
@@ -48,16 +36,15 @@ func setupTestCase(t *testing.T) func(t *testing.T) {
 	}
 }
 
-func TestSimple(t *testing.T) {
+func TestTelosDecideProposals(t *testing.T) {
 
 	teardownTestCase := setupTestCase(t)
 	defer teardownTestCase(t)
 
-	var env Environment
+	// var env Environment
+	env := SetupEnvironment(t)
 	t.Run("Setting up the DAO environment: ", func(t *testing.T) {
-		env := SetupEnvironment(t)
-		log.Println()
-		log.Println(env.String())
+		t.Log(env.String())
 	})
 
 	t.Run("Badges proposals", func(t *testing.T) {
@@ -65,31 +52,32 @@ func TestSimple(t *testing.T) {
 			name  string
 			input string
 			title string
+			hash  eos.Checksum256
 		}{
 			{
 				name:  "enroller",
 				title: "Enroller",
-				input: "../../scripts/payloads/badges/enroller_badge_proposal.json",
+				input: "../scripts/payloads/badges/enroller_badge_proposal.json",
 			},
 			{
 				name:  "librarian",
 				title: "Badge Librarian",
-				input: "../../scripts/payloads/badges/librarian_badge_proposal.json",
+				input: "../scripts/payloads/badges/librarian_badge_proposal.json",
 			},
 			{
 				name:  "treasurer",
 				title: "Treasurer",
-				input: "../../scripts/payloads/badges/treasurer_badge_proposal.json",
+				input: "../scripts/payloads/badges/treasurer_badge_proposal.json",
 			},
 		}
 
-		proposals := make([]docgraph.Document, len(tests))
+		badges := make([]docgraph.Document, len(tests))
 		ballots := make([]eos.Name, len(tests))
 
 		for testIndex, test := range tests {
 			t.Run(test.name, func(t *testing.T) {
 
-				err := ProposeBadgeFromFile(env.ctx, &env.api, env.DAO, env.Members[0], test.input)
+				_, err := dao.ProposeBadgeFromFile(env.ctx, &env.api, env.DAO, env.Members[0], test.input)
 				assert.NilError(t, err)
 
 				// unmarshal JSON into a Document
@@ -101,7 +89,8 @@ func TestSimple(t *testing.T) {
 
 				lastDoc, err := docgraph.GetLastDocument(env.ctx, &env.api, env.DAO)
 				assert.NilError(t, err)
-				proposals[testIndex] = lastDoc
+				badges[testIndex] = lastDoc
+				tests[testIndex].hash = lastDoc.Hash
 
 				fv, err := lastDoc.GetContent("title")
 				assert.NilError(t, err)
@@ -114,46 +103,40 @@ func TestSimple(t *testing.T) {
 			})
 		}
 
-		time.Sleep(10 * time.Second)
-
+		time.Sleep(100 * time.Millisecond)
 		for ballotIndex := range ballots {
+			_, err := dao.TelosDecideVote(env.ctx, &env.api, env.TelosDecide,
+				env.Whale, ballots[ballotIndex], eos.Name("pass"))
 
-			actions := []*eos.Action{
-				{
-					Account: env.TelosDecide,
-					Name:    eos.ActN("castvote"),
-					Authorization: []eos.PermissionLevel{
-						{Actor: env.Whale, Permission: eos.PN("active")},
-					},
-					ActionData: eos.NewActionData(&Vote{
-						Voter:      eos.Name(env.Whale),
-						BallotName: ballots[ballotIndex],
-						Options:    []eos.Name{"pass"},
-					}),
-				}}
-
-			_, err := eostest.ExecTrx(env.ctx, &env.api, actions)
 			assert.NilError(t, err)
 		}
 
-		time.Sleep(400 * time.Second)
-
-		for proposalIndex := range proposals {
-
-			actions := []*eos.Action{
-				{
-					Account: env.DAO,
-					Name:    eos.ActN("closedocprop"),
-					Authorization: []eos.PermissionLevel{
-						{Actor: env.Members[0], Permission: eos.PN("active")},
-					},
-					ActionData: eos.NewActionData(&CloseDocProp{
-						ProposalHash: proposals[proposalIndex].Hash,
-					}),
-				}}
-
-			_, err := eostest.ExecTrx(env.ctx, &env.api, actions)
+		time.Sleep(62 * time.Second)
+		for proposalIndex := range badges {
+			_, err := dao.CloseProposal(env.ctx, &env.api, env.DAO, env.Members[2], badges[proposalIndex].Hash)
 			assert.NilError(t, err)
 		}
+
+		time.Sleep(1 * time.Second)
+		t.Log("Submit badge assignment proposal for ")
+
+		_, err := dao.ProposeBadgeAssignment(env.ctx, &env.api, env.DAO, env.Members[2],
+			badges[0].Hash, "../scripts/payloads/badges/enroller_badge_assignment.json")
+		assert.NilError(t, err)
+
+		lastDoc, err := docgraph.GetLastDocument(env.ctx, &env.api, env.DAO)
+		assert.NilError(t, err)
+
+		ballot, err := lastDoc.GetContent("ballot_id")
+		assert.NilError(t, err)
+
+		time.Sleep(1 * time.Second)
+		_, err = dao.TelosDecideVote(env.ctx, &env.api, env.TelosDecide,
+			env.Whale, ballot.Impl.(eos.Name), eos.Name("pass"))
+		assert.NilError(t, err)
+
+		time.Sleep(61 * time.Second)
+		_, err = dao.CloseProposal(env.ctx, &env.api, env.DAO, env.Members[2], lastDoc.Hash)
+		assert.NilError(t, err)
 	})
 }
