@@ -1,0 +1,41 @@
+{
+    "content_groups": [
+        [
+            {
+                "label": "content_group_label",
+                "value": [
+                    "string",
+                    "details"
+                ]
+            },
+            {
+                "label": "title",
+                "value": [
+                    "string",
+                    "Badge Assignment"
+                ]
+            },
+            {
+                "label": "description",
+                "value": [
+                    "string",
+                    "Generic badge assignment"
+                ]
+            },
+            {
+                "label": "start_period",
+                "value": [
+                    "int64",
+                    45
+                ]
+            },
+            {
+                "label": "end_period",
+                "value": [
+                    "int64",
+                    75
+                ]
+            }
+        ]
+    ]
+}

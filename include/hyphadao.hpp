@@ -348,7 +348,7 @@ namespace hyphaspace
       // badge-related functions
       document_graph::document propose_badge (const name& proposer, std::vector<document_graph::content_group> &content_groups);
       document_graph::document propose_badge_assignment (const name& proposer, std::vector<document_graph::content_group> &content_groups);
-      void assign_badge (const document_graph::document &badge, const name &assignee);
+      void assign_badge (const document_graph::document &badge_assignment);
       void check_coefficient (document_graph::content_group &content_group, const string &coefficient_key);
 
       document_graph::content_group create_system_group (const name& proposer, 

@@ -140,9 +140,10 @@ document_graph::document hyphadao::propose_badge_assignment(const name &proposer
     // badge assignee must exist
     name assignee = std::get<name>(_document_graph.get_content(details, common::ASSIGNEE, true));
 
-    // TODO: Additional input cleansing
     // badge assignee must be a DHO member
     verify_membership (assignee);
+
+    // TODO: Additional input cleansing
     // start_period and end_period must be valid, no more than X periods in between
 
     // badge assignment proposal must link to a valid badge
@@ -161,12 +162,18 @@ document_graph::document hyphadao::propose_badge_assignment(const name &proposer
 
     // creates the document, or the graph NODE
     document_graph::document proposal_doc = _document_graph.create_document(proposer, content_groups);
+    auto member_doc_hash = get_member_doc(assignee).hash;
 
+    // update graph edges:
+    //    member    ---- owns       ---->   proposal
+    //    proposal  ---- ownedby    ---->   member
+    //    root      ---- proposal   ---->   proposal
+    
     // the proposer OWNS the proposal; this creates the graph EDGE
-    _document_graph.create_edge(get_member_doc(proposer).hash, proposal_doc.hash, common::OWNS);
+    _document_graph.create_edge(member_doc_hash, proposal_doc.hash, common::OWNS);
 
     // the proposal was PROPOSED_BY proposer; this creates the graph EDGE
-    _document_graph.create_edge(proposal_doc.hash, get_member_doc(proposer).hash, common::OWNED_BY);
+    _document_graph.create_edge(proposal_doc.hash, member_doc_hash, common::OWNED_BY);
 
     // the DHO also links to the document as a proposal, another graph EDGE
     _document_graph.create_edge(get_root(), proposal_doc.hash, common::PROPOSAL);
@@ -174,12 +181,33 @@ document_graph::document hyphadao::propose_badge_assignment(const name &proposer
     return proposal_doc;
 }
 
-void hyphadao::assign_badge(const document_graph::document &badge, const name &assignee)
+void hyphadao::assign_badge(const document_graph::document &badge_assignment)
 {
-    // update graph edges
-    // the assignee has EARNED this badge
-    _document_graph.create_edge(get_member_doc(assignee).hash, badge.hash, common::HOLDS_BADGE);
+    // document nodes we need: 
+    //      badge, 
+    //      badge_assignment, and 
+    //      member 
+
+    document_graph::content_group details = _document_graph.get_content_group(badge_assignment, common::DETAILS, true);
+    document_graph::document badge = _document_graph.get_document(std::get<checksum256>(_document_graph.get_content(
+                    details, common::BADGE_STRING, true)));
+    name assignee = std::get<name>(_document_graph.get_content(details, common::ASSIGNEE, true));
+    checksum256 member_doc_hash = get_member_doc(assignee).hash;
+
+    // update graph edges:
+    //    member    ---- holdsbadge     ---->   badge
+    //    member    ---- badgeassign    ---->   badge_assignment
+    //    badge     ---- heldby         ---->   member
+    //    badge     ---- assignment     ---->   badge_assignment
+
+    // the assignee now HOLDS this badge
+    _document_graph.create_edge(member_doc_hash, badge.hash, common::HOLDS_BADGE);
+
+    // the assignee now HOLDS this badge
+    _document_graph.create_edge(member_doc_hash, badge_assignment.hash, common::ASSIGN_BADGE);
 
     // the badge also links back to the assignee
-    _document_graph.create_edge(badge.hash, get_member_doc(assignee).hash, common::HELD_BY);
+    _document_graph.create_edge(badge.hash, member_doc_hash, common::HELD_BY);
+
+    _document_graph.create_edge(badge.hash, badge_assignment.hash, common::ASSIGNMENT);
 }

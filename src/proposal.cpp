@@ -238,12 +238,11 @@ void hyphadao::closedocprop(const checksum256 &proposal_hash)
 {
     check(!is_paused(), "Contract is paused for maintenance. Please try again later.");
 
-    document_table d_t(get_self(), get_self().value);
-    auto d_t_by_hash = d_t.get_index<name("idhash")>();
-    auto d_itr = d_t_by_hash.find(proposal_hash);
-    check(d_itr != d_t_by_hash.end(), "Document with hash not found: " + _document_graph.readable_hash(proposal_hash));
-    document_graph::document docprop = *d_itr;
-
+    // document_table d_t(get_self(), get_self().value);
+    // auto d_t_by_hash = d_t.get_index<name("idhash")>();
+    // auto d_itr = d_t_by_hash.find(proposal_hash);
+    // check(d_itr != d_t_by_hash.end(), "Document with hash not found: " + _document_graph.readable_hash(proposal_hash));
+    document_graph::document docprop = _document_graph.get_document(proposal_hash); // *d_itr;
     name ballot_id = std::get<name>(_document_graph.get_content(docprop, common::SYSTEM, common::BALLOT_ID, true));
 
     checksum256 self_hash = get_root();
@@ -260,15 +259,7 @@ void hyphadao::closedocprop(const checksum256 &proposal_hash)
 
         case common::ASSIGN_BADGE.value: {
 
-            document_graph::content_group details = _document_graph.get_content_group(docprop, common::DETAILS, true);
-
-            document_graph::document badge = _document_graph.get_document(
-                std::get<checksum256>(_document_graph.get_content(
-                    details, common::BADGE_STRING, true)));
-
-            name assignee = std::get<name>(_document_graph.get_content(details, common::ASSIGNEE, true));
-
-            assign_badge(badge, assignee);
+            assign_badge(docprop);
             break;
         }
         default:

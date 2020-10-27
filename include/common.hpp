@@ -35,7 +35,6 @@ namespace common {
     static const string         SYSTEM                      = string ("system");
     static const string         BALLOT_ID                   = string ("ballot_id");
     static const string         BALLOT_TYPE                 = string ("ballot_type");
-
     
     // graph edge names
     static constexpr name       HOLDS_BADGE                 = name ("holdsbadge");
@@ -46,6 +45,7 @@ namespace common {
 
     static constexpr name       ASSIGN_BADGE                = name ("assignbadge");
     static constexpr name       VOTE_TALLY                  = name ("votetally");
+    static constexpr name       ASSIGNMENT                  = name ("assignment");
     
     // graph edges hanging off of primary DHO node
     static constexpr name       BADGE_NAME                  = name ("badge");
