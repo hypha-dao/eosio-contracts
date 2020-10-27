@@ -158,7 +158,7 @@ document_graph::document hyphadao::propose_badge_assignment(const name &proposer
                                                  common::ASSIGN_BADGE,
                                                  std::get<string>(_document_graph.get_content(details, common::TITLE, true)),
                                                  std::get<string>(_document_graph.get_content(details, common::DESCRIPTION, true)),
-                                                 "Assign badge " + badge_title + " to " + assignee.to_string()));
+                                                 "Assign badge " + badge_title + " to ")); // + assignee.to_string()));
 
     // creates the document, or the graph NODE
     document_graph::document proposal_doc = _document_graph.create_document(proposer, content_groups);

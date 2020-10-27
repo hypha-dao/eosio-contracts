@@ -95,7 +95,12 @@ void hyphadao::enroll(const name &enroller,
 
 document_graph::document hyphadao::get_member_doc (const name& member)
 {
-	return _document_graph.get_or_create (member, _document_graph.new_content(common::MEMBER_STRING, member));
+	auto ctnt = _document_graph.new_content("member", member);
+	document_graph::content_group cg; 
+	cg.push_back(ctnt);
+	vector<document_graph::content_group> cgs;
+	cgs.push_back(cg);
+	return _document_graph.get_document(_document_graph.hash_document(cgs));
 }
 
 document_graph::document hyphadao::get_member_doc (const name& creator, const name& member)
