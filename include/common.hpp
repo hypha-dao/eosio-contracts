@@ -26,6 +26,13 @@ namespace common {
     static const string         CONTENT                     = string ("content");
     static const string         ICON                        = string ("icon");
 
+    static const string         START_PERIOD                = string ("start_period");
+    static const string         END_PERIOD                  = string ("end_period");
+
+    static const string         HYPHA_COEFFICIENT           = string ("hypha_coefficient_x10000");
+    static const string         HVOICE_COEFFICIENT          = string ("hvoice_coefficient_x10000");
+    static const string         SEEDS_COEFFICIENT           = string ("seeds_coefficient_x10000");
+    static const string         HUSD_COEFFICIENT            = string ("husd_coefficient_x10000");
 
     static const string         BADGE_STRING                = string ("badge");
     static const string         DETAILS                     = string ("details");

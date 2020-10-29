@@ -160,8 +160,10 @@ void hyphadao::new_proposal(const name &owner,
             check(ints.find("end_period") != ints.end(), "End period is required for payout/contribution proposals.");
 
             uint64_t period_id = ints.at("end_period");
-            auto p_itr = bank.period_t.find(period_id);
-            check(p_itr != bank.period_t.end(), "Cannot create proposal. End period ID not found: " + std::to_string(period_id));
+
+            period_table period_t(get_self(), get_self().value);
+            auto p_itr = period_t.find(period_id);
+            check(p_itr != period_t.end(), "Cannot create proposal. End period ID not found: " + std::to_string(period_id));
 
             // merge calculated assets into map
             map<string, asset> calculated_assets = get_assets(usd_amount, get_float(ints, "deferred_perc_x100"), p_itr->end_date);

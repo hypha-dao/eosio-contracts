@@ -22,7 +22,7 @@ void hyphadao::withdraw (const name &withdrawer, const uint64_t &assignment_id, 
 		withdrawer.to_string() + " but the assigned account is " + original_itr->names.at("assigned_account").to_string());
 
 	original_t.modify (original_itr, get_self(), [&](auto &o) {
-		o.ints["end_period"] = bank.get_last_period_id();
+		o.ints["end_period"] = get_last_period_id();
 		o.time_points["withdrawal_date"] = current_time_point();
 		o.strings["withdrawal_notes"] = notes;
 		o.updated_date = current_time_point();
@@ -191,7 +191,7 @@ void hyphadao::suspend(const uint64_t &proposal_id)
 		"; Original Object ID: " + std::to_string(o_itr->ints.at("original_object_id")) + " does not exist.");
 
 	original_t.modify (original_itr, get_self(), [&](auto &o) {
-		o.ints["end_period"] = bank.get_last_period_id();
+		o.ints["end_period"] = get_last_period_id();
 		o.time_points["suspension_date"] = current_time_point();
 		o.updated_date = current_time_point();
 	});
@@ -199,12 +199,6 @@ void hyphadao::suspend(const uint64_t &proposal_id)
 	// move the proposal to the archives
 	vector<name> new_scopes = {name("edit"), name("proparchive")};
 	changescope(name("proposal"), proposal_id, new_scopes, true);
-}
-
-void hyphadao::addperiod(const time_point &start_date, const time_point &end_date, const string &phase)
-{
-	require_auth(get_self());
-	bank.addperiod(start_date, end_date, phase);
 }
 
 void hyphadao::assign(const uint64_t &proposal_id)
@@ -264,11 +258,11 @@ void hyphadao::makepayout(const uint64_t &proposal_id)
 	check(o_itr != o_t.end(), "Scope: " + name("proposal").to_string() + "; Object ID: " + std::to_string(proposal_id) + " does not exist.");
 
 	string memo{"One time payout for Hypha Contribution. Proposal ID: " + std::to_string(proposal_id)};
-	bank.makepayment(-1, o_itr->names.at("recipient"), o_itr->assets.at("hypha_amount"), memo, common::NO_ASSIGNMENT, 1);
-	bank.makepayment(-1, o_itr->names.at("recipient"), o_itr->assets.at("husd_amount"), memo, common::NO_ASSIGNMENT, 1);
-	bank.makepayment(-1, o_itr->names.at("recipient"), o_itr->assets.at("hvoice_amount"), memo, common::NO_ASSIGNMENT, 1);
-	bank.makepayment(-1, o_itr->names.at("recipient"), o_itr->assets.at("seeds_instant_amount"), memo, common::NO_ASSIGNMENT, 1);
-	bank.makepayment(-1, o_itr->names.at("recipient"), o_itr->assets.at("seeds_escrow_amount"), memo, common::NO_ASSIGNMENT, 0);
+	make_payment(-1, o_itr->names.at("recipient"), o_itr->assets.at("hypha_amount"), memo, common::NO_ASSIGNMENT, 1);
+	make_payment(-1, o_itr->names.at("recipient"), o_itr->assets.at("husd_amount"), memo, common::NO_ASSIGNMENT, 1);
+	make_payment(-1, o_itr->names.at("recipient"), o_itr->assets.at("hvoice_amount"), memo, common::NO_ASSIGNMENT, 1);
+	make_payment(-1, o_itr->names.at("recipient"), o_itr->assets.at("seeds_instant_amount"), memo, common::NO_ASSIGNMENT, 1);
+	make_payment(-1, o_itr->names.at("recipient"), o_itr->assets.at("seeds_escrow_amount"), memo, common::NO_ASSIGNMENT, 0);
 
 	vector<name> new_scopes = {name("payout"), name("proparchive")};
 	changescope(name("proposal"), proposal_id, new_scopes, true);
@@ -383,8 +377,9 @@ void hyphadao::payassign(const uint64_t &assignment_id, const uint64_t &period_i
 	}
 
 	// Check that the period has elapsed
-	auto p_itr = bank.period_t.find(period_id);
-	check(p_itr != bank.period_t.end(), "Cannot make payment. Period ID not found: " + std::to_string(period_id));
+	period_table period_t(get_self(), get_self().value);
+	auto p_itr = period_t.find(period_id);
+	check(p_itr != period_t.end(), "Cannot make payment. Period ID not found: " + std::to_string(period_id));
 	check(p_itr->end_date.sec_since_epoch() < current_block_time().to_time_point().sec_since_epoch(),
 		  "Cannot make payment. Period ID " + std::to_string(period_id) + " has not closed yet.");
 
@@ -460,11 +455,21 @@ void hyphadao::payassign(const uint64_t &assignment_id, const uint64_t &period_i
             ", HVOICE: " + voice_payment.to_string() +
             ", HUSD: " + husd_payment.to_string());
 
+	// creating a single struct improves performance for table queries here
+	asset_batch ab {};
+	ab.d_seeds = deferred_seeds_payment;
+	ab.hypha = hypha_payment;
+	ab.seeds = instant_seeds_payment;
+	ab.voice = voice_payment;
+	ab.husd = husd_payment;
+
+	ab = apply_badge_coefficients (period_id, a_itr->names.at("assigned_account"), ab);
+
 	// Make all payments to the assigned account; NOTE: the makepayment function simply returns if the amount is zero
 	// The bank knows how to send various payments/tokens
-	bank.makepayment(period_id, a_itr->names.at("assigned_account"), hypha_payment, memo, assignment_id, 1);
-	bank.makepayment(period_id, a_itr->names.at("assigned_account"), deferred_seeds_payment, memo, assignment_id, 0);
-	bank.makepayment(period_id, a_itr->names.at("assigned_account"), instant_seeds_payment, memo, assignment_id, 1);
-	bank.makepayment(period_id, a_itr->names.at("assigned_account"), voice_payment, memo, assignment_id, 1);
-	bank.makepayment(period_id, a_itr->names.at("assigned_account"), husd_payment, memo, assignment_id, 1);
+	make_payment(period_id, a_itr->names.at("assigned_account"), ab.hypha, memo, assignment_id, 1);
+	make_payment(period_id, a_itr->names.at("assigned_account"), ab.d_seeds, memo, assignment_id, 0);
+	make_payment(period_id, a_itr->names.at("assigned_account"), ab.seeds, memo, assignment_id, 1);
+	make_payment(period_id, a_itr->names.at("assigned_account"), ab.voice, memo, assignment_id, 1);
+	make_payment(period_id, a_itr->names.at("assigned_account"), ab.husd, memo, assignment_id, 1);
 }

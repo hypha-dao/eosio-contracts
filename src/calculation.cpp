@@ -132,3 +132,63 @@ map<string, asset> hyphadao::get_assets(const uint64_t &role_id,
 
     return assets;
 }
+
+vector<document_graph::document> hyphadao::get_current_badges (const uint64_t &period_id, const name &member)
+{
+    vector<document_graph::document> current_badges;
+
+    // get edges for member named "assignbadge"
+    auto member_doc = get_member_doc (member);
+
+    vector<document_graph::edge> badge_assignment_edges = _document_graph.get_edges(member_doc.hash, common::ASSIGN_BADGE, true);
+    for (const document_graph::edge e : badge_assignment_edges) {
+        document_graph::document badge_assignment = _document_graph.get_document(e.to_node);
+        auto start_period = _document_graph.get_content(badge_assignment, common::DETAILS, common::START_PERIOD, true);
+        auto end_period = _document_graph.get_content(badge_assignment, common::DETAILS, common::END_PERIOD, true);
+
+        check(std::holds_alternative<int64_t>(start_period), "fatal error: start_period must be a uint; badge: " + 
+            _document_graph.readable_hash(badge_assignment.hash));
+
+        check(std::holds_alternative<int64_t>(end_period), "fatal error: end_period must be an int; badge: " + 
+            _document_graph.readable_hash(badge_assignment.hash));
+
+        // check that period_id falls within start_period and end_period
+        if (period_id >= std::get<int64_t>(start_period) && period_id <= std::get<int64_t>(end_period)) {
+            auto badge_edge = _document_graph.get_edge(badge_assignment.hash, common::BADGE_NAME, true);            
+            current_badges.push_back (_document_graph.get_document(badge_edge.to_node));
+        }
+    }
+    return current_badges;
+}
+
+asset hyphadao::apply_coefficient (const document_graph::document &badge, const asset &base, const string &coefficient_key) 
+{
+    auto coefficient = _document_graph.get_content(badge, common::DETAILS, coefficient_key, false);
+    check(std::holds_alternative<int64_t>(coefficient), "fatal error: coefficient must be an int; badge: " + 
+        _document_graph.readable_hash(badge.hash) + "; coeffecient_key: " + coefficient_key);
+
+    if (coefficient == _document_graph.DOES_NOT_EXIST) {
+        return asset {0, base.symbol};
+    }
+
+    return adjust_asset (base, (float) std::get<int64_t>(coefficient) / (float) 10000);
+}
+
+hyphadao::asset_batch hyphadao::apply_badge_coefficients (const uint64_t period_id, const name &member, const hyphadao::asset_batch &ab) 
+{
+    // get list of badges
+    auto badges = get_current_badges (period_id, member);
+    asset_batch applied_assets = ab;
+
+    // for each badge, apply appropriate coefficients
+    for (const auto badge : badges) {
+
+        applied_assets.hypha += apply_coefficient (badge, ab.hypha, common::HYPHA_COEFFICIENT);
+        applied_assets.voice += apply_coefficient (badge, ab.voice, common::HVOICE_COEFFICIENT);
+        applied_assets.seeds += apply_coefficient (badge, ab.seeds, common::SEEDS_COEFFICIENT);
+        applied_assets.d_seeds += apply_coefficient (badge, ab.d_seeds, common::SEEDS_COEFFICIENT);
+        applied_assets.husd += apply_coefficient (badge, ab.husd, common::HUSD_COEFFICIENT);
+    }
+
+    return applied_assets;
+}

@@ -195,10 +195,11 @@ void hyphadao::assign_badge(const document_graph::document &badge_assignment)
     checksum256 member_doc_hash = get_member_doc(assignee).hash;
 
     // update graph edges:
-    //    member    ---- holdsbadge     ---->   badge
-    //    member    ---- badgeassign    ---->   badge_assignment
-    //    badge     ---- heldby         ---->   member
-    //    badge     ---- assignment     ---->   badge_assignment
+    //    member            ---- holdsbadge     ---->   badge
+    //    member            ---- badgeassign    ---->   badge_assignment
+    //    badge             ---- heldby         ---->   member
+    //    badge             ---- assignment     ---->   badge_assignment
+    //    badge_assignment  ---- badge          ---->   badge
 
     // the assignee now HOLDS this badge
     _document_graph.create_edge(member_doc_hash, badge.hash, common::HOLDS_BADGE);
@@ -210,4 +211,7 @@ void hyphadao::assign_badge(const document_graph::document &badge_assignment)
     _document_graph.create_edge(badge.hash, member_doc_hash, common::HELD_BY);
 
     _document_graph.create_edge(badge.hash, badge_assignment.hash, common::ASSIGNMENT);
+
+    _document_graph.create_edge(badge_assignment.hash, badge.hash, common::BADGE_NAME);
+
 }
