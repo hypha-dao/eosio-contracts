@@ -150,6 +150,17 @@ string hyphadao::get_string(const map<string, string> strings, string key)
 	}
 }
 
+void hyphadao::debugx(const string &message)
+{
+	transaction trx(time_point_sec(current_time_point()) + (60));
+	trx.actions.emplace_back(
+		permission_level{get_self(), name("active")},
+		get_self(), name("debugmsg"),
+		make_tuple(message));
+	trx.delay_sec = 0;
+	trx.send(get_next_sender_id(), get_self());
+}
+
 void hyphadao::checkx(const bool &condition, const string &message)
 {
 

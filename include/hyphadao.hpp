@@ -192,6 +192,7 @@ namespace hyphaspace
        asset seeds   = asset{0, common::S_SEEDS};
        asset voice   = asset{0, common::S_HVOICE};
        asset husd    = asset{0, common::S_HUSD};
+
     };
 
       // struct [[eosio::table, eosio::contract("hyphadao")]] document
@@ -400,7 +401,7 @@ namespace hyphaspace
       void assign_badge (const document_graph::document &badge_assignment);
       void check_coefficient (document_graph::content_group &content_group, const string &coefficient_key);
       asset apply_coefficient (const document_graph::document &badge, const asset &base, const string &coefficient_key);
-      asset_batch apply_badge_coefficients (const uint64_t period_id, const name &member, const asset_batch &ab);
+      asset_batch apply_badge_coefficients (const uint64_t period_id, const name &member, const asset_batch ab);
       vector<document_graph::document> get_current_badges (const uint64_t &period_id, const name &member);
 
       document_graph::content_group create_system_group (const name& proposer, 
@@ -428,6 +429,7 @@ namespace hyphaspace
       // Utilities      
       uint64_t hash (std::string str); 
       void debug(const string &notes);     
+      void debugx(const string &message);
       asset adjust_asset(const asset &original_asset, const float &adjustment);
       bool is_proposal_direct_assets (const map<string, asset> &assets);  // ??
       void checkx(const bool &condition, const string &message);

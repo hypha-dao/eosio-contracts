@@ -32,10 +32,11 @@ namespace hyphaspace
                 edges.push_back (*itr);
                 found = true;
             } 
+            itr++;
         } 
 
         if (strict) {
-            check (found , "no edges not exist: from " + readable_hash(from_node) + " with name " + edge_name.to_string());
+            check (found , "no edges exist: from " + readable_hash(from_node) + " with name " + edge_name.to_string());
         }
 
         return edges;

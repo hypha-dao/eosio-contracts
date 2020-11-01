@@ -3,38 +3,39 @@
 using namespace hyphaspace;
 
 // retrieve the seeds price as of a specific point in time
-float hyphadao::get_seeds_price_usd (const time_point& price_time_point) 
+float hyphadao::get_seeds_price_usd(const time_point &price_time_point)
 {
-    price_history_tables ph_t (name("tlosto.seeds"), name("tlosto.seeds").value);
+    price_history_tables ph_t(name("tlosto.seeds"), name("tlosto.seeds").value);
 
     // start at the end and decrement until the input time point is greater than the date on the price history table
     // assume price history table is in proper sequence; it does not have an index on the date
     auto ph_itr = ph_t.rbegin();
-    while ( ph_itr->id > ph_t.begin()->id && 
-            price_time_point.sec_since_epoch() < ph_itr->date.sec_since_epoch()) {
+    while (ph_itr->id > ph_t.begin()->id &&
+           price_time_point.sec_since_epoch() < ph_itr->date.sec_since_epoch())
+    {
         ph_itr++;
     }
 
     asset seeds_usd = ph_itr->seeds_usd;
-    float seeds_usd_float = (float) seeds_usd.amount / (float) pow(10,seeds_usd.symbol.precision());
-    return (float)1 / ( seeds_usd_float ); 
+    float seeds_usd_float = (float)seeds_usd.amount / (float)pow(10, seeds_usd.symbol.precision());
+    return (float)1 / (seeds_usd_float);
 }
 
 // get the current SEEDS price
-float hyphadao::get_seeds_price_usd () 
+float hyphadao::get_seeds_price_usd()
 {
     configtables c_t(name("tlosto.seeds"), name("tlosto.seeds").value);
     configtable config_t = c_t.get();
 
-    float seeds_price_usd = (float)1 / ((float) config_t.seeds_per_usd.amount / (float)10000); 
-    return (float)1 / ((float) config_t.seeds_per_usd.amount / (float)config_t.seeds_per_usd.symbol.precision());
+    float seeds_price_usd = (float)1 / ((float)config_t.seeds_per_usd.amount / (float)10000);
+    return (float)1 / ((float)config_t.seeds_per_usd.amount / (float)config_t.seeds_per_usd.symbol.precision());
 }
 
 // this is called on assignment payment claims, to retrieve the SEEDS amount to be paid from the time of the period being claimed
-asset hyphadao::get_seeds_amount (const asset &usd_amount, 
-                                    const time_point &price_time_point, 
-                                    const float &time_share, 
-                                    const float &deferred_perc) 
+asset hyphadao::get_seeds_amount(const asset &usd_amount,
+                                 const time_point &price_time_point,
+                                 const float &time_share,
+                                 const float &deferred_perc)
 {
     asset adjusted_usd_amount = adjust_asset(adjust_asset(usd_amount, deferred_perc), time_share);
 
@@ -43,19 +44,22 @@ asset hyphadao::get_seeds_amount (const asset &usd_amount,
     float seeds_deferral_coeff = get_float(c.ints, "seeds_deferral_factor_x100");
 
     float seeds_price = get_seeds_price_usd(price_time_point);
-    debug("get_seeds_amount: INPUT: USD Amount: " + usd_amount.to_string() +
-        ", INPUT: deferred_perc: " + std::to_string(deferred_perc) +
-        ", INPUT: time_share: " + std::to_string(time_share) +
-        ", INPUT: seeds_deferral_factor_x100: " + std::to_string(seeds_deferral_coeff) +
-        ", CALC: adjusted_usd_amount: " + adjusted_usd_amount.to_string() +
-        ", CALC: get_seeds_price_usd: " + std::to_string(seeds_price));
+    // debugx("seeds price: " + std::to_string(seeds_price));
 
-    return adjust_asset(asset{static_cast<int64_t>(adjusted_usd_amount.amount * (float) 100 * (float) seeds_deferral_coeff), common::S_SEEDS}, (float)1 / (float)seeds_price);
+    debug("get_seeds_amount: INPUT: USD Amount: " + usd_amount.to_string() +
+          ", INPUT: deferred_perc: " + std::to_string(deferred_perc) +
+          ", INPUT: time_share: " + std::to_string(time_share) +
+          ", INPUT: seeds_deferral_factor_x100: " + std::to_string(seeds_deferral_coeff) +
+          ", CALC: adjusted_usd_amount: " + adjusted_usd_amount.to_string() +
+          ", CALC: get_seeds_price_usd: " + std::to_string(seeds_price));
+
+    // return asset {0, common::S_SEEDS};
+    return adjust_asset(asset{static_cast<int64_t>(adjusted_usd_amount.amount * (float)100 * (float)seeds_deferral_coeff), common::S_SEEDS}, (float)1 / (float)seeds_price);
 }
 
 map<string, asset> hyphadao::get_assets(const asset &usd_amount,
-                                        const float &deferred_perc, 
-                                        const time_point &price_time_point) 
+                                        const float &deferred_perc,
+                                        const time_point &price_time_point)
 {
     map<string, asset> assets;
 
@@ -67,25 +71,25 @@ map<string, asset> hyphadao::get_assets(const asset &usd_amount,
     assets["hypha_amount"] = adjust_asset(asset{deferred_adjusted_usd_amount.amount, common::S_HYPHA}, hypha_deferral_coeff);
     assets["hvoice_amount"] = asset{usd_amount.amount, common::S_HVOICE};
     assets["husd_amount"] = asset{usd_amount.amount - deferred_adjusted_usd_amount.amount, common::S_HUSD};
-    assets["seeds_escrow_amount"] = get_seeds_amount (	usd_amount, 
-                                                        price_time_point, 
-                                                        float(1.0000000000000),
-                                                        deferred_perc);
+    assets["seeds_escrow_amount"] = get_seeds_amount(usd_amount,
+                                                     price_time_point,
+                                                     float(1.0000000000000),
+                                                     deferred_perc);
 
     debug("Calculations for get_assets: INPUT: USD Amount: " + usd_amount.to_string() +
-            ", INPUT: deferred_perc: " + std::to_string(deferred_perc) +
-            ", CALC: hypha_amount: " + assets["hypha_amount"].to_string() +
-            ", CALC: husd_amount: " + assets["husd_amount"].to_string() +
-            ", CALC: seeds_escrow_amount: " + assets["seeds_escrow_amount"].to_string() +
-            ", CALC: hvoice_amount: " + assets["hvoice_amount"].to_string());
+          ", INPUT: deferred_perc: " + std::to_string(deferred_perc) +
+          ", CALC: hypha_amount: " + assets["hypha_amount"].to_string() +
+          ", CALC: husd_amount: " + assets["husd_amount"].to_string() +
+          ", CALC: seeds_escrow_amount: " + assets["seeds_escrow_amount"].to_string() +
+          ", CALC: hvoice_amount: " + assets["hvoice_amount"].to_string());
 
-    return assets;            
+    return assets;
 }
 
 // this is used when calculating the assets for an assignment proposal
-map<string, asset> hyphadao::get_assets(const uint64_t &role_id, 
-                                        const float &deferred_perc, 
-                                        const float &time_share_perc) 
+map<string, asset> hyphadao::get_assets(const uint64_t &role_id,
+                                        const float &deferred_perc,
+                                        const float &time_share_perc)
 {
     map<string, asset> assets;
 
@@ -123,71 +127,79 @@ map<string, asset> hyphadao::get_assets(const uint64_t &role_id,
     assets["hvoice_salary_per_phase"] = asset{commitment_adjusted_usd_phase.amount * 2, common::S_HVOICE};
 
     debug("Calculations for get_assets: INPUT: Role: " + std::to_string(role_id) +
-            ", INPUT: deferred_perc: " + std::to_string(deferred_perc) +
-            ", INPUT: time_share_perc: " + std::to_string(time_share_perc) +
-            ", CALC: usd_salary_value_per_phase: " + assets["usd_salary_value_per_phase"].to_string() +
-            ", CALC: hypha_salary_per_phase: " + assets["hypha_salary_per_phase"].to_string() +
-            ", CALC: husd_salary_per_phase: " + assets["husd_salary_per_phase"].to_string() +
-            ", CALC: hvoice_salary_per_phase: " + assets["hvoice_salary_per_phase"].to_string());
+          ", INPUT: deferred_perc: " + std::to_string(deferred_perc) +
+          ", INPUT: time_share_perc: " + std::to_string(time_share_perc) +
+          ", CALC: usd_salary_value_per_phase: " + assets["usd_salary_value_per_phase"].to_string() +
+          ", CALC: hypha_salary_per_phase: " + assets["hypha_salary_per_phase"].to_string() +
+          ", CALC: husd_salary_per_phase: " + assets["husd_salary_per_phase"].to_string() +
+          ", CALC: hvoice_salary_per_phase: " + assets["hvoice_salary_per_phase"].to_string());
 
     return assets;
 }
 
-vector<document_graph::document> hyphadao::get_current_badges (const uint64_t &period_id, const name &member)
+vector<document_graph::document> hyphadao::get_current_badges(const uint64_t &period_id, const name &member)
 {
     vector<document_graph::document> current_badges;
 
     // get edges for member named "assignbadge"
-    auto member_doc = get_member_doc (member);
+    auto member_doc = get_member_doc(member);
 
-    vector<document_graph::edge> badge_assignment_edges = _document_graph.get_edges(member_doc.hash, common::ASSIGN_BADGE, true);
-    for (const document_graph::edge e : badge_assignment_edges) {
+    vector<document_graph::edge> badge_assignment_edges = _document_graph.get_edges(member_doc.hash, common::ASSIGN_BADGE, false);
+    for (const document_graph::edge e : badge_assignment_edges)
+    {
         document_graph::document badge_assignment = _document_graph.get_document(e.to_node);
         auto start_period = _document_graph.get_content(badge_assignment, common::DETAILS, common::START_PERIOD, true);
         auto end_period = _document_graph.get_content(badge_assignment, common::DETAILS, common::END_PERIOD, true);
 
-        check(std::holds_alternative<int64_t>(start_period), "fatal error: start_period must be a uint; badge: " + 
-            _document_graph.readable_hash(badge_assignment.hash));
+        check(std::holds_alternative<int64_t>(start_period), "fatal error: start_period must be a uint; badge: " +
+                                                                 _document_graph.readable_hash(badge_assignment.hash));
 
-        check(std::holds_alternative<int64_t>(end_period), "fatal error: end_period must be an int; badge: " + 
-            _document_graph.readable_hash(badge_assignment.hash));
+        check(std::holds_alternative<int64_t>(end_period), "fatal error: end_period must be an int; badge: " +
+                                                               _document_graph.readable_hash(badge_assignment.hash));
 
         // check that period_id falls within start_period and end_period
-        if (period_id >= std::get<int64_t>(start_period) && period_id <= std::get<int64_t>(end_period)) {
-            auto badge_edge = _document_graph.get_edge(badge_assignment.hash, common::BADGE_NAME, true);            
-            current_badges.push_back (_document_graph.get_document(badge_edge.to_node));
+        if (period_id >= std::get<int64_t>(start_period) && period_id <= std::get<int64_t>(end_period))
+        {
+            auto badge_edge = _document_graph.get_edge(badge_assignment.hash, common::BADGE_NAME, true);
+            current_badges.push_back(_document_graph.get_document(badge_edge.to_node));
         }
     }
     return current_badges;
 }
 
-asset hyphadao::apply_coefficient (const document_graph::document &badge, const asset &base, const string &coefficient_key) 
+asset hyphadao::apply_coefficient(const document_graph::document &badge, const asset &base, const string &coefficient_key)
 {
     auto coefficient = _document_graph.get_content(badge, common::DETAILS, coefficient_key, false);
-    check(std::holds_alternative<int64_t>(coefficient), "fatal error: coefficient must be an int; badge: " + 
-        _document_graph.readable_hash(badge.hash) + "; coeffecient_key: " + coefficient_key);
+    check(std::holds_alternative<int64_t>(coefficient), "fatal error: coefficient must be an int; badge: " +
+                                                            _document_graph.readable_hash(badge.hash) + "; coeffecient_key: " + coefficient_key);
 
-    if (coefficient == _document_graph.DOES_NOT_EXIST) {
-        return asset {0, base.symbol};
+    if (coefficient == _document_graph.DOES_NOT_EXIST)
+    {
+        debugx("Coeffecient : " + coefficient_key + " not found.");
+        return asset{0, base.symbol};
     }
 
-    return adjust_asset (base, (float) std::get<int64_t>(coefficient) / (float) 10000);
+    float coeff_float = (float)((float)std::get<int64_t>(coefficient) / (float)10000);
+    float adjustment = (float)coeff_float - (float)1;
+    return adjust_asset(base, adjustment);
 }
 
-hyphadao::asset_batch hyphadao::apply_badge_coefficients (const uint64_t period_id, const name &member, const hyphadao::asset_batch &ab) 
+hyphadao::asset_batch hyphadao::apply_badge_coefficients(const uint64_t period_id, const name &member, const hyphadao::asset_batch ab)
 {
     // get list of badges
-    auto badges = get_current_badges (period_id, member);
+    auto badges = get_current_badges(period_id, member);
     asset_batch applied_assets = ab;
 
     // for each badge, apply appropriate coefficients
-    for (const auto badge : badges) {
+    for (const auto badge : badges)
+    {
 
-        applied_assets.hypha += apply_coefficient (badge, ab.hypha, common::HYPHA_COEFFICIENT);
-        applied_assets.voice += apply_coefficient (badge, ab.voice, common::HVOICE_COEFFICIENT);
-        applied_assets.seeds += apply_coefficient (badge, ab.seeds, common::SEEDS_COEFFICIENT);
-        applied_assets.d_seeds += apply_coefficient (badge, ab.d_seeds, common::SEEDS_COEFFICIENT);
-        applied_assets.husd += apply_coefficient (badge, ab.husd, common::HUSD_COEFFICIENT);
+        applied_assets.husd = applied_assets.husd + apply_coefficient(badge, ab.husd, common::HUSD_COEFFICIENT);
+        ;
+        applied_assets.hypha = applied_assets.hypha + apply_coefficient(badge, ab.hypha, common::HYPHA_COEFFICIENT);
+        applied_assets.voice = applied_assets.voice + apply_coefficient(badge, ab.voice, common::HVOICE_COEFFICIENT);
+        applied_assets.seeds = applied_assets.seeds + apply_coefficient(badge, ab.seeds, common::SEEDS_COEFFICIENT);
+        applied_assets.d_seeds = applied_assets.d_seeds + apply_coefficient(badge, ab.d_seeds, common::SEEDS_COEFFICIENT);
     }
 
     return applied_assets;

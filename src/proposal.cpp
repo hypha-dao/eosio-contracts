@@ -240,10 +240,6 @@ void hyphadao::closedocprop(const checksum256 &proposal_hash)
 {
     check(!is_paused(), "Contract is paused for maintenance. Please try again later.");
 
-    // document_table d_t(get_self(), get_self().value);
-    // auto d_t_by_hash = d_t.get_index<name("idhash")>();
-    // auto d_itr = d_t_by_hash.find(proposal_hash);
-    // check(d_itr != d_t_by_hash.end(), "Document with hash not found: " + _document_graph.readable_hash(proposal_hash));
     document_graph::document docprop = _document_graph.get_document(proposal_hash); // *d_itr;
     name ballot_id = std::get<name>(_document_graph.get_content(docprop, common::SYSTEM, common::BALLOT_ID, true));
 
