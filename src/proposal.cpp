@@ -222,7 +222,7 @@ void hyphadao::propose(const name &proposer,
                        const name &proposal_type,
                        std::vector<document_graph::content_group> &content_groups)
 {
-    verify_membership (proposer) ;
+    verify_membership(proposer);
 
     document_graph::document proposal;
     switch (proposal_type.value)
@@ -236,17 +236,179 @@ void hyphadao::propose(const name &proposer,
     }
 }
 
+bool hyphadao::did_pass(const checksum256 &proposal_hash) 
+{
+    // read existing options from the proposal's vote tally
+    auto tally_edge = _document_graph.get_edge(proposal_hash, common::VOTE_TALLY, true);
+    auto tally_doc = _document_graph.get_document(tally_edge.to_node);
+    std::vector<document_graph::content_group> options_from_tally = _document_graph.get_content_groups_of_type(
+        tally_doc.content_groups,
+        common::GROUP_TYPE_OPTION,
+        true);
+    
+    string maximum_option = "";
+    asset maximum_vote_power = asset {0, common::S_HVOICE };
+
+    for (const document_graph::content_group &option_from_tally : options_from_tally)
+    {
+        auto option_vote_power = std::get<asset>(_document_graph.get_content(option_from_tally, common::VOTE_POWER, true));
+        if (option_vote_power > maximum_vote_power) 
+        {
+            maximum_vote_power = option_vote_power;
+            maximum_option = std::get<string>(_document_graph.get_content(option_from_tally, common::OPTION_KEY, true));
+        }
+    }
+    if (maximum_option == "Pass") {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+void hyphadao::vote(const name &voter,
+                    const checksum256 &proposal_hash,
+                    std::vector<document_graph::content_group> &vote_selections)
+{
+    require_auth(voter);
+
+    // read existing options from the proposal's vote tally
+    auto tally_edge = _document_graph.get_edge(proposal_hash, common::VOTE_TALLY, true);
+    auto tally_doc = _document_graph.get_document(tally_edge.to_node);
+    std::vector<document_graph::content_group> options_from_tally = _document_graph.get_content_groups_of_type(
+        tally_doc.content_groups,
+        common::GROUP_TYPE_OPTION,
+        true);
+
+    // represents new tally document being created
+    std::vector<document_graph::content_group> new_options_from_tally{};
+
+    // iterate through all options from the existing tally document
+    for (const document_graph::content_group &option_from_tally : options_from_tally)
+    {
+        auto option_key_from_tally = _document_graph.get_content(option_from_tally, common::OPTION_KEY, true);
+        string tally_option_key = std::get<string>(option_key_from_tally);
+        bool option_selected = false;
+
+        // iterate through all options on the vote selections
+        for (const document_graph::content_group &vote_selection : vote_selections)
+        {
+            auto option_from_vote = _document_graph.get_content(vote_selection, common::OPTION_KEY, true);
+            string vote_option_key = std::get<string>(option_from_vote);
+
+            if (vote_option_key == tally_option_key)
+            {
+                option_selected = true;
+
+                auto tally_option_voting_power = _document_graph.get_content(option_from_tally, common::VOTE_POWER, true);
+                asset existing_voting_power = std::get<asset>(tally_option_voting_power);
+
+                // create new content group to increment vote on new tally document
+                document_graph::content_group new_option_cg{};
+                new_option_cg.push_back(_document_graph.new_content(common::VOTE_POWER, existing_voting_power + get_voting_power(voter)));
+                new_option_cg.push_back(_document_graph.get_content_item(option_from_tally, common::CONTENT_GROUP_TYPE, true));
+                new_option_cg.push_back(_document_graph.get_content_item(option_from_tally, common::DESCRIPTION, true));
+                new_option_cg.push_back(_document_graph.get_content_item(option_from_tally, common::OPTION_KEY, true));
+                new_options_from_tally.push_back(new_option_cg);
+            }
+        }
+        // if option was not selected, just use the existing option from the tally
+        if (!option_selected)
+        {
+            new_options_from_tally.push_back(option_from_tally);
+        }
+    }
+
+    // remove the existing tally document
+    _document_graph.erase_document(tally_doc.hash);
+
+    // construct and save the new tally document
+    document_graph::document new_tally = _document_graph.create_document(voter, new_options_from_tally);
+    _document_graph.create_edge(proposal_hash, new_tally.hash, common::VOTE_TALLY);
+}
+
+void hyphadao::vote_option_key(const name &voter,
+                               const checksum256 &proposal_hash,
+                               const string &option_key)
+{
+    vector<document_graph::content_group> voting_options;
+
+    document_graph::content_group pass_option_cg = document_graph::content_group{};
+    pass_option_cg.push_back(_document_graph.new_content(common::CONTENT_GROUP_TYPE, common::GROUP_TYPE_OPTION));
+    pass_option_cg.push_back(_document_graph.new_content(common::OPTION_KEY, option_key));
+    pass_option_cg.push_back(_document_graph.new_content(common::VOTE_POWER, asset{1, common::S_HVOICE}));
+
+    voting_options.push_back(pass_option_cg);
+    return vote(voter, proposal_hash, voting_options);
+}
+
+void hyphadao::votepass(const name &voter,
+                        const checksum256 &proposal_hash)
+{
+    return vote_option_key(voter, proposal_hash, string("Pass"));
+}
+
+void hyphadao::votefail(const name &voter,
+                        const checksum256 &proposal_hash)
+{
+    return vote_option_key(voter, proposal_hash, string("Fail"));
+}
+
+name hyphadao::get_ballot_type (const checksum256& proposal_hash) 
+{
+    document_graph::document docprop = _document_graph.get_document(proposal_hash); 
+    document_graph::flexvalue ballot_type = _document_graph.get_content(docprop, common::DETAILS, common::BALLOT_TYPE, false);
+
+    if (ballot_type == _document_graph.DOES_NOT_EXIST)
+    {
+        // default to telos decide
+        return name(common::BALLOT_TYPE_TELOS_DECIDE);
+    } 
+    else 
+    {
+        check(std::holds_alternative<name>(ballot_type), "fatal error: ballot_type must be a name type");
+        return std::get<name>(ballot_type);
+    }
+}
+
 void hyphadao::closedocprop(const checksum256 &proposal_hash)
 {
     check(!is_paused(), "Contract is paused for maintenance. Please try again later.");
 
     document_graph::document docprop = _document_graph.get_document(proposal_hash); // *d_itr;
-    name ballot_id = std::get<name>(_document_graph.get_content(docprop, common::SYSTEM, common::BALLOT_ID, true));
+    
+    name ballot_type = get_ballot_type (proposal_hash);
+    bool did_ballot_pass = false;
+
+    switch (ballot_type.value)
+    {
+    case common::BALLOT_TYPE_OPTIONS.value:
+        // check votes on vote tally document
+        did_ballot_pass = did_pass(proposal_hash);
+        break;
+
+    case common::BALLOT_TYPE_TELOS_DECIDE.value:
+    {
+        name ballot_id = std::get<name>(_document_graph.get_content(docprop, common::SYSTEM, common::BALLOT_ID, true));
+        did_ballot_pass = did_pass(ballot_id);
+        config_table config_s(get_self(), get_self().value);
+        Config c = config_s.get_or_create(get_self(), Config());
+
+        action(
+            permission_level{get_self(), name("active")},
+            c.names.at("telos_decide_contract"), name("closevoting"),
+            std::make_tuple(ballot_id, true))
+            .send();
+        
+        break;
+    }
+    default:
+        check(false, "Unknown ballot type: " + ballot_type.to_string());
+    }
 
     checksum256 self_hash = get_root();
     _document_graph.remove_edge(self_hash, proposal_hash, common::PROPOSAL, true);
 
-    if (did_pass(ballot_id))
+    if (did_ballot_pass)
     {
         name proposal_type = std::get<name>(_document_graph.get_content(docprop, common::SYSTEM, common::TYPE, true));
         switch (proposal_type.value)
@@ -255,13 +417,13 @@ void hyphadao::closedocprop(const checksum256 &proposal_hash)
             _document_graph.create_edge(self_hash, proposal_hash, common::BADGE_NAME);
             break;
 
-        case common::ASSIGN_BADGE.value: {
-
+        case common::ASSIGN_BADGE.value:
+        {
             assign_badge(docprop);
             break;
         }
         default:
-            check (false, "Unknown proposal type: " + proposal_type.to_string());
+            check(false, "Unknown proposal type: " + proposal_type.to_string());
         }
         // if proposal passes, create an edge for PASSED_PROPS
         _document_graph.create_edge(self_hash, proposal_hash, common::PASSED_PROPS);
@@ -270,14 +432,5 @@ void hyphadao::closedocprop(const checksum256 &proposal_hash)
     {
         // create edge for FAILED_PROPS
         _document_graph.create_edge(self_hash, proposal_hash, common::FAILED_PROPS);
-    }
-
-    config_table config_s(get_self(), get_self().value);
-    Config c = config_s.get_or_create(get_self(), Config());
-
-    action(
-        permission_level{get_self(), name("active")},
-        c.names.at("telos_decide_contract"), name("closevoting"),
-        std::make_tuple(ballot_id, true))
-        .send();
+    } 
 }

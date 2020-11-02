@@ -335,6 +335,20 @@ bool hyphadao::holds_hypha(const name &account)
     }
 }
 
+asset hyphadao::get_voting_power (const name &member)
+{
+	config_table config_s(get_self(), get_self().value);
+    Config c = config_s.get_or_create(get_self(), Config());
+
+	trailservice::trail::voters_table v_t (c.names.at("telos_decide_contract"), member.value);
+	auto v_itr = v_t.find(common::S_HVOICE.code().raw());
+    if (v_itr == v_t.end())
+    {
+        return asset {0, common::S_HVOICE};
+    }
+    return v_itr->liquid;
+}
+
 
 // void hyphadao::reset()
 // {

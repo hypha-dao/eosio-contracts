@@ -42,6 +42,10 @@ namespace common {
     static const string         SYSTEM                      = string ("system");
     static const string         BALLOT_ID                   = string ("ballot_id");
     static const string         BALLOT_TYPE                 = string ("ballot_type");
+
+    static const string         VOTE_POWER                  = string ("vote_power");
+    static const string         OPTION_KEY                  = string ("option_key");
+    static const string         CONTENT_GROUP_TYPE          = string ("content_group_type");
     
     // graph edge names
     static constexpr name       HOLDS_BADGE                 = name ("holdsbadge");

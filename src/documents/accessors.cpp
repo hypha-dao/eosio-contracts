@@ -82,6 +82,21 @@ namespace hyphaspace
         return typed_content_groups;
     }
 
+    document_graph::content document_graph::get_content_item(const content_group &content_group,
+                                                                const string &content_label,
+                                                                const bool &strict)
+    {
+        for (const document_graph::content &content : content_group)
+        {
+            if (content.label == content_label)
+            {
+                return content;
+            }
+        }
+        check (!strict, "content_label required: " + content_label);
+        return content{};
+    }
+
     document_graph::flexvalue document_graph::get_content(const content_group &content_group,
                                                           const string &content_label,
                                                           const bool &strict)

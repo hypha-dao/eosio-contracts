@@ -36,27 +36,20 @@ document_graph::document hyphadao::create_votetally_doc(const name &proposer, st
         option_groups.push_back(pass_option_cg);
         option_groups.push_back(fail_option_cg);
     }
-    return _document_graph.create_document(proposer, option_groups);
+    return _document_graph.get_or_create(proposer, option_groups);
 }
 
 document_graph::content_group hyphadao::create_system_group(const name &proposer,
-                                                            const name &proposal_type,
-                                                            const string &decide_title,
-                                                            const string &decide_desc,
-                                                            const string &decide_content)
+                                                            const name &proposal_type)
 
 {
     // create the system content_group and populate with system details
     config_table config_s(get_self(), get_self().value);
     Config c = config_s.get_or_create(get_self(), Config());
-
-    name ballot_id = register_ballot(proposer, decide_title, decide_desc, decide_content);
-
     document_graph::content_group system_cg = document_graph::content_group{};
     system_cg.push_back(_document_graph.new_content("content_group_label", "system"));
     system_cg.push_back(_document_graph.new_content("client_version", get_string(c.strings, "client_version")));
     system_cg.push_back(_document_graph.new_content("contract_version", get_string(c.strings, "contract_version")));
-    system_cg.push_back(_document_graph.new_content("ballot_id", ballot_id));
     system_cg.push_back(_document_graph.new_content("proposer", proposer));
     system_cg.push_back(_document_graph.new_content(common::TYPE, proposal_type));
     return system_cg;
@@ -69,10 +62,11 @@ document_graph::document hyphadao::propose_badge(const name &proposer, std::vect
 
     // check coefficients
     // TODO: move coeffecient thresholds to be configuration values
-    check_coefficient(proposal_details, "husd_coefficient_x10000");
-    check_coefficient(proposal_details, "hypha_coefficient_x10000");
-    check_coefficient(proposal_details, "hvoice_coefficient_x10000");
-    check_coefficient(proposal_details, "seeds_coefficient_x10000");
+    // TODO: apply time-frame for expiration of badge
+    check_coefficient(proposal_details, common::HUSD_COEFFICIENT);
+    check_coefficient(proposal_details, common::HYPHA_COEFFICIENT);
+    check_coefficient(proposal_details, common::HVOICE_COEFFICIENT);
+    check_coefficient(proposal_details, common::SEEDS_COEFFICIENT);
 
     // handle ballot type - specific functionality
     document_graph::flexvalue ballot_type = _document_graph.get_content(proposal_details, common::BALLOT_TYPE, false);
@@ -91,6 +85,8 @@ document_graph::document hyphadao::propose_badge(const name &proposer, std::vect
         ballot_type_name = std::get<name>(ballot_type);
     }
     
+    document_graph::content_group system_cg = create_system_group(proposer, common::BADGE_NAME);
+    
     switch (ballot_type_name.value)
     {
     case common::BALLOT_TYPE_OPTIONS.value:
@@ -99,21 +95,26 @@ document_graph::document hyphadao::propose_badge(const name &proposer, std::vect
         break;
 
     case common::BALLOT_TYPE_TELOS_DECIDE.value:
-        // TODO: apply time-frame for expiration of badge
-        content_groups.push_back(create_system_group(proposer,
-                                                        common::BADGE_NAME,
-                                                        std::get<string>(_document_graph.get_content(proposal_details, common::TITLE, true)),
-                                                        std::get<string>(_document_graph.get_content(proposal_details, common::DESCRIPTION, true)),
-                                                        std::get<string>(_document_graph.get_content(proposal_details, common::ICON, true))));
+        system_cg.push_back(_document_graph.new_content(common::BALLOT_ID, 
+                            register_ballot(proposer, 
+                                            std::get<string>(_document_graph.get_content(proposal_details, common::TITLE, true)),
+                                            std::get<string>(_document_graph.get_content(proposal_details, common::DESCRIPTION, true)),
+                                            std::get<string>(_document_graph.get_content(proposal_details, common::ICON, true)))));
         break;
 
     default:
         check(false, "Unknown ballot type: " + ballot_type_name.to_string());
     }
     
+    content_groups.push_back (system_cg);
+
     // creates the document, or the graph NODE
     document_graph::document proposal_doc = _document_graph.create_document(proposer, content_groups);
 
+    // Graph structure post creating proposal:
+    //      root 		    ---proposal  ---> 	propDocument
+    //      member 		    ---owns  -------> 	propDocument
+    //      propDocument    ---ownedby  ----> 	member
     // the proposer OWNS the proposal; this creates the graph EDGE
     _document_graph.create_edge(get_member_doc(proposer).hash, proposal_doc.hash, common::OWNS);
 
@@ -125,6 +126,8 @@ document_graph::document hyphadao::propose_badge(const name &proposer, std::vect
 
     if (add_vote_tally_edge)
     {
+        // edge to be created for native ballots
+        //      propDocument        --- votetally -->   vote_tally_document
         _document_graph.create_edge(proposal_doc.hash, vote_tally_document.hash, common::VOTE_TALLY);
     }
 
@@ -154,11 +157,13 @@ document_graph::document hyphadao::propose_badge_assignment(const name &proposer
     check(std::get<name>(_document_graph.get_content(badge, common::SYSTEM, common::TYPE, true)) == common::BADGE_NAME,
           "badge document hash provided in assignment proposal is not of type badge");
 
-    content_groups.push_back(create_system_group(proposer,
-                                                 common::ASSIGN_BADGE,
-                                                 std::get<string>(_document_graph.get_content(details, common::TITLE, true)),
-                                                 std::get<string>(_document_graph.get_content(details, common::DESCRIPTION, true)),
-                                                 "Assign badge " + badge_title + " to ")); // + assignee.to_string()));
+    document_graph::content_group system_cg = create_system_group(proposer, common::ASSIGN_BADGE);
+    system_cg.push_back(_document_graph.new_content(common::BALLOT_ID, 
+                        register_ballot(proposer, 
+                                        std::get<string>(_document_graph.get_content(details, common::TITLE, true)),
+                                        std::get<string>(_document_graph.get_content(details, common::DESCRIPTION, true)),
+                                        "Assign badge " + badge_title + " to " + assignee.to_string())));
+    content_groups.push_back (system_cg);
 
     // creates the document, or the graph NODE
     document_graph::document proposal_doc = _document_graph.create_document(proposer, content_groups);

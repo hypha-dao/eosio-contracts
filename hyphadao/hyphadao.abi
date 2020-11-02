@@ -1315,6 +1315,52 @@
             ]
         },
         {
+            "name": "vote",
+            "base": "",
+            "fields": [
+                {
+                    "name": "voter",
+                    "type": "name"
+                },
+                {
+                    "name": "proposal_hash",
+                    "type": "checksum256"
+                },
+                {
+                    "name": "vote_selections",
+                    "type": "content_group[]"
+                }
+            ]
+        },
+        {
+            "name": "votefail",
+            "base": "",
+            "fields": [
+                {
+                    "name": "voter",
+                    "type": "name"
+                },
+                {
+                    "name": "proposal_hash",
+                    "type": "checksum256"
+                }
+            ]
+        },
+        {
+            "name": "votepass",
+            "base": "",
+            "fields": [
+                {
+                    "name": "voter",
+                    "type": "name"
+                },
+                {
+                    "name": "proposal_hash",
+                    "type": "checksum256"
+                }
+            ]
+        },
+        {
             "name": "withdraw",
             "base": "",
             "fields": [
@@ -1597,6 +1643,21 @@
         {
             "name": "updversion",
             "type": "updversion",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "vote",
+            "type": "vote",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "votefail",
+            "type": "votefail",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "votepass",
+            "type": "votepass",
             "ricardian_contract": ""
         },
         {

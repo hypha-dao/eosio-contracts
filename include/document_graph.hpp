@@ -156,6 +156,9 @@ namespace hyphaspace
                                 const string &content_group_label,
                                 const string &content_label,
                                 const bool &strict);
+        content get_content_item(const content_group &content_group,
+                                const string &content_label,
+                                const bool &strict);
 
         static std::string to_string(const vector<document_graph::content_group> &content_groups);
         static std::string to_string(const document_graph::content_group &content_group);
