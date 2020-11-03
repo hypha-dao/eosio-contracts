@@ -8,9 +8,9 @@ void hyphadao::check_coefficient(document_graph::content_group &content_group, c
     if (coefficient_x10000 != _document_graph.DOES_NOT_EXIST)
     {
         check(std::holds_alternative<int64_t>(coefficient_x10000), "fatal error: coefficient must be an int64_t type: " + coefficient_key);
-        check(std::get<int64_t>(coefficient_x10000) >= 9000 &&
-                  std::get<int64_t>(coefficient_x10000) <= 11000,
-              "fatal error: coefficient_x10000 must be between 9000 and 11000, inclusive: " + coefficient_key);
+        check(std::get<int64_t>(coefficient_x10000) >= 7000 &&
+                  std::get<int64_t>(coefficient_x10000) <= 13000,
+              "fatal error: coefficient_x10000 must be between 7000 and 13000, inclusive: " + coefficient_key);
     }
 }
 
