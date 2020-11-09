@@ -5,7 +5,6 @@
 #include <eosio/multi_index.hpp>
 #include <eosio/transaction.hpp>
 
-#include <bank.hpp>
 #include <common.hpp>
 #include <trail.hpp>
 #include <document_graph.hpp>
@@ -152,6 +151,50 @@ namespace hyphaspace
       };
       typedef eosio::multi_index<name("pricehistory"), price_history_table> price_history_tables;
 
+      struct [[eosio::table, eosio::contract("hyphadao")]] Period
+    {
+        uint64_t period_id;
+        time_point start_date;
+        time_point end_date;
+        string phase;
+
+        uint64_t primary_key() const { return period_id; }
+    };
+
+    struct [[eosio::table, eosio::contract("hyphadao")]] Payment
+    {
+        uint64_t payment_id;
+        time_point payment_date;
+        uint64_t period_id = 0;
+        uint64_t assignment_id = -1;
+        name recipient;
+        asset amount;
+        string memo;
+
+        uint64_t primary_key() const { return payment_id; }
+        uint64_t by_period() const { return period_id; }
+        uint64_t by_recipient() const { return recipient.value; }
+        uint64_t by_assignment() const { return assignment_id; }
+    };
+
+    typedef multi_index<name("periods"), Period> period_table;
+
+    typedef multi_index<name("payments"), Payment,
+                        indexed_by<name("byperiod"), const_mem_fun<Payment, uint64_t, &Payment::by_period>>,
+                        indexed_by<name("byrecipient"), const_mem_fun<Payment, uint64_t, &Payment::by_recipient>>,
+                        indexed_by<name("byassignment"), const_mem_fun<Payment, uint64_t, &Payment::by_assignment>>>
+        payment_table;
+
+    struct asset_batch 
+    {
+       asset hypha   = asset{0, common::S_HYPHA};
+       asset d_seeds = asset{0, common::S_SEEDS};
+       asset seeds   = asset{0, common::S_SEEDS};
+       asset voice   = asset{0, common::S_HVOICE};
+       asset husd    = asset{0, common::S_HUSD};
+
+    };
+
       // struct [[eosio::table, eosio::contract("hyphadao")]] document
       // {
       //    uint64_t id;
@@ -205,6 +248,10 @@ namespace hyphaspace
       const uint64_t MICROSECONDS_PER_HOUR = (uint64_t)60 * (uint64_t)60 * (uint64_t)1000000;
       const uint64_t MICROSECONDS_PER_YEAR = MICROSECONDS_PER_HOUR * (uint64_t)24 * (uint64_t)365;
 
+      /// **********************************
+      ///  Generation 1 Actions
+      /// **********************************
+
       ACTION create(const name &scope,
                      map<string, name> names,
                      map<string, string> strings,
@@ -214,10 +261,6 @@ namespace hyphaspace
                      const map<string, float> floats,
                      map<string, transaction> trxs);
       
-      ACTION propose (const name& proposer, const name& proposal_type, std::vector<document_graph::content_group> &content_groups);
-
-      ACTION created(const name &creator, const checksum256 &hash);
-
       ACTION edit(const name &scope,
                   const uint64_t &id,
                   const map<string, name> names,
@@ -227,56 +270,6 @@ namespace hyphaspace
                   const map<string, uint64_t> ints,
                   const map<string, float> floats,
                   map<string, transaction> trxs);
-      
-      ACTION copytodraft (const name& copier, const name &scope, const uint64_t &id);
-      ACTION propdraft (const uint64_t& id);
-      ACTION erasedraft (const uint64_t& id);
-
-      ACTION propsuspend (const name &proposer, const name &scope, const uint64_t &id);
-      ACTION withdraw (const name &withdrawer, const uint64_t &assignment_id, const string& notes);
-      
-      ACTION apply(const name &applicant, const string &content);
-
-      ACTION enroll(const name &enroller,
-                    const name &applicant,
-                    const string &content);
-
-      // Admin
-      // ACTION reset ();
-      ACTION resetperiods();
-      ACTION resetscope(const name &scope);
-      ACTION erasedoc(const name &scope,
-                      const uint64_t &id);
-      ACTION togglepause();
-    
-      ACTION recreate(const name &scope, const uint64_t &id);
-      ACTION debugmsg(const string &message);
-      ACTION updversion(const string &component, const string &version);
-      ACTION updassets(const uint64_t &proposal_id);
-      ACTION fixseedsprec (const uint64_t &proposal_id);
-      ACTION changescope(const name &scope, const uint64_t &id, const vector<name> &new_scopes, const bool &remove_old);
-      ACTION set (const name &scope, const uint64_t &id, const string& key, const flexvalue1& flexvalue);
-      ACTION updassassets (const uint64_t &assignment_id);
-
-      ACTION createdoc (const name& creator, const vector<document_graph::content_group> &content_groups);
-      ACTION transform(const name &creator, const name &scope, const uint64_t &id);
-      ACTION transscope (const name& creator, const name &scope, const uint64_t &starting_id, const uint64_t &batch_size);
-      ACTION erasedocs (const name &scope);
-
-      // document_graph
-      ACTION erasedochash (const checksum256 &doc);
-      ACTION erasealldocs (const string &notes);
-      ACTION eraseedges (const string &notes); 
-      ACTION erasedocbyid (const uint64_t &id);
-
-      
-      // alerts Group
-      ACTION setalert (const name &level, const string &content);
-      ACTION remalert (const string &notes);
-
-      // ACTION backupobjs (const name& scope);
-      // ACTION erasebackups (const name& scope);
-      // ACTION restoreobjs (const name& scope);
 
       ACTION setconfig(const map<string, name> names,
                        const map<string, string> strings,
@@ -285,22 +278,12 @@ namespace hyphaspace
                        const map<string, uint64_t> ints,
                        const map<string, float> floats,
                        const map<string, transaction> trxs);
-
       ACTION setconfigatt(const string& key, const hyphadao::flexvalue1& value);
       ACTION remconfigatt(const string& key);
-
       ACTION setlastballt(const name &last_ballot_id);
+      ACTION togglepause();
 
-      ACTION clrdebugs(const uint64_t &starting_id, const uint64_t &batch_size);
-
-      ACTION addperiod(const time_point &start_time,
-                       const time_point &end_time,
-                       const string &phase);
-      ACTION remperiods(const uint64_t &begin_period_id,
-                        const uint64_t &end_period_id);
-
-      ACTION remapply(const name &applicant);
-
+      
       // These actions are executed only on approval of a proposal.
       // To introduce a new proposal type, we would add another action to the below.
       ACTION newrole(const uint64_t &proposal_id);
@@ -312,36 +295,103 @@ namespace hyphaspace
 
       // anyone can call closeprop, it executes the transaction if the voting passed
       ACTION closeprop(const uint64_t &proposal_id);
+      
+      ACTION copytodraft (const name& copier, const name &scope, const uint64_t &id);
+      ACTION propdraft (const uint64_t& id);
+      ACTION erasedraft (const uint64_t& id);
+      ACTION recreate(const name &scope, const uint64_t &id);
+
+      ACTION propsuspend (const name &proposer, const name &scope, const uint64_t &id);
+      ACTION withdraw (const name &withdrawer, const uint64_t &assignment_id, const string& notes);
+
+      ACTION removemember(const name &member_to_remove);
+      ACTION addmember(const name &member);
+
+      // data object handling
+      ACTION transform(const name &creator, const name &scope, const uint64_t &id);
+      ACTION transscope (const name& creator, const name &scope, const uint64_t &starting_id, const uint64_t &batch_size);
+      ACTION erasedocs (const name &scope);
+      ACTION resetscope(const name &scope);
+      ACTION erasedoc(const name &scope, const uint64_t &id);
+      ACTION changescope(const name &scope, const uint64_t &id, const vector<name> &new_scopes, const bool &remove_old);
+
+      // migration related actions
+      // ACTION backupobjs (const name& scope);
+      // ACTION erasebackups (const name& scope);
+      // ACTION restoreobjs (const name& scope);
+      /// **********************************
+      ///  END - Generation 1 Actions
+      /// **********************************
+
+
+      /// **********************************
+      ///  Generation 2 Actions
+      /// **********************************
+
+      ACTION propose (const name& proposer, const name& proposal_type, std::vector<document_graph::content_group> &content_groups);
+      ACTION created(const name &creator, const checksum256 &hash);
+      // document_graph
+      ACTION createdoc (const name& creator, const vector<document_graph::content_group> &content_groups);
+      ACTION erasedochash (const checksum256 &doc);
+      ACTION erasealldocs (const string &notes);
+      ACTION eraseedges (const string &notes); 
+      ACTION erasedocbyid (const uint64_t &id);
       ACTION closedocprop (const checksum256 &proposal_hash);
+      // create the initial rootnode document
+      ACTION createroot (const string &notes);
+      // make member documents from the members table
+      ACTION makememdocs (const string &notes);
+
+      /// **********************************
+      ///  END - Generation 2 Actions
+      /// **********************************
+
+      // membership actions      
+      ACTION apply(const name &applicant, const string &content);
+      ACTION enroll(const name &enroller, const name &applicant, const string &content);
+      ACTION remapply(const name &applicant);
+
+      // Admin
+      // ACTION reset ();
+      ACTION debugmsg(const string &message);
+      ACTION clrdebugs(const uint64_t &starting_id, const uint64_t &batch_size);
+      ACTION updversion(const string &component, const string &version);
+      ACTION updassets(const uint64_t &proposal_id);
+      ACTION set (const name &scope, const uint64_t &id, const string& key, const flexvalue1& flexvalue); 
+      ACTION updassassets (const uint64_t &assignment_id); // temporary fix
+      ACTION fixseedsprec (const uint64_t &proposal_id);  // temporary fix
+
+      // alerts Group
+      ACTION setalert (const name &level, const string &content);
+      ACTION remalert (const string &notes);
+
+      // Calendar actions
+      ACTION addperiod(const time_point &start_time, const time_point &end_time, const string &phase);
+      ACTION remperiods(const uint64_t &begin_period_id, const uint64_t &end_period_id);
+      ACTION resetperiods();
 
       // users can claim their salary pay
       ACTION payassign(const uint64_t &assignment_id, const uint64_t &period_id);
 
-      // temporary hack (?) - keep a list of the members, although true membership is governed by token holdings
-      ACTION removemember(const name &member_to_remove);
-      ACTION addmember(const name &member);
-
-      // create the initial rootnode document
-      ACTION createroot (const string &notes);
-      ACTION makememdocs (const string &notes);
-
    private:
-      Bank bank = Bank(get_self());
+
+      // bank-related functions
+      void remove_periods(const uint64_t &begin_period_id, const uint64_t &end_period_id);
+      void reset_periods();
+      void make_payment(const uint64_t &period_id,const name &recipient, const asset &quantity, const string &memo,const uint64_t &assignment_id,const uint64_t &bypass_escrow);
+      void issuetoken(const name &token_contract, const name &issuer, const name &to, const asset &token_amount, const string &memo);
+
+      bool holds_hypha(const name &account);
+      uint64_t get_last_period_id();
+
+      float get_seeds_price_usd () ;
+      float get_seeds_price_usd (const time_point& price_time_point);
+      asset get_seeds_amount (const asset &usd_amount, const time_point &price_time_point, const float &time_share, const float &deferred_perc);
+
+      // Generation 2 - document graph related
       document_graph _document_graph = document_graph(get_self());
-
       checksum256 get_root();
-
-      void defcloseprop(const uint64_t &proposal_id);
-      void qualify_owner(const name &proposer);
-
-      name register_ballot(const name &proposer,
-							      const map<string, string> &strings);
-
-      name register_ballot(const name &proposer,
-                           const string &title, const string &description, const string &content);
-
       document_graph::document create_votetally_doc (const name& proposer, std::vector<document_graph::content_group> &content_groups);
-
       bool did_pass (const name &ballot_id);
       void verify_membership (const name& member) ;
       
@@ -350,6 +400,9 @@ namespace hyphaspace
       document_graph::document propose_badge_assignment (const name& proposer, std::vector<document_graph::content_group> &content_groups);
       void assign_badge (const document_graph::document &badge_assignment);
       void check_coefficient (document_graph::content_group &content_group, const string &coefficient_key);
+      asset apply_coefficient (const document_graph::document &badge, const asset &base, const string &coefficient_key);
+      asset_batch apply_badge_coefficients (const uint64_t period_id, const name &member, const asset_batch ab);
+      vector<document_graph::document> get_current_badges (const uint64_t &period_id, const name &member);
 
       document_graph::content_group create_system_group (const name& proposer, 
                                                          const name& proposal_type, 
@@ -360,22 +413,27 @@ namespace hyphaspace
       document_graph::document get_member_doc (const name& member);
       document_graph::document get_member_doc (const name &creator, const name& member);
 
-      uint64_t hash (std::string str); 
-      uint64_t get_next_sender_id();
-      void debug(const string &notes);
-      // void change_scope(const name &current_scope, const uint64_t &id, const vector<name> &new_scopes, const bool &remove_old);
-     
-      asset adjust_asset(const asset &original_asset, const float &adjustment);
+      void defcloseprop(const uint64_t &proposal_id);
+      void qualify_owner(const name &proposer);
+
+      // Telos Decide related (to be deprecated)
+      name register_ballot(const name &proposer,const map<string, string> &strings);
+      name register_ballot(const name &proposer,const string &title, const string &description, const string &content);
+
+      // config related
       float get_float(const std::map<string, uint64_t> ints, string key);
-
       bool is_paused();
-      bool is_proposal_direct_assets (const map<string, asset> &assets);
-
+      uint64_t get_next_sender_id();
       string get_string(const std::map<string, string> strings, string key);
+
+      // Utilities      
+      uint64_t hash (std::string str); 
+      void debug(const string &notes);     
+      void debugx(const string &message);
+      asset adjust_asset(const asset &original_asset, const float &adjustment);
+      bool is_proposal_direct_assets (const map<string, asset> &assets);  // ??
       void checkx(const bool &condition, const string &message);
       void check_capacity(const uint64_t &role_id, const uint64_t &req_time_share_x100);
-
-      uint64_t get_last_period_id();
 
       void new_object (const name &creator,
                         const name &scope,
@@ -411,8 +469,7 @@ namespace hyphaspace
                   const map<string, uint64_t> ints,
                   const map<string, transaction> trxs);
 
-      void event (const name &level,
-                  const map<string, flexvalue1> &values);
+      void event (const name &level, const map<string, flexvalue1> &values);
 
       map<string, flexvalue1> variant_helper (const map<string, name> &names,
                             const map<string, string> &strings,
@@ -426,10 +483,6 @@ namespace hyphaspace
                                  
       map<string, asset> get_assets(const uint64_t &role_id, 
                                     const float &deferred_perc, 
-                                    const float &time_share_perc);
-
-      float get_seeds_price_usd () ;
-      float get_seeds_price_usd (const time_point& price_time_point);
-      asset get_seeds_amount (const asset &usd_amount, const time_point &price_time_point, const float &time_share, const float &deferred_perc);
+                                    const float &time_share_perc);      
    };
 } // namespace hyphasapce

@@ -100,11 +100,15 @@ namespace hyphaspace
 
         uint64_t to_uint64 (const checksum256 &document_hash);
         void create_edge (const checksum256 &from_node, const checksum256 &to_node, const name &edge_name);
+        void create_edge (const checksum256 &from_node, const checksum256 &to_node, const name &edge_name, const bool strict);
 
         void remove_edge (const checksum256 &from_node, const checksum256 &to_node, const name &edge_name, const bool strict);
         void remove_edges (const checksum256 &from_node, const checksum256 &to_node, const bool strict);
         void remove_edges (const checksum256 &from_node, const name &edge_name, const bool strict);
         void remove_edges (const checksum256 &node, const bool strict);
+
+        vector<edge> get_edges (const checksum256 &from_node, const name &edge_name, const bool strict);
+        edge get_edge (const checksum256 &from_node, const name &edge_name, const bool strict);
 
         // Any account/member can creator a new document, support many options/constructors
         document create_document(const name &creator, const vector<content_group> &content_groups);
