@@ -100,6 +100,7 @@ namespace hyphaspace
 
         uint64_t to_uint64 (const checksum256 &document_hash);
         void create_edge (const checksum256 &from_node, const checksum256 &to_node, const name &edge_name);
+        void create_edge (const checksum256 &from_node, const checksum256 &to_node, const name &edge_name, const bool strict);
 
         void remove_edge (const checksum256 &from_node, const checksum256 &to_node, const name &edge_name, const bool strict);
         void remove_edges (const checksum256 &from_node, const checksum256 &to_node, const bool strict);

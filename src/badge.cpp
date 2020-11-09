@@ -201,14 +201,14 @@ void hyphadao::assign_badge(const document_graph::document &badge_assignment)
     //    badge             ---- assignment     ---->   badge_assignment
     //    badge_assignment  ---- badge          ---->   badge
 
-    // the assignee now HOLDS this badge
-    _document_graph.create_edge(member_doc_hash, badge.hash, common::HOLDS_BADGE);
+    // the assignee now HOLDS this badge, non-strict in case the member already has the badge
+    _document_graph.create_edge(member_doc_hash, badge.hash, common::HOLDS_BADGE, false);
 
-    // the assignee now HOLDS this badge
+    // the assignee now is badgeassigned this badge assignment
     _document_graph.create_edge(member_doc_hash, badge_assignment.hash, common::ASSIGN_BADGE);
 
-    // the badge also links back to the assignee
-    _document_graph.create_edge(badge.hash, member_doc_hash, common::HELD_BY);
+    // the badge also links back to the assignee, non-strict in case the member already has the badge
+    _document_graph.create_edge(badge.hash, member_doc_hash, common::HELD_BY, false);
 
     _document_graph.create_edge(badge.hash, badge_assignment.hash, common::ASSIGNMENT);
 
