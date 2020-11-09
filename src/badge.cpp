@@ -8,9 +8,9 @@ void hyphadao::check_coefficient(document_graph::content_group &content_group, c
     if (coefficient_x10000 != _document_graph.DOES_NOT_EXIST)
     {
         check(std::holds_alternative<int64_t>(coefficient_x10000), "fatal error: coefficient must be an int64_t type: " + coefficient_key);
-        check(std::get<int64_t>(coefficient_x10000) >= 9000 &&
-                  std::get<int64_t>(coefficient_x10000) <= 11000,
-              "fatal error: coefficient_x10000 must be between 9000 and 11000, inclusive: " + coefficient_key);
+        check(std::get<int64_t>(coefficient_x10000) >= 7000 &&
+                  std::get<int64_t>(coefficient_x10000) <= 13000,
+              "fatal error: coefficient_x10000 must be between 7000 and 13000, inclusive: " + coefficient_key);
     }
 }
 
@@ -195,19 +195,23 @@ void hyphadao::assign_badge(const document_graph::document &badge_assignment)
     checksum256 member_doc_hash = get_member_doc(assignee).hash;
 
     // update graph edges:
-    //    member    ---- holdsbadge     ---->   badge
-    //    member    ---- badgeassign    ---->   badge_assignment
-    //    badge     ---- heldby         ---->   member
-    //    badge     ---- assignment     ---->   badge_assignment
+    //    member            ---- holdsbadge     ---->   badge
+    //    member            ---- badgeassign    ---->   badge_assignment
+    //    badge             ---- heldby         ---->   member
+    //    badge             ---- assignment     ---->   badge_assignment
+    //    badge_assignment  ---- badge          ---->   badge
 
-    // the assignee now HOLDS this badge
-    _document_graph.create_edge(member_doc_hash, badge.hash, common::HOLDS_BADGE);
+    // the assignee now HOLDS this badge, non-strict in case the member already has the badge
+    _document_graph.create_edge(member_doc_hash, badge.hash, common::HOLDS_BADGE, false);
 
-    // the assignee now HOLDS this badge
+    // the assignee now is badgeassigned this badge assignment
     _document_graph.create_edge(member_doc_hash, badge_assignment.hash, common::ASSIGN_BADGE);
 
-    // the badge also links back to the assignee
-    _document_graph.create_edge(badge.hash, member_doc_hash, common::HELD_BY);
+    // the badge also links back to the assignee, non-strict in case the member already has the badge
+    _document_graph.create_edge(badge.hash, member_doc_hash, common::HELD_BY, false);
 
     _document_graph.create_edge(badge.hash, badge_assignment.hash, common::ASSIGNMENT);
+
+    _document_graph.create_edge(badge_assignment.hash, badge.hash, common::BADGE_NAME);
+
 }

@@ -1,4 +1,5 @@
 project(hyphadao)
+cmake_minimum_required(VERSION 3.17)
 
 set(EOSIO_WASM_OLD_BEHAVIOR "Off")
 find_package(eosio.cdt)
@@ -9,6 +10,7 @@ add_contract( hyphadao hyphadao
                 config.cpp 
                 badge.cpp 
                 membership.cpp 
+                bank.cpp
                 object.cpp 
                 utility.cpp 
                 calculation.cpp 

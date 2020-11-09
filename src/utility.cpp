@@ -82,7 +82,7 @@ void hyphadao::clrdebugs(const uint64_t &starting_id, const uint64_t &batch_size
 void hyphadao::resetperiods()
 {
 	require_auth(get_self());
-	bank.reset_periods();
+	reset_periods();
 }
 
 void hyphadao::debugmsg(const string &message)
@@ -115,7 +115,7 @@ void hyphadao::remperiods(const uint64_t &begin_period_id,
 						  const uint64_t &end_period_id)
 {
 	require_auth(get_self());
-	bank.remove_periods(begin_period_id, end_period_id);
+	remove_periods(begin_period_id, end_period_id);
 }
 
 asset hyphadao::adjust_asset(const asset &original_asset, const float &adjustment)
@@ -148,6 +148,17 @@ string hyphadao::get_string(const map<string, string> strings, string key)
 	{
 		return string{""};
 	}
+}
+
+void hyphadao::debugx(const string &message)
+{
+	transaction trx(time_point_sec(current_time_point()) + (60));
+	trx.actions.emplace_back(
+		permission_level{get_self(), name("active")},
+		get_self(), name("debugmsg"),
+		make_tuple(message));
+	trx.delay_sec = 0;
+	trx.send(get_next_sender_id(), get_self());
 }
 
 void hyphadao::checkx(const bool &condition, const string &message)
@@ -235,6 +246,95 @@ void hyphadao::erasealldocs (const string &notes)
 		d_itr++;
 	}
 }
+
+// void hyphadao::reset()
+//     {
+//         require_auth(contract);
+
+//         auto pay_itr = payment_t.begin();
+//         while (pay_itr != payment_t.end())
+//         {
+//             pay_itr = payment_t.erase(pay_itr);
+//         }
+//     }
+
+// ONLY DEV
+void hyphadao::remove_periods(const uint64_t &begin_period_id,
+                              const uint64_t &end_period_id)
+{
+    require_auth(get_self());
+    period_table period_t(get_self(), get_self().value);
+    auto p_itr = period_t.find(begin_period_id);
+    check(p_itr != period_t.end(), "Begin period ID not found: " + std::to_string(begin_period_id));
+
+    while (p_itr->period_id <= end_period_id)
+    {
+        p_itr = period_t.erase(p_itr);
+    }
+}
+
+// ONLY DEV
+void hyphadao::reset_periods()
+{
+    require_auth(get_self());
+    period_table period_t(get_self(), get_self().value);
+    auto per_itr = period_t.begin();
+    while (per_itr != period_t.end())
+    {
+        per_itr = period_t.erase(per_itr);
+    }
+}
+
+void hyphadao::addperiod(const time_point &start_date, const time_point &end_date, const string &phase)
+{
+    require_auth(get_self());
+    period_table period_t(get_self(), get_self().value);
+    period_t.emplace(get_self(), [&](auto &p) {
+        p.period_id = period_t.available_primary_key();
+        p.start_date = start_date;
+        p.end_date = end_date;
+        p.phase = phase;
+    });
+}
+
+
+uint64_t hyphadao::get_last_period_id()
+{
+    period_table p_t(get_self(), get_self().value);
+    auto p_itr = p_t.begin();
+    while (p_itr != p_t.end())
+    {
+        if (p_itr->start_date <= current_time_point() && p_itr->end_date >= current_time_point())
+        {
+            return p_itr->period_id - 1;
+        }
+        p_itr++;
+    }
+    check(false, "FATAL ERROR: Last period ID is not found, perhaps periods table is empty.");
+    return 0;
+}
+
+bool hyphadao::holds_hypha(const name &account)
+{
+    config_table config_s(get_self(), get_self().value);
+    Config c = config_s.get_or_create(get_self(), Config());
+
+    eosiotoken::accounts a_t(c.names.at("hypha_token_contract"), account.value);
+    auto a_itr = a_t.find(common::S_HYPHA.code().raw());
+    if (a_itr == a_t.end())
+    {
+        return false;
+    }
+    else if (a_itr->balance.amount > 0)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
 
 // void hyphadao::reset()
 // {

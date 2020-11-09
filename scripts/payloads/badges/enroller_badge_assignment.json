@@ -33,14 +33,14 @@
                 "label": "start_period",
                 "value": [
                     "int64",
-                    45
+                    2
                 ]
             },
             {
                 "label": "end_period",
                 "value": [
                     "int64",
-                    75
+                    9
                 ]
             }
         ]
