@@ -29,7 +29,7 @@ void hyphadao::withdraw (const name &withdrawer, const uint64_t &assignment_id, 
 	});
 }
 
-void hyphadao::propsuspend (const name& proposer, const name& scope, const uint64_t& id) 
+void hyphadao::propsuspend(const name &proposer, const name &scope, const uint64_t &id, const string &notes)
 {
 	// check paused state
 	check(!is_paused(), "Contract is paused for maintenance. Please try again later.");
@@ -50,13 +50,16 @@ void hyphadao::propsuspend (const name& proposer, const name& scope, const uint6
 	temp_names["type"] = name("suspend");
 	temp_names["trx_action_name"] = name("suspend");
 
+	map<string, string> temp_strings{};
+
+	temp_strings["notes"] = notes;
+
 	// not used, just required for passing to new_proposal (non-const must be lvalues)
-	map<string, string> not_used_strings {};
 	map<string, asset> not_used_assets {};
 	map<string, time_point> not_used_timepoints {};
 	map<string, transaction> not_used_transactions {};
 
-	new_proposal (proposer, temp_names, not_used_strings, not_used_assets, 
+	new_proposal (proposer, temp_names, temp_strings, not_used_assets, 
 			not_used_timepoints, temp_ints, not_used_transactions );
 }
 

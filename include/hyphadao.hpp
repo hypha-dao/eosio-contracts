@@ -232,7 +232,7 @@ namespace hyphaspace
       ACTION propdraft (const uint64_t& id);
       ACTION erasedraft (const uint64_t& id);
 
-      ACTION propsuspend (const name &proposer, const name &scope, const uint64_t &id);
+      ACTION propsuspend(const name &proposer, const name &scope, const uint64_t &id, const string &notes);
       ACTION withdraw (const name &withdrawer, const uint64_t &assignment_id, const string& notes);
       
       ACTION apply(const name &applicant, const string &content);
