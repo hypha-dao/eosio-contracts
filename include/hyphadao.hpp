@@ -301,7 +301,7 @@ namespace hyphaspace
       ACTION erasedraft (const uint64_t& id);
       ACTION recreate(const name &scope, const uint64_t &id);
 
-      ACTION propsuspend (const name &proposer, const name &scope, const uint64_t &id);
+      ACTION propsuspend (const name &proposer, const name &scope, const uint64_t &id, const string &notes);
       ACTION withdraw (const name &withdrawer, const uint64_t &assignment_id, const string& notes);
 
       ACTION removemember(const name &member_to_remove);
