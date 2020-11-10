@@ -1347,7 +1347,7 @@
         {
             "name": "apply",
             "type": "apply",
-            "ricardian_contract": ""
+            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Apply\nsummary: 'Apply for Membership'\nicon: https://eos.gyftie.org/statics/logos/mobile.png#54b516210a9fe709b1ccc8c075e16538d51e3664674f707f80630a7e53dbd2e7\n---\n\n{{$action.authorization.[0].actor}} applies"
         },
         {
             "name": "assign",
@@ -1367,7 +1367,7 @@
         {
             "name": "closeprop",
             "type": "closeprop",
-            "ricardian_contract": ""
+            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Close Proposal\nsummary: 'Close the Proposal after the Voting Period ends'\nicon: https://eos.gyftie.org/statics/logos/mobile.png#54b516210a9fe709b1ccc8c075e16538d51e3664674f707f80630a7e53dbd2e7\n---\n\n{{$action.authorization.[0].actor}} applies"
         },
         {
             "name": "clrdebugs",
@@ -1382,7 +1382,7 @@
         {
             "name": "create",
             "type": "create",
-            "ricardian_contract": ""
+            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Create Object\nsummary: 'Create an object in the contract'\nicon: https://eos.gyftie.org/statics/logos/mobile.png#54b516210a9fe709b1ccc8c075e16538d51e3664674f707f80630a7e53dbd2e7\n---\n\n{{$action.authorization.[0].actor}} applies"
         },
         {
             "name": "created",
@@ -1412,7 +1412,7 @@
         {
             "name": "enroll",
             "type": "enroll",
-            "ricardian_contract": ""
+            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Enroll\nsummary: 'Enroll a member in the organization'\nicon: https://eos.gyftie.org/statics/logos/mobile.png#54b516210a9fe709b1ccc8c075e16538d51e3664674f707f80630a7e53dbd2e7\n---\n\n{{$action.authorization.[0].actor}} enrolls the existing applicant {{applicant}} with the content {{content}} to Hypha DAO.\""
         },
         {
             "name": "erasealldocs",
@@ -1482,7 +1482,7 @@
         {
             "name": "payassign",
             "type": "payassign",
-            "ricardian_contract": ""
+            "ricardian_contract": "---\nspec_version: \"0.2.0\"\ntitle: Claim Assignment Pay\nsummary: 'Claim assignment pay for a specified assignment and period ID'\nicon: https://eos.gyftie.org/statics/logos/mobile.png#54b516210a9fe709b1ccc8c075e16538d51e3664674f707f80630a7e53dbd2e7\n---\n\n{{$action.authorization.[0].actor}} pays the given assignment with the id: {{assignment_id}} in the period with the id: {{period_id}}.\""
         },
         {
             "name": "propdraft",
