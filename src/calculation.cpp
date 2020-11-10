@@ -171,12 +171,11 @@ asset hyphadao::apply_coefficient(const document_graph::document &badge, const a
 {
     auto coefficient = _document_graph.get_content(badge, common::DETAILS, coefficient_key, false);
     check(std::holds_alternative<int64_t>(coefficient), "fatal error: coefficient must be an int; badge: " +
-                                                            _document_graph.readable_hash(badge.hash) + "; coeffecient_key: " + coefficient_key);
+                                                            _document_graph.readable_hash(badge.hash) + "; coefficient_key: " + coefficient_key);
 
     if (coefficient == _document_graph.DOES_NOT_EXIST)
     {
-        debugx("Coeffecient : " + coefficient_key + " not found.");
-        return asset{0, base.symbol};
+        return asset {0, base.symbol};
     }
 
     float coeff_float = (float)((float)std::get<int64_t>(coefficient) / (float)10000);
@@ -193,10 +192,8 @@ hyphadao::asset_batch hyphadao::apply_badge_coefficients(const uint64_t period_i
     // for each badge, apply appropriate coefficients
     for (const auto badge : badges)
     {
-
-        applied_assets.husd = applied_assets.husd + apply_coefficient(badge, ab.husd, common::HUSD_COEFFICIENT);
-        ;
         applied_assets.hypha = applied_assets.hypha + apply_coefficient(badge, ab.hypha, common::HYPHA_COEFFICIENT);
+        applied_assets.husd = applied_assets.husd + apply_coefficient(badge, ab.husd, common::HUSD_COEFFICIENT);
         applied_assets.voice = applied_assets.voice + apply_coefficient(badge, ab.voice, common::HVOICE_COEFFICIENT);
         applied_assets.seeds = applied_assets.seeds + apply_coefficient(badge, ab.seeds, common::SEEDS_COEFFICIENT);
         applied_assets.d_seeds = applied_assets.d_seeds + apply_coefficient(badge, ab.d_seeds, common::SEEDS_COEFFICIENT);
