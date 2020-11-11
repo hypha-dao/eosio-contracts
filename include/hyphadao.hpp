@@ -142,76 +142,58 @@ namespace hyphaspace
       typedef singleton<name("config"), configtable> configtables;
       typedef eosio::multi_index<name("config"), configtable> dump_for_config;
 
-      struct [[eosio::table, eosio::contract("hyphadao")]] price_history_table {
+      struct [[eosio::table, eosio::contract("hyphadao")]] price_history_table
+      {
          uint64_t id;
          asset seeds_usd;
          time_point date;
 
-         uint64_t primary_key()const { return id; }
+         uint64_t primary_key() const { return id; }
       };
       typedef eosio::multi_index<name("pricehistory"), price_history_table> price_history_tables;
 
       struct [[eosio::table, eosio::contract("hyphadao")]] Period
-    {
-        uint64_t period_id;
-        time_point start_date;
-        time_point end_date;
-        string phase;
+      {
+         uint64_t period_id;
+         time_point start_date;
+         time_point end_date;
+         string phase;
 
-        uint64_t primary_key() const { return period_id; }
-    };
+         uint64_t primary_key() const { return period_id; }
+      };
 
-    struct [[eosio::table, eosio::contract("hyphadao")]] Payment
-    {
-        uint64_t payment_id;
-        time_point payment_date;
-        uint64_t period_id = 0;
-        uint64_t assignment_id = -1;
-        name recipient;
-        asset amount;
-        string memo;
+      struct [[eosio::table, eosio::contract("hyphadao")]] Payment
+      {
+         uint64_t payment_id;
+         time_point payment_date;
+         uint64_t period_id = 0;
+         uint64_t assignment_id = -1;
+         name recipient;
+         asset amount;
+         string memo;
 
-        uint64_t primary_key() const { return payment_id; }
-        uint64_t by_period() const { return period_id; }
-        uint64_t by_recipient() const { return recipient.value; }
-        uint64_t by_assignment() const { return assignment_id; }
-    };
+         uint64_t primary_key() const { return payment_id; }
+         uint64_t by_period() const { return period_id; }
+         uint64_t by_recipient() const { return recipient.value; }
+         uint64_t by_assignment() const { return assignment_id; }
+      };
 
-    typedef multi_index<name("periods"), Period> period_table;
+      typedef multi_index<name("periods"), Period> period_table;
 
-    typedef multi_index<name("payments"), Payment,
-                        indexed_by<name("byperiod"), const_mem_fun<Payment, uint64_t, &Payment::by_period>>,
-                        indexed_by<name("byrecipient"), const_mem_fun<Payment, uint64_t, &Payment::by_recipient>>,
-                        indexed_by<name("byassignment"), const_mem_fun<Payment, uint64_t, &Payment::by_assignment>>>
-        payment_table;
+      typedef multi_index<name("payments"), Payment,
+                          indexed_by<name("byperiod"), const_mem_fun<Payment, uint64_t, &Payment::by_period>>,
+                          indexed_by<name("byrecipient"), const_mem_fun<Payment, uint64_t, &Payment::by_recipient>>,
+                          indexed_by<name("byassignment"), const_mem_fun<Payment, uint64_t, &Payment::by_assignment>>>
+          payment_table;
 
-    struct asset_batch 
-    {
-       asset hypha   = asset{0, common::S_HYPHA};
-       asset d_seeds = asset{0, common::S_SEEDS};
-       asset seeds   = asset{0, common::S_SEEDS};
-       asset voice   = asset{0, common::S_HVOICE};
-       asset husd    = asset{0, common::S_HUSD};
-
-    };
-
-      // struct [[eosio::table, eosio::contract("hyphadao")]] document
-      // {
-      //    uint64_t id;
-      //    checksum256 hash;
-      //    name creator;
-      //    vector<document_graph::content_group> content_groups;
-
-      //    vector<document_graph::certificate> certificates;
-      //    uint64_t primary_key() const { return id; }
-      //    uint64_t by_creator() const { return creator.value; }
-      //    checksum256 by_hash() const { return hash; }
-
-      //    time_point created_date = current_time_point();
-      //    uint64_t by_created() const { return created_date.sec_since_epoch(); }
-
-      //    EOSLIB_SERIALIZE(document, (id)(hash)(creator)(content_groups)(certificates)(created_date))
-      // };
+      struct asset_batch
+      {
+         asset hypha = asset{0, common::S_HYPHA};
+         asset d_seeds = asset{0, common::S_SEEDS};
+         asset seeds = asset{0, common::S_SEEDS};
+         asset voice = asset{0, common::S_HVOICE};
+         asset husd = asset{0, common::S_HUSD};
+      };
 
       typedef multi_index<name("documents"), document_graph::document,
                           indexed_by<name("idhash"), const_mem_fun<document_graph::document, checksum256, &document_graph::document::by_hash>>,
@@ -219,31 +201,16 @@ namespace hyphaspace
                           indexed_by<name("bycreated"), const_mem_fun<document_graph::document, uint64_t, &document_graph::document::by_created>>>
           document_table;
 
-      // scopes: badges, roles, assignments, members, specific member name, etc. 
-      struct [[eosio::table, eosio::contract("hyphadao")]] DocumentIndex
-      {
-         uint64_t id;
-
-         checksum256 document_hash;
-         checksum256 by_hash() const { return document_hash; }
-
-         time_point created_date = current_time_point();
-         uint64_t by_created() const { return created_date.sec_since_epoch(); }
-
-         uint64_t primary_key() const { return id; }
-      };
-
-      typedef multi_index<name("docindex"),DocumentIndex,
-                              indexed_by<name("idhash"), const_mem_fun<DocumentIndex, checksum256, &DocumentIndex::by_hash>>,
-                              indexed_by<name("bycreated"), const_mem_fun<DocumentIndex, uint64_t, &DocumentIndex::by_created>>>
-               docindex_table;
-
       typedef multi_index<name("edges"), document_graph::edge,
-                              indexed_by<name("fromnode"), const_mem_fun<document_graph::edge, checksum256, &document_graph::edge::by_from>>,
-                              indexed_by<name("tonode"), const_mem_fun<document_graph::edge, checksum256, &document_graph::edge::by_to>>,
-                              indexed_by<name("edgename"), const_mem_fun<document_graph::edge, uint64_t, &document_graph::edge::by_edge_name>>,
-                              indexed_by<name("bycreated"), const_mem_fun<document_graph::edge, uint64_t, &document_graph::edge::by_created>>>
-               edge_table;
+                          indexed_by<name("fromnode"), const_mem_fun<document_graph::edge, checksum256, &document_graph::edge::by_from>>,
+                          indexed_by<name("tonode"), const_mem_fun<document_graph::edge, checksum256, &document_graph::edge::by_to>>,
+                          indexed_by<name("edgename"), const_mem_fun<document_graph::edge, uint64_t, &document_graph::edge::by_edge_name>>,
+                          indexed_by<name("byfromname"), const_mem_fun<document_graph::edge, uint64_t, &document_graph::edge::by_from_node_edge_name_index>>,
+                          indexed_by<name("byfromto"), const_mem_fun<document_graph::edge, uint64_t, &document_graph::edge::by_from_node_to_node_index>>,
+                          indexed_by<name("bytoname"), const_mem_fun<document_graph::edge, uint64_t, &document_graph::edge::by_to_node_edge_name_index>>,
+                          indexed_by<name("bycreated"), const_mem_fun<document_graph::edge, uint64_t, &document_graph::edge::by_created>>,
+                          indexed_by<name("bycreator"), const_mem_fun<document_graph::edge, uint64_t, &document_graph::edge::by_creator>>>
+          edge_table;
 
       const uint64_t MICROSECONDS_PER_HOUR = (uint64_t)60 * (uint64_t)60 * (uint64_t)1000000;
       const uint64_t MICROSECONDS_PER_YEAR = MICROSECONDS_PER_HOUR * (uint64_t)24 * (uint64_t)365;
@@ -253,14 +220,14 @@ namespace hyphaspace
       /// **********************************
 
       ACTION create(const name &scope,
-                     map<string, name> names,
-                     map<string, string> strings,
-                     map<string, asset> assets,
-                     map<string, time_point> time_points,
-                     map<string, uint64_t> ints,
-                     const map<string, float> floats,
-                     map<string, transaction> trxs);
-      
+                    map<string, name> names,
+                    map<string, string> strings,
+                    map<string, asset> assets,
+                    map<string, time_point> time_points,
+                    map<string, uint64_t> ints,
+                    const map<string, float> floats,
+                    map<string, transaction> trxs);
+
       ACTION edit(const name &scope,
                   const uint64_t &id,
                   const map<string, name> names,
@@ -278,39 +245,38 @@ namespace hyphaspace
                        const map<string, uint64_t> ints,
                        const map<string, float> floats,
                        const map<string, transaction> trxs);
-      ACTION setconfigatt(const string& key, const hyphadao::flexvalue1& value);
-      ACTION remconfigatt(const string& key);
+      ACTION setconfigatt(const string &key, const hyphadao::flexvalue1 &value);
+      ACTION remconfigatt(const string &key);
       ACTION setlastballt(const name &last_ballot_id);
       ACTION togglepause();
 
-      
       // These actions are executed only on approval of a proposal.
       // To introduce a new proposal type, we would add another action to the below.
       ACTION newrole(const uint64_t &proposal_id);
       ACTION assign(const uint64_t &proposal_id);
       ACTION makepayout(const uint64_t &proposal_id);
       ACTION exectrx(const uint64_t &proposal_id);
-      ACTION mergeobject(const uint64_t& proposal_id);
+      ACTION mergeobject(const uint64_t &proposal_id);
       ACTION suspend(const uint64_t &proposal_id);
 
       // anyone can call closeprop, it executes the transaction if the voting passed
       ACTION closeprop(const uint64_t &proposal_id);
-      
-      ACTION copytodraft (const name& copier, const name &scope, const uint64_t &id);
-      ACTION propdraft (const uint64_t& id);
-      ACTION erasedraft (const uint64_t& id);
+
+      ACTION copytodraft(const name &copier, const name &scope, const uint64_t &id);
+      ACTION propdraft(const uint64_t &id);
+      ACTION erasedraft(const uint64_t &id);
       ACTION recreate(const name &scope, const uint64_t &id);
 
-      ACTION propsuspend (const name &proposer, const name &scope, const uint64_t &id);
-      ACTION withdraw (const name &withdrawer, const uint64_t &assignment_id, const string& notes);
+      ACTION propsuspend(const name &proposer, const name &scope, const uint64_t &id);
+      ACTION withdraw(const name &withdrawer, const uint64_t &assignment_id, const string &notes);
 
       ACTION removemember(const name &member_to_remove);
       ACTION addmember(const name &member);
 
       // data object handling
       ACTION transform(const name &creator, const name &scope, const uint64_t &id);
-      ACTION transscope (const name& creator, const name &scope, const uint64_t &starting_id, const uint64_t &batch_size);
-      ACTION erasedocs (const name &scope);
+      ACTION transscope(const name &creator, const name &scope, const uint64_t &starting_id, const uint64_t &batch_size);
+      ACTION erasedocs(const name &scope);
       ACTION resetscope(const name &scope);
       ACTION erasedoc(const name &scope, const uint64_t &id);
       ACTION changescope(const name &scope, const uint64_t &id, const vector<name> &new_scopes, const bool &remove_old);
@@ -323,30 +289,29 @@ namespace hyphaspace
       ///  END - Generation 1 Actions
       /// **********************************
 
-
       /// **********************************
       ///  Generation 2 Actions
       /// **********************************
 
-      ACTION propose (const name& proposer, const name& proposal_type, std::vector<document_graph::content_group> &content_groups);
+      ACTION propose(const name &proposer, const name &proposal_type, std::vector<document_graph::content_group> &content_groups);
       ACTION created(const name &creator, const checksum256 &hash);
       // document_graph
-      ACTION createdoc (const name& creator, const vector<document_graph::content_group> &content_groups);
-      ACTION erasedochash (const checksum256 &doc);
-      ACTION erasealldocs (const string &notes);
-      ACTION eraseedges (const string &notes); 
-      ACTION erasedocbyid (const uint64_t &id);
-      ACTION closedocprop (const checksum256 &proposal_hash);
+      ACTION createdoc(const name &creator, const vector<document_graph::content_group> &content_groups);
+      ACTION erasedochash(const checksum256 &doc);
+      ACTION erasealldocs(const string &notes);
+      ACTION eraseedges(const string &notes);
+      ACTION erasedocbyid(const uint64_t &id);
+      ACTION closedocprop(const checksum256 &proposal_hash);
       // create the initial rootnode document
-      ACTION createroot (const string &notes);
+      ACTION createroot(const string &notes);
       // make member documents from the members table
-      ACTION makememdocs (const string &notes);
+      ACTION makememdocs(const string &notes);
 
       /// **********************************
       ///  END - Generation 2 Actions
       /// **********************************
 
-      // membership actions      
+      // membership actions
       ACTION apply(const name &applicant, const string &content);
       ACTION enroll(const name &enroller, const name &applicant, const string &content);
       ACTION remapply(const name &applicant);
@@ -357,13 +322,13 @@ namespace hyphaspace
       ACTION clrdebugs(const uint64_t &starting_id, const uint64_t &batch_size);
       ACTION updversion(const string &component, const string &version);
       ACTION updassets(const uint64_t &proposal_id);
-      ACTION set (const name &scope, const uint64_t &id, const string& key, const flexvalue1& flexvalue); 
-      ACTION updassassets (const uint64_t &assignment_id); // temporary fix
-      ACTION fixseedsprec (const uint64_t &proposal_id);  // temporary fix
+      ACTION set(const name &scope, const uint64_t &id, const string &key, const flexvalue1 &flexvalue);
+      ACTION updassassets(const uint64_t &assignment_id); // temporary fix
+      ACTION fixseedsprec(const uint64_t &proposal_id);   // temporary fix
 
       // alerts Group
-      ACTION setalert (const name &level, const string &content);
-      ACTION remalert (const string &notes);
+      ACTION setalert(const name &level, const string &content);
+      ACTION remalert(const string &notes);
 
       // Calendar actions
       ACTION addperiod(const time_point &start_time, const time_point &end_time, const string &phase);
@@ -374,51 +339,50 @@ namespace hyphaspace
       ACTION payassign(const uint64_t &assignment_id, const uint64_t &period_id);
 
    private:
-
       // bank-related functions
       void remove_periods(const uint64_t &begin_period_id, const uint64_t &end_period_id);
       void reset_periods();
-      void make_payment(const uint64_t &period_id,const name &recipient, const asset &quantity, const string &memo,const uint64_t &assignment_id,const uint64_t &bypass_escrow);
+      void make_payment(const uint64_t &period_id, const name &recipient, const asset &quantity, const string &memo, const uint64_t &assignment_id, const uint64_t &bypass_escrow);
       void issuetoken(const name &token_contract, const name &issuer, const name &to, const asset &token_amount, const string &memo);
 
       bool holds_hypha(const name &account);
       uint64_t get_last_period_id();
 
-      float get_seeds_price_usd () ;
-      float get_seeds_price_usd (const time_point& price_time_point);
-      asset get_seeds_amount (const asset &usd_amount, const time_point &price_time_point, const float &time_share, const float &deferred_perc);
+      float get_seeds_price_usd();
+      float get_seeds_price_usd(const time_point &price_time_point);
+      asset get_seeds_amount(const asset &usd_amount, const time_point &price_time_point, const float &time_share, const float &deferred_perc);
 
       // Generation 2 - document graph related
       document_graph _document_graph = document_graph(get_self());
       checksum256 get_root();
-      document_graph::document create_votetally_doc (const name& proposer, std::vector<document_graph::content_group> &content_groups);
-      bool did_pass (const name &ballot_id);
-      void verify_membership (const name& member) ;
-      
+      document_graph::document create_votetally_doc(const name &proposer, std::vector<document_graph::content_group> &content_groups);
+      bool did_pass(const name &ballot_id);
+      void verify_membership(const name &member);
+
       // badge-related functions
-      document_graph::document propose_badge (const name& proposer, std::vector<document_graph::content_group> &content_groups);
-      document_graph::document propose_badge_assignment (const name& proposer, std::vector<document_graph::content_group> &content_groups);
-      void assign_badge (const document_graph::document &badge_assignment);
-      void check_coefficient (document_graph::content_group &content_group, const string &coefficient_key);
-      asset apply_coefficient (const document_graph::document &badge, const asset &base, const string &coefficient_key);
-      asset_batch apply_badge_coefficients (const uint64_t period_id, const name &member, const asset_batch ab);
-      vector<document_graph::document> get_current_badges (const uint64_t &period_id, const name &member);
+      document_graph::document propose_badge(const name &proposer, std::vector<document_graph::content_group> &content_groups);
+      document_graph::document propose_badge_assignment(const name &proposer, std::vector<document_graph::content_group> &content_groups);
+      void assign_badge(const document_graph::document &badge_assignment);
+      void check_coefficient(document_graph::content_group & content_group, const string &coefficient_key);
+      asset apply_coefficient(const document_graph::document &badge, const asset &base, const string &coefficient_key);
+      asset_batch apply_badge_coefficients(const uint64_t period_id, const name &member, const asset_batch ab);
+      vector<document_graph::document> get_current_badges(const uint64_t &period_id, const name &member);
 
-      document_graph::content_group create_system_group (const name& proposer, 
-                                                         const name& proposal_type, 
-                                                         const string& decide_title,
-                                                         const string& decide_desc,
-                                                         const string& decide_content);
+      document_graph::content_group create_system_group(const name &proposer,
+                                                        const name &proposal_type,
+                                                        const string &decide_title,
+                                                        const string &decide_desc,
+                                                        const string &decide_content);
 
-      document_graph::document get_member_doc (const name& member);
-      document_graph::document get_member_doc (const name &creator, const name& member);
+      document_graph::document get_member_doc(const name &member);
+      document_graph::document get_member_doc(const name &creator, const name &member);
 
       void defcloseprop(const uint64_t &proposal_id);
       void qualify_owner(const name &proposer);
 
       // Telos Decide related (to be deprecated)
-      name register_ballot(const name &proposer,const map<string, string> &strings);
-      name register_ballot(const name &proposer,const string &title, const string &description, const string &content);
+      name register_ballot(const name &proposer, const map<string, string> &strings);
+      name register_ballot(const name &proposer, const string &title, const string &description, const string &content);
 
       // config related
       float get_float(const std::map<string, uint64_t> ints, string key);
@@ -426,63 +390,63 @@ namespace hyphaspace
       uint64_t get_next_sender_id();
       string get_string(const std::map<string, string> strings, string key);
 
-      // Utilities      
-      uint64_t hash (std::string str); 
-      void debug(const string &notes);     
+      // Utilities
+      uint64_t hash(std::string str);
+      void debug(const string &notes);
       void debugx(const string &message);
       asset adjust_asset(const asset &original_asset, const float &adjustment);
-      bool is_proposal_direct_assets (const map<string, asset> &assets);  // ??
+      bool is_proposal_direct_assets(const map<string, asset> &assets); // ??
       void checkx(const bool &condition, const string &message);
       void check_capacity(const uint64_t &role_id, const uint64_t &req_time_share_x100);
 
-      void new_object (const name &creator,
-                        const name &scope,
-                        const map<string, name> names,
-                        const map<string, string> strings,
-                        const map<string, asset> assets,
-                        const map<string, time_point> time_points,
-                        const map<string, uint64_t> ints,
-                        const map<string, transaction> trxs);
+      void new_object(const name &creator,
+                      const name &scope,
+                      const map<string, name> names,
+                      const map<string, string> strings,
+                      const map<string, asset> assets,
+                      const map<string, time_point> time_points,
+                      const map<string, uint64_t> ints,
+                      const map<string, transaction> trxs);
 
-      void new_document (const name &creator,
-                        const name &scope, 
+      void new_document(const name &creator,
+                        const name &scope,
                         const map<string, name> names,
                         const map<string, string> strings,
                         const map<string, asset> assets,
                         const map<string, time_point> time_points,
                         const map<string, uint64_t> ints);
 
-      void new_proposal(const name& owner,
+      void new_proposal(const name &owner,
                         map<string, name> &names,
                         map<string, string> &strings,
                         map<string, asset> &assets,
                         map<string, time_point> &time_points,
                         map<string, uint64_t> &ints,
-                        map<string, transaction> &trxs) ;
+                        map<string, transaction> &trxs);
 
-      void merge (const name& scope, 
-                  const uint64_t& id, 
-                  const map<string, name> names,
-                  const map<string, string> strings,
-                  const map<string, asset> assets,
-                  const map<string, time_point> time_points,
-                  const map<string, uint64_t> ints,
-                  const map<string, transaction> trxs);
+      void merge(const name &scope,
+                 const uint64_t &id,
+                 const map<string, name> names,
+                 const map<string, string> strings,
+                 const map<string, asset> assets,
+                 const map<string, time_point> time_points,
+                 const map<string, uint64_t> ints,
+                 const map<string, transaction> trxs);
 
-      void event (const name &level, const map<string, flexvalue1> &values);
+      void event(const name &level, const map<string, flexvalue1> &values);
 
-      map<string, flexvalue1> variant_helper (const map<string, name> &names,
-                            const map<string, string> &strings,
-                            const map<string, asset> &assets,
-                            const map<string, time_point> &time_points,
-                            const map<string, uint64_t> &ints );
+      map<string, flexvalue1> variant_helper(const map<string, name> &names,
+                                             const map<string, string> &strings,
+                                             const map<string, asset> &assets,
+                                             const map<string, time_point> &time_points,
+                                             const map<string, uint64_t> &ints);
 
       map<string, asset> get_assets(const asset &usd_amount,
                                     const float &deferred_perc,
                                     const time_point &price_time_point);
-                                 
-      map<string, asset> get_assets(const uint64_t &role_id, 
-                                    const float &deferred_perc, 
-                                    const float &time_share_perc);      
+
+      map<string, asset> get_assets(const uint64_t &role_id,
+                                    const float &deferred_perc,
+                                    const float &time_share_perc);
    };
-} // namespace hyphasapce
+} // namespace hyphaspace
