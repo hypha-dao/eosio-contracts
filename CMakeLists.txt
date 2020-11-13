@@ -1,5 +1,4 @@
-cmake_minimum_required(VERSION 3.13)
-project(hyphadao)
+cmake_minimum_required(VERSION 3.17)
 
 include(ExternalProject)
 # if no cdt root is given use default path
