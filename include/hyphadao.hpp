@@ -276,7 +276,6 @@ namespace hyphaspace
       // data object handling
       ACTION transform(const name &creator, const name &scope, const uint64_t &id);
       ACTION transscope(const name &creator, const name &scope, const uint64_t &starting_id, const uint64_t &batch_size);
-      ACTION erasedocs(const name &scope);
       ACTION resetscope(const name &scope);
       ACTION erasedoc(const name &scope, const uint64_t &id);
       ACTION changescope(const name &scope, const uint64_t &id, const vector<name> &new_scopes, const bool &remove_old);
@@ -290,7 +289,7 @@ namespace hyphaspace
       /// **********************************
 
       /// **********************************
-      ///  Generation 2 Actions
+      ///  BEGIN - Generation 2 Actions
       /// **********************************
 
       ACTION propose(const name &proposer, const name &proposal_type, std::vector<document_graph::content_group> &content_groups);
@@ -298,7 +297,9 @@ namespace hyphaspace
       // document_graph
       ACTION createdoc(const name &creator, const vector<document_graph::content_group> &content_groups);
       ACTION erasedochash(const checksum256 &doc);
+      ACTION erasedocs(const uint64_t &begin_id, const uint64_t &batch_size);
       ACTION erasealldocs(const string &notes);
+
       ACTION eraseedges(const string &notes);
       ACTION erasedocbyid(const uint64_t &id);
       ACTION closedocprop(const checksum256 &proposal_hash);

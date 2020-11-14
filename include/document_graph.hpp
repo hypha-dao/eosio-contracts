@@ -45,6 +45,7 @@ namespace hyphaspace
         };
 
         struct [[eosio::table, eosio::contract("hyphadao")]] document
+        // TABLE document
         {
             uint64_t id;
             checksum256 hash;
@@ -71,6 +72,7 @@ namespace hyphaspace
         
         // scopes: get_self() 
         struct [[eosio::table, eosio::contract("hyphadao")]] edge
+        // TABLE edge
         {
             uint64_t id; 
 
