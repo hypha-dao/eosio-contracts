@@ -307,6 +307,24 @@
             ]
         },
         {
+            "name": "certificate",
+            "base": "",
+            "fields": [
+                {
+                    "name": "certifier",
+                    "type": "name"
+                },
+                {
+                    "name": "notes",
+                    "type": "string"
+                },
+                {
+                    "name": "certification_date",
+                    "type": "time_point"
+                }
+            ]
+        },
+        {
             "name": "changescope",
             "base": "",
             "fields": [
@@ -507,6 +525,78 @@
                 {
                     "name": "message",
                     "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "document",
+            "base": "",
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "hash",
+                    "type": "checksum256"
+                },
+                {
+                    "name": "creator",
+                    "type": "name"
+                },
+                {
+                    "name": "content_groups",
+                    "type": "content_group[]"
+                },
+                {
+                    "name": "certificates",
+                    "type": "certificate[]"
+                },
+                {
+                    "name": "created_date",
+                    "type": "time_point"
+                }
+            ]
+        },
+        {
+            "name": "edge",
+            "base": "",
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "from_node_edge_name_index",
+                    "type": "uint64"
+                },
+                {
+                    "name": "from_node_to_node_index",
+                    "type": "uint64"
+                },
+                {
+                    "name": "to_node_edge_name_index",
+                    "type": "uint64"
+                },
+                {
+                    "name": "from_node",
+                    "type": "checksum256"
+                },
+                {
+                    "name": "to_node",
+                    "type": "checksum256"
+                },
+                {
+                    "name": "edge_name",
+                    "type": "name"
+                },
+                {
+                    "name": "created_date",
+                    "type": "time_point"
+                },
+                {
+                    "name": "creator",
+                    "type": "name"
                 }
             ]
         },
@@ -1549,6 +1639,20 @@
         {
             "name": "debugs",
             "type": "Debug",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "documents",
+            "type": "document",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "edges",
+            "type": "edge",
             "index_type": "i64",
             "key_names": [],
             "key_types": []
