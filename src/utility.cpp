@@ -229,6 +229,31 @@ void hyphadao::eraseedges (const string &notes)
 		e_itr = e_t.erase (e_itr);
 	}
 }
+
+void hyphadao::erasedocs(const uint64_t &begin_id, const uint64_t &batch_size) 
+{
+	require_auth(get_self());
+	document_table d_t (get_self(), get_self().value);
+	auto d_itr = d_t.find (begin_id);
+	check (d_itr != d_t.end(), "begin_id not found: " + std::to_string(begin_id));
+	
+	int i = 0;
+	while (d_itr != d_t.end() && i < batch_size) {
+		d_itr = d_t.erase(d_itr);		
+		i++;
+	}
+
+	if (d_itr != d_t.end()) {
+		// d_itr++;
+		eosio::transaction out{};
+		out.actions.emplace_back(permission_level{get_self(), name("active")},
+								get_self(), name("erasedocs"),
+			std::make_tuple(d_itr->id, batch_size));
+		out.delay_sec = 1;
+		out.send(get_next_sender_id(), get_self());
+	}
+}
+
 void hyphadao::erasealldocs (const string &notes)
 {
 	require_auth(get_self());

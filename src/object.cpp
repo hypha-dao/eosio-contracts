@@ -295,17 +295,17 @@ void hyphadao::transscope (const name &creator, const name &scope, const uint64_
 	out.send(get_next_sender_id(), get_self());
 }
 
-void hyphadao::erasedocs (const name &scope) 
-{
-	require_auth (get_self());
-	document_table d_t(get_self(), scope.value);
-	auto d_itr = d_t.begin();
+// void hyphadao::erasedocs (const name &scope) 
+// {
+// 	require_auth (get_self());
+// 	document_table d_t(get_self(), scope.value);
+// 	auto d_itr = d_t.begin();
 
-	while (d_itr != d_t.end()) 
-	{
-		d_itr = d_t.erase (d_itr);
-	}
-}
+// 	while (d_itr != d_t.end()) 
+// 	{
+// 		d_itr = d_t.erase (d_itr);
+// 	}
+// }
 
 void hyphadao::transform(const name &creator, const name &scope, const uint64_t &id)
 {
