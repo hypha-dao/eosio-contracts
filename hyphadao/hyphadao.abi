@@ -121,24 +121,6 @@
             ]
         },
         {
-            "name": "DocumentIndex",
-            "base": "",
-            "fields": [
-                {
-                    "name": "id",
-                    "type": "uint64"
-                },
-                {
-                    "name": "document_hash",
-                    "type": "checksum256"
-                },
-                {
-                    "name": "created_date",
-                    "type": "time_point"
-                }
-            ]
-        },
-        {
             "name": "Member",
             "base": "",
             "fields": [
@@ -585,6 +567,18 @@
                     "type": "uint64"
                 },
                 {
+                    "name": "from_node_edge_name_index",
+                    "type": "uint64"
+                },
+                {
+                    "name": "from_node_to_node_index",
+                    "type": "uint64"
+                },
+                {
+                    "name": "to_node_edge_name_index",
+                    "type": "uint64"
+                },
+                {
                     "name": "from_node",
                     "type": "checksum256"
                 },
@@ -599,6 +593,10 @@
                 {
                     "name": "created_date",
                     "type": "time_point"
+                },
+                {
+                    "name": "creator",
+                    "type": "name"
                 }
             ]
         },
@@ -711,8 +709,12 @@
             "base": "",
             "fields": [
                 {
-                    "name": "scope",
-                    "type": "name"
+                    "name": "begin_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "batch_size",
+                    "type": "uint64"
                 }
             ]
         },
@@ -1637,13 +1639,6 @@
         {
             "name": "debugs",
             "type": "Debug",
-            "index_type": "i64",
-            "key_names": [],
-            "key_types": []
-        },
-        {
-            "name": "docindex",
-            "type": "DocumentIndex",
             "index_type": "i64",
             "key_names": [],
             "key_types": []

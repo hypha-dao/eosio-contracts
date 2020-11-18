@@ -45,6 +45,7 @@ namespace hyphaspace
         };
 
         struct [[eosio::table, eosio::contract("hyphadao")]] document
+        // TABLE document
         {
             uint64_t id;
             checksum256 hash;
@@ -71,8 +72,17 @@ namespace hyphaspace
         
         // scopes: get_self() 
         struct [[eosio::table, eosio::contract("hyphadao")]] edge
+        // TABLE edge
         {
             uint64_t id; 
+
+            // these three additional indexes allow isolating/querying edges more precisely (less iteration)
+            uint64_t from_node_edge_name_index;
+            uint64_t from_node_to_node_index;
+            uint64_t to_node_edge_name_index;
+            uint64_t by_from_node_edge_name_index() const { return from_node_edge_name_index; }
+            uint64_t by_from_node_to_node_index() const { return from_node_to_node_index; } 
+            uint64_t by_to_node_edge_name_index() const { return to_node_edge_name_index; }
 
             checksum256 from_node;
             checksum256 by_from() const { return from_node; }
@@ -86,19 +96,27 @@ namespace hyphaspace
             time_point created_date = current_time_point();
             uint64_t by_created() const { return created_date.sec_since_epoch(); }
 
+            name creator;
+            uint64_t by_creator() const { return creator.value; }
+
             uint64_t primary_key() const { return id; }
 
-            EOSLIB_SERIALIZE(edge, (id)(from_node)(to_node)(edge_name)(created_date))
+            EOSLIB_SERIALIZE(edge, (id) (from_node_edge_name_index)(from_node_to_node_index)(to_node_edge_name_index)
+                                        (from_node)(to_node)(edge_name)
+                                        (created_date)(creator))
         };
 
         typedef multi_index<name("edges"), edge,
-                        indexed_by<name("fromnode"), const_mem_fun<edge, checksum256, &edge::by_from>>,
-                        indexed_by<name("tonode"), const_mem_fun<edge, checksum256, &edge::by_to>>,
-                        indexed_by<name("edgename"), const_mem_fun<edge, uint64_t, &edge::by_edge_name>>,
-                        indexed_by<name("bycreated"), const_mem_fun<edge, uint64_t, &edge::by_created>>>
+            indexed_by<name("fromnode"), const_mem_fun<edge, checksum256, &edge::by_from>>,
+            indexed_by<name("tonode"), const_mem_fun<edge, checksum256, &edge::by_to>>,
+            indexed_by<name("edgename"), const_mem_fun<edge, uint64_t, &edge::by_edge_name>>,
+            indexed_by<name("byfromname"), const_mem_fun<edge, uint64_t, &edge::by_from_node_edge_name_index>>,
+            indexed_by<name("byfromto"), const_mem_fun<edge, uint64_t, &edge::by_from_node_to_node_index>>,
+            indexed_by<name("bytoname"), const_mem_fun<edge, uint64_t, &edge::by_to_node_edge_name_index>>,
+            indexed_by<name("bycreated"), const_mem_fun<edge, uint64_t, &edge::by_created>>,
+            indexed_by<name("bycreator"), const_mem_fun<edge, uint64_t, &edge::by_creator>>>
         edge_table;
 
-        uint64_t to_uint64 (const checksum256 &document_hash);
         void create_edge (const checksum256 &from_node, const checksum256 &to_node, const name &edge_name);
         void create_edge (const checksum256 &from_node, const checksum256 &to_node, const name &edge_name, const bool strict);
 
@@ -108,8 +126,15 @@ namespace hyphaspace
         void remove_edges (const checksum256 &node, const bool strict);
 
         vector<edge> get_edges (const checksum256 &from_node, const name &edge_name, const bool strict);
-        edge get_edge (const checksum256 &from_node, const name &edge_name, const bool strict);
+        vector<edge> get_edges_from_name (const checksum256 &from_node, const name &edge_name, const bool strict);
+        vector<edge> get_edges_to_name (const checksum256 &to_node, const name &edge_name, const bool strict);
+        vector<edge> get_edges_from_to (const checksum256 &from_node, const checksum256 &to_node, const bool strict);
 
+        edge get_edge (const checksum256 &from_node, const name &edge_name, const bool strict);
+        edge get_edge_from_name (const checksum256 &from_node, const name &edge_name, const bool strict);
+        edge get_edge_to_name (const checksum256 &to_node, const name &edge_name, const bool strict);
+        edge get_edge_from_to (const checksum256 &from_node, const checksum256 &to_node, const bool strict);
+        
         // Any account/member can creator a new document, support many options/constructors
         document create_document(const name &creator, const vector<content_group> &content_groups);
         document create_document(const name &creator, const content_group &content_group);
@@ -157,6 +182,9 @@ namespace hyphaspace
                                 const string &content_group_label,
                                 const string &content_label,
                                 const bool &strict);
+        content get_content_item(const content_group &content_group,
+                                                                const string &content_label,
+                                                                const bool &strict);
 
         static std::string to_string(const vector<document_graph::content_group> &content_groups);
         static std::string to_string(const document_graph::content_group &content_group);
@@ -166,6 +194,11 @@ namespace hyphaspace
         static checksum256 hash_document (const vector<content_group> &content_groups);
         static std::string to_hex(const char *d, uint32_t s);
         static std::string readable_hash (const checksum256 &proposal_hash);
+        
+        // uint64_t to_uint64 (const checksum256 &document_hash);
+        static uint64_t to_uint64 (const string &fingerprint);
         static uint64_t edge_id(checksum256 from_node, checksum256 to_node, name edge_name);
+        static uint64_t hash(checksum256 from_node, checksum256 to_node);
+        static uint64_t hash(checksum256 from_node, name edge_name); 
     };
 }; // namespace hyphaspace

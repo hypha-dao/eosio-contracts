@@ -215,6 +215,23 @@ void hyphadao::new_proposal(const name &owner,
         }
     }
     new_object(owner, name("proposal"), names, strings, assets, time_points, ints, trxs);
+    
+    const uint64_t new_proposal_id = o_t.rbegin()->id;
+
+    const uint64_t delay_sec_buffer = 1;
+
+    const uint64_t num_seconds_delay = c.ints.at("voting_duration_sec") + delay_sec_buffer;
+
+    transaction trx(time_point_sec(current_time_point()) + num_seconds_delay + delay_sec_buffer);
+    trx.actions.emplace_back(
+        permission_level{get_self(), name("active")},
+        get_self(),
+        name("closeprop"),
+        make_tuple(new_proposal_id)
+    );
+    trx.delay_sec = num_seconds_delay;
+    trx.send(get_next_sender_id(), get_self());
+
     event(name("high"), variant_helper(names, strings, assets, time_points, ints));
 }
 
@@ -234,7 +251,27 @@ void hyphadao::propose(const name &proposer,
         proposal = propose_badge_assignment(proposer, content_groups);
         break;
     }
+
+    config_table config_s(get_self(), get_self().value);
+    Config c = config_s.get_or_create(get_self(), Config());
+
+    const uint64_t new_proposal_id = o_t.rbegin()->id;
+
+    const uint64_t delay_sec_buffer = 1;
+
+    const uint64_t num_seconds_delay = c.ints.at("voting_duration_sec") + delay_sec_buffer;
+
+    transaction trx(time_point_sec(current_time_point()) + num_seconds_delay + delay_sec_buffer);
+    trx.actions.emplace_back(
+        permission_level{get_self(), name("active")},
+        get_self(),
+        name("closedocprop"),
+        make_tuple(proposal.hash)
+    );
+    trx.delay_sec = num_seconds_delay;
+    trx.send(get_next_sender_id(), get_self());
 }
+        
 
 void hyphadao::closedocprop(const checksum256 &proposal_hash)
 {
