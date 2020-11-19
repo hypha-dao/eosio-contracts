@@ -404,8 +404,8 @@ void hyphadao::payassign(const uint64_t &assignment_id, const uint64_t &period_i
 
 	// We've disabled this check that confirms the period being claimed falls within a role's guidelines
 	// likely this will replaced with budgeting anyways
-	check(r_itr->ints.at("start_period") <= period_id && r_itr->ints.at("end_period") >= period_id, "For role, period ID must be between " +
-																										std::to_string(r_itr->ints.at("start_period")) + " and " + std::to_string(r_itr->ints.at("end_period")) + " (inclusive). You tried: " + std::to_string(period_id));
+	// check(r_itr->ints.at("start_period") <= period_id && r_itr->ints.at("end_period") >= period_id, "For role, period ID must be between " +
+	// 																									std::to_string(r_itr->ints.at("start_period")) + " and " + std::to_string(r_itr->ints.at("end_period")) + " (inclusive). You tried: " + std::to_string(period_id));
 
 	float first_phase_ratio_calc = 1; // pro-rate based on elapsed % of the first phase
 

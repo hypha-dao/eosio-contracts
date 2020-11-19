@@ -2,79 +2,6 @@
 
 using namespace hyphaspace;
 
-void hyphadao::fixseedsprec(const uint64_t &proposal_id)
-{
-    require_auth(get_self());
-
-    object_table o_t(get_self(), name("proposal").value);
-    auto p_itr = o_t.find(proposal_id);
-    check(p_itr != o_t.end(), "Proposal ID does not exist: " + std::to_string(proposal_id));
-
-    std::map<string, asset>::const_iterator asset_itr;
-    for (asset_itr = p_itr->assets.begin(); asset_itr != p_itr->assets.end(); ++asset_itr)
-    {
-        if (asset_itr->first == "seeds_escrow_amount" &&
-            asset_itr->second.symbol.code().to_string() == "SEEDS" &&
-            asset_itr->second.symbol.precision() == 2)
-        {
-            o_t.modify(p_itr, get_self(), [&](auto &o) {
-                o.assets["seeds_escrow_amount"] = asset{asset_itr->second.amount * 100, common::S_SEEDS};
-            });
-        }
-    }
-}
-
-void hyphadao::updassets(const uint64_t &proposal_id)
-{
-    require_auth(get_self());
-
-    object_table o_t(get_self(), name("proposal").value);
-    auto p_itr = o_t.find(proposal_id);
-    check(p_itr != o_t.end(), "Proposal ID does not exist: " + std::to_string(proposal_id));
-
-    o_t.modify(p_itr, get_self(), [&](auto &p) {
-        // merge calculated assets into map
-        map<string, asset> calculated_assets = get_assets(p_itr->ints.at("role_id"), get_float(p_itr->ints, "deferred_perc_x100"), get_float(p_itr->ints, "time_share_x100"));
-        std::map<string, asset>::const_iterator asset_itr;
-        for (asset_itr = calculated_assets.begin(); asset_itr != calculated_assets.end(); ++asset_itr)
-        {
-            p.assets[asset_itr->first] = asset_itr->second;
-        }
-    });
-}
-
-void hyphadao::updassassets(const uint64_t &assignment_id)
-{
-    require_auth(get_self());
-
-    object_table o_t(get_self(), name("assignment").value);
-    auto a_itr = o_t.find(assignment_id);
-    check(a_itr != o_t.end(), "Assignment ID does not exist: " + std::to_string(assignment_id));
-
-    o_t.modify(a_itr, get_self(), [&](auto &a) {
-        auto instant_seeds_itr = a.assets.find("seeds_instant_salary_per_phase");
-        if (instant_seeds_itr != a.assets.end())
-        {
-            a.assets.erase(instant_seeds_itr);
-        }
-
-        auto escrow_seeds_itr = a.assets.find("seeds_escrow_salary_per_phase");
-        if (escrow_seeds_itr != a.assets.end())
-        {
-            a.assets.erase(escrow_seeds_itr);
-        }
-
-        // merge calculated assets into map
-        map<string, asset> calculated_assets = get_assets(a_itr->ints.at("role_id"), get_float(a_itr->ints, "deferred_perc_x100"), get_float(a_itr->ints, "time_share_x100"));
-        std::map<string, asset>::const_iterator asset_itr;
-        for (asset_itr = calculated_assets.begin(); asset_itr != calculated_assets.end(); ++asset_itr)
-        {
-            a.assets[asset_itr->first] = asset_itr->second;
-        }
-        a.updated_date = current_time_point();
-    });
-}
-
 void hyphadao::new_proposal(const name &owner,
                             map<string, name> &names,
                             map<string, string> &strings,
@@ -233,6 +160,12 @@ void hyphadao::propose(const name &proposer,
     case common::ASSIGN_BADGE.value:
         proposal = propose_badge_assignment(proposer, content_groups);
         break;
+    case common::ROLE_NAME.value:
+        proposal = propose_role(proposer, content_groups);
+        break;
+    case common::ASSIGNMENT.value:
+        proposal = propose_role_assignment(proposer, content_groups);
+        break;
     }
 }
 
@@ -252,14 +185,22 @@ void hyphadao::closedocprop(const checksum256 &proposal_hash)
         switch (proposal_type.value)
         {
         case common::BADGE_NAME.value:
-            _document_graph.create_edge(self_hash, proposal_hash, common::BADGE_NAME);
+            create_badge(docprop);
             break;
 
         case common::ASSIGN_BADGE.value: {
-
             assign_badge(docprop);
             break;
         }
+
+        case common::ROLE_NAME.value:
+            create_role(docprop);
+            break;
+
+        case common::ASSIGNMENT.value:
+            assign_role(docprop);
+            break;
+
         default:
             check (false, "Unknown proposal type: " + proposal_type.to_string());
         }

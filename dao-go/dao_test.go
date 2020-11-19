@@ -223,6 +223,8 @@ func TestTelosDecideBadgeProposals(t *testing.T) {
 				//    member    ---- assignbadge    ---->   badge_assignment
 				//    badge     ---- heldby         ---->   member
 				//    badge     ---- assignment     ---->   badge_assignment
+				//    badge_assignment     ---- badge    ---->   badge
+
 				checkEdge(t, env, assignee.Doc, badgeDoc, eos.Name("holdsbadge"))
 				checkEdge(t, env, assignee.Doc, badgeAssignmentDoc, eos.Name("assignbadge"))
 				checkEdge(t, env, badgeDoc, assignee.Doc, eos.Name("heldby"))

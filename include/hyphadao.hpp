@@ -4,6 +4,7 @@
 #include <eosio/singleton.hpp>
 #include <eosio/multi_index.hpp>
 #include <eosio/transaction.hpp>
+#include <eosio/name.hpp>
 
 #include <common.hpp>
 #include <trail.hpp>
@@ -322,10 +323,10 @@ namespace hyphaspace
       ACTION debugmsg(const string &message);
       ACTION clrdebugs(const uint64_t &starting_id, const uint64_t &batch_size);
       ACTION updversion(const string &component, const string &version);
-      ACTION updassets(const uint64_t &proposal_id);
+      // ACTION updassets(const uint64_t &proposal_id);
       ACTION set(const name &scope, const uint64_t &id, const string &key, const flexvalue1 &flexvalue);
-      ACTION updassassets(const uint64_t &assignment_id); // temporary fix
-      ACTION fixseedsprec(const uint64_t &proposal_id);   // temporary fix
+      // ACTION updassassets(const uint64_t &assignment_id); // temporary fix
+      // ACTION fixseedsprec(const uint64_t &proposal_id);   // temporary fix
 
       // alerts Group
       ACTION setalert(const name &level, const string &content);
@@ -362,8 +363,10 @@ namespace hyphaspace
 
       // badge-related functions
       document_graph::document propose_badge(const name &proposer, std::vector<document_graph::content_group> &content_groups);
+      void create_badge(const document_graph::document &badge);
       document_graph::document propose_badge_assignment(const name &proposer, std::vector<document_graph::content_group> &content_groups);
       void assign_badge(const document_graph::document &badge_assignment);
+
       void check_coefficient(document_graph::content_group & content_group, const string &coefficient_key);
       asset apply_coefficient(const document_graph::document &badge, const asset &base, const string &coefficient_key);
       asset_batch apply_badge_coefficients(const uint64_t period_id, const name &member, const asset_batch ab);
@@ -374,6 +377,13 @@ namespace hyphaspace
                                                         const string &decide_title,
                                                         const string &decide_desc,
                                                         const string &decide_content);
+
+
+      document_graph::document propose_role(const name &proposer, std::vector<document_graph::content_group> &content_groups);
+      void create_role(const document_graph::document &role);
+      document_graph::document propose_role_assignment(const name &proposer,
+                                                         std::vector<document_graph::content_group> &content_groups);
+      void assign_role(const document_graph::document &role_assignment);
 
       document_graph::document get_member_doc(const name &member);
       document_graph::document get_member_doc(const name &creator, const name &member);

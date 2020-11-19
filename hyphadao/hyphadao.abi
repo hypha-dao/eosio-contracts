@@ -763,16 +763,6 @@
             ]
         },
         {
-            "name": "fixseedsprec",
-            "base": "",
-            "fields": [
-                {
-                    "name": "proposal_id",
-                    "type": "uint64"
-                }
-            ]
-        },
-        {
             "name": "makememdocs",
             "base": "",
             "fields": [
@@ -1283,26 +1273,6 @@
             ]
         },
         {
-            "name": "updassassets",
-            "base": "",
-            "fields": [
-                {
-                    "name": "assignment_id",
-                    "type": "uint64"
-                }
-            ]
-        },
-        {
-            "name": "updassets",
-            "base": "",
-            "fields": [
-                {
-                    "name": "proposal_id",
-                    "type": "uint64"
-                }
-            ]
-        },
-        {
             "name": "updversion",
             "base": "",
             "fields": [
@@ -1457,11 +1427,6 @@
             "ricardian_contract": ""
         },
         {
-            "name": "fixseedsprec",
-            "type": "fixseedsprec",
-            "ricardian_contract": ""
-        },
-        {
             "name": "makememdocs",
             "type": "makememdocs",
             "ricardian_contract": ""
@@ -1584,16 +1549,6 @@
         {
             "name": "transscope",
             "type": "transscope",
-            "ricardian_contract": ""
-        },
-        {
-            "name": "updassassets",
-            "type": "updassassets",
-            "ricardian_contract": ""
-        },
-        {
-            "name": "updassets",
-            "type": "updassets",
             "ricardian_contract": ""
         },
         {

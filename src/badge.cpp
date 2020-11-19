@@ -131,6 +131,10 @@ document_graph::document hyphadao::propose_badge(const name &proposer, std::vect
     return proposal_doc;
 }
 
+void hyphadao::create_badge(const document_graph::document &badge)
+{
+    _document_graph.create_edge(get_root(), badge.hash, common::BADGE_NAME);
+}
 document_graph::document hyphadao::propose_badge_assignment(const name &proposer,
                                                             std::vector<document_graph::content_group> &content_groups)
 {
@@ -158,11 +162,11 @@ document_graph::document hyphadao::propose_badge_assignment(const name &proposer
                                                  common::ASSIGN_BADGE,
                                                  std::get<string>(_document_graph.get_content(details, common::TITLE, true)),
                                                  std::get<string>(_document_graph.get_content(details, common::DESCRIPTION, true)),
-                                                 "Assign badge " + badge_title + " to ")); // + assignee.to_string()));
+                                                 "Assign badge " + badge_title + " to " + assignee.to_string()));
 
     // creates the document, or the graph NODE
     document_graph::document proposal_doc = _document_graph.create_document(proposer, content_groups);
-    auto member_doc_hash = get_member_doc(assignee).hash;
+    auto member_doc_hash = get_member_doc(proposer).hash;
 
     // update graph edges:
     //    member    ---- owns       ---->   proposal
@@ -213,5 +217,4 @@ void hyphadao::assign_badge(const document_graph::document &badge_assignment)
     _document_graph.create_edge(badge.hash, badge_assignment.hash, common::ASSIGNMENT);
 
     _document_graph.create_edge(badge_assignment.hash, badge.hash, common::BADGE_NAME);
-
 }
