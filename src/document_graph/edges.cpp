@@ -2,7 +2,7 @@
 
 namespace hyphaspace
 {
-    void document_graph::create_edge (const checksum256 &from_node, 
+    void document_graph::create_edge (  const checksum256 &from_node, 
                                         const checksum256 &to_node, 
                                         const name &edge_name, 
                                         const bool strict)

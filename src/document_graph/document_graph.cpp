@@ -3,6 +3,12 @@
 
 namespace hyphaspace
 {
+    static document_graph::flexvalue not_found() 
+    {
+        // arbitrary, lazy, hopefully never used value
+        return document_graph::flexvalue(-4206942069);  
+    }
+
     document_graph::content document_graph::new_content(const string &label, const flexvalue &fv)
     {
         content c{};

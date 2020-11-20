@@ -173,7 +173,7 @@ asset hyphadao::apply_coefficient(const document_graph::document &badge, const a
     check(std::holds_alternative<int64_t>(coefficient), "fatal error: coefficient must be an int; badge: " +
                                                             _document_graph.readable_hash(badge.hash) + "; coefficient_key: " + coefficient_key);
 
-    if (coefficient == _document_graph.DOES_NOT_EXIST)
+    if (coefficient == document_graph::not_found())
     {
         return asset {0, base.symbol};
     }

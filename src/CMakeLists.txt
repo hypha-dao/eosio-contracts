@@ -6,16 +6,15 @@ find_package(eosio.cdt)
 
 add_contract( hyphadao hyphadao 
                 hyphadao.cpp 
-                proposal.cpp 
+                legacy_proposal.cpp 
                 config.cpp 
                 badge.cpp 
-                role.cpp
                 membership.cpp 
                 bank.cpp
                 object.cpp 
                 utility.cpp 
                 calculation.cpp 
-                decide.cpp
+                Proposals/
                 document_graph/document_graph.cpp 
                 document_graph/edges.cpp 
                 document_graph/accessors.cpp 

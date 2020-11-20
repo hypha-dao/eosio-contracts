@@ -94,7 +94,7 @@ namespace hyphaspace
             }
         }
         check (!strict, "content_label required: " + content_label);
-        return DOES_NOT_EXIST;
+        return document_graph::not_found();
     }
 
     document_graph::flexvalue document_graph::get_content(const document &document,

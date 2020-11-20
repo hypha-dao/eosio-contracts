@@ -93,39 +93,24 @@ void hyphadao::enroll(const name &enroller,
 	a_t.erase(a_itr);
 }
 
-document_graph::document hyphadao::get_member_doc (const name& member)
+checksum256 hyphadao::get_member_hash (const name &member)
 {
-	auto ctnt = _document_graph.new_content("member", member);
+	auto ctnt = document_graph::new_content("member", member);
 	document_graph::content_group cg; 
 	cg.push_back(ctnt);
 	vector<document_graph::content_group> cgs;
 	cgs.push_back(cg);
-	return _document_graph.get_document(_document_graph.hash_document(cgs));
+	return document_graph::hash_document(cgs);
+}
+
+document_graph::document hyphadao::get_member_doc (const name& member)
+{
+	return _document_graph.get_document(get_member_hash(member));
 }
 
 document_graph::document hyphadao::get_member_doc (const name& creator, const name& member)
 {
-	return _document_graph.get_or_create (creator, _document_graph.new_content(common::MEMBER_STRING, member));
-}
-
-void hyphadao::verify_membership (const name& member) 
-{
-	// create hash to represent this member account
-	std::vector<document_graph::content_group> member_cgs;
-	document_graph::content_group member_cg = document_graph::content_group{};
-	member_cg.push_back(_document_graph.new_content("member", member));
-	member_cgs.push_back(member_cg);
-	checksum256 member_hash = _document_graph.hash_document(member_cgs);
-
-	// check to see if this member has a document saved
-	document_graph::document member_doc = _document_graph.get_document(member_hash);
-
-	checksum256 root_hash = get_root();
-	// verify that the member_hash is a MEMBER of the root_hash
-	edge_table e_t (get_self(), get_self().value);
-    auto itr = e_t.find (_document_graph.edge_id (root_hash, member_hash, common::MEMBER));
-
-	check (itr != e_t.end(), "account: " + member.to_string() + " is not a member of " + _document_graph.readable_hash(root_hash));
+	return _document_graph.get_or_create (creator, document_graph::new_content(common::MEMBER_STRING, member));
 }
 
 void hyphadao::makememdocs (const string &notes)

@@ -10,6 +10,9 @@
 #include <trail.hpp>
 #include <document_graph.hpp>
 
+#include <Proposals/ProposalFactory.hpp>
+#include <Proposals/Proposal.hpp>
+
 using namespace eosio;
 using namespace std;
 
@@ -340,6 +343,18 @@ namespace hyphaspace
       // users can claim their salary pay
       ACTION payassign(const uint64_t &assignment_id, const uint64_t &period_id);
 
+      document_graph _document_graph = document_graph(get_self());
+      
+      static checksum256 get_root(const name &contract);
+      // static void verify_membership(const name &member);
+
+      static checksum256 get_member_hash(const name &member);
+      document_graph::document get_member_doc(const name &member);
+      document_graph::document get_member_doc(const name &creator, const name &member);
+
+      static asset adjust_asset(const asset &original_asset, const float &adjustment);
+      static string get_string(const std::map<string, string> strings, string key);
+
    private:
       // bank-related functions
       void remove_periods(const uint64_t &begin_period_id, const uint64_t &end_period_id);
@@ -355,57 +370,49 @@ namespace hyphaspace
       asset get_seeds_amount(const asset &usd_amount, const time_point &price_time_point, const float &time_share, const float &deferred_perc);
 
       // Generation 2 - document graph related
-      document_graph _document_graph = document_graph(get_self());
-      checksum256 get_root();
       document_graph::document create_votetally_doc(const name &proposer, std::vector<document_graph::content_group> &content_groups);
-      bool did_pass(const name &ballot_id);
-      void verify_membership(const name &member);
+      // bool did_pass(const name &ballot_id);
 
-      // badge-related functions
-      document_graph::document propose_badge(const name &proposer, std::vector<document_graph::content_group> &content_groups);
-      void create_badge(const document_graph::document &badge);
-      document_graph::document propose_badge_assignment(const name &proposer, std::vector<document_graph::content_group> &content_groups);
-      void assign_badge(const document_graph::document &badge_assignment);
+      // // badge-related functions
+      // document_graph::document propose_badge(const name &proposer, std::vector<document_graph::content_group> &content_groups);
+      // void create_badge(const document_graph::document &badge);
+      // document_graph::document propose_badge_assignment(const name &proposer, std::vector<document_graph::content_group> &content_groups);
+      // void assign_badge(const document_graph::document &badge_assignment);
 
-      void check_coefficient(document_graph::content_group & content_group, const string &coefficient_key);
+      // void check_coefficient(document_graph::content_group & content_group, const string &coefficient_key);
       asset apply_coefficient(const document_graph::document &badge, const asset &base, const string &coefficient_key);
       asset_batch apply_badge_coefficients(const uint64_t period_id, const name &member, const asset_batch ab);
       vector<document_graph::document> get_current_badges(const uint64_t &period_id, const name &member);
 
-      document_graph::content_group create_system_group(const name &proposer,
-                                                        const name &proposal_type,
-                                                        const string &decide_title,
-                                                        const string &decide_desc,
-                                                        const string &decide_content);
+      // document_graph::content_group create_system_group(const name &proposer,
+      //                                                   const name &proposal_type,
+      //                                                   const string &decide_title,
+      //                                                   const string &decide_desc,
+      //                                                   const string &decide_content);
+      checksum256 get_root();
 
-
-      document_graph::document propose_role(const name &proposer, std::vector<document_graph::content_group> &content_groups);
-      void create_role(const document_graph::document &role);
-      document_graph::document propose_role_assignment(const name &proposer,
-                                                         std::vector<document_graph::content_group> &content_groups);
-      void assign_role(const document_graph::document &role_assignment);
-
-      document_graph::document get_member_doc(const name &member);
-      document_graph::document get_member_doc(const name &creator, const name &member);
+      // document_graph::document propose_role(const name &proposer, std::vector<document_graph::content_group> &content_groups);
+      // void create_role(const document_graph::document &role);
+      // document_graph::document propose_role_assignment(const name &proposer,
+      //                                                    std::vector<document_graph::content_group> &content_groups);
+      // void assign_role(const document_graph::document &role_assignment);
 
       void defcloseprop(const uint64_t &proposal_id);
       void qualify_owner(const name &proposer);
 
       // Telos Decide related (to be deprecated)
-      name register_ballot(const name &proposer, const map<string, string> &strings);
-      name register_ballot(const name &proposer, const string &title, const string &description, const string &content);
+      // static name register_ballot(const name &proposer, const map<string, string> &strings);
+      // static name register_ballot(const name &proposer, const string &title, const string &description, const string &content);
 
       // config related
       float get_float(const std::map<string, uint64_t> ints, string key);
       bool is_paused();
       uint64_t get_next_sender_id();
-      string get_string(const std::map<string, string> strings, string key);
 
       // Utilities
       uint64_t hash(std::string str);
       void debug(const string &notes);
       void debugx(const string &message);
-      asset adjust_asset(const asset &original_asset, const float &adjustment);
       bool is_proposal_direct_assets(const map<string, asset> &assets); // ??
       void checkx(const bool &condition, const string &message);
       void check_capacity(const uint64_t &role_id, const uint64_t &req_time_share_x100);

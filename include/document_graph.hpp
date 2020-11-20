@@ -11,6 +11,7 @@ using namespace std;
 
 namespace hyphaspace
 {
+
     class document_graph
     {
     public:
@@ -22,7 +23,6 @@ namespace hyphaspace
         // flexvalue can any of these commonly used eosio data types
         // a checksum256 can be a link to another document, akin to an "edge" on a graph
         typedef std::variant<name, string, asset, time_point, int64_t, checksum256> flexvalue;
-        const flexvalue DOES_NOT_EXIST = -4206942069;  // arbitrary, lazy, hopefully never used value
 
         // a single labeled flexvalue
         struct content
@@ -159,17 +159,17 @@ namespace hyphaspace
         void certify_document(const name &certifier, const checksum256 &hash, const string &notes);
 
         certificate new_certificate(const name &certifier, const string &notes);
-        content new_content(const string &label, const flexvalue &fv);
+        static content new_content(const string &label, const flexvalue &fv);
 
         // accessors
         document get_document (const checksum256 &hash);
         document get_parent (const document &document);
        
-        content_group get_content_group(const vector<content_group> &content_groups, 
+        static content_group get_content_group(const vector<content_group> &content_groups, 
                                         const string &content_group_label, 
                                         const bool &strict);
         
-        content_group get_content_group (const document &document, 
+        static content_group get_content_group (const document &document, 
                                             const string &content_group_label, 
                                             const bool &strict);
 
@@ -177,12 +177,12 @@ namespace hyphaspace
                                                 const name &content_group_type,
                                                 const bool &strict);
 
-        flexvalue get_content (const content_group &content_group, const string& content_label, const bool &strict);
-        flexvalue get_content(const document &document,
+        static flexvalue get_content (const content_group &content_group, const string& content_label, const bool &strict);
+        static flexvalue get_content(const document &document,
                                 const string &content_group_label,
                                 const string &content_label,
                                 const bool &strict);
-        content get_content_item(const content_group &content_group,
+        static content get_content_item(const content_group &content_group,
                                                                 const string &content_label,
                                                                 const bool &strict);
 
@@ -200,5 +200,7 @@ namespace hyphaspace
         static uint64_t edge_id(checksum256 from_node, checksum256 to_node, name edge_name);
         static uint64_t hash(checksum256 from_node, checksum256 to_node);
         static uint64_t hash(checksum256 from_node, name edge_name); 
+
+        static flexvalue not_found();
     };
 }; // namespace hyphaspace

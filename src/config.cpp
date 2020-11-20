@@ -10,14 +10,19 @@ void hyphadao::createroot (const string &notes)
 	setconfigatt("root_node", _document_graph.readable_hash(root.hash));
 }
 
-checksum256 hyphadao::get_root ()
+checksum256 hyphadao::get_root (const name &contract)
 {
-	auto ctnt = _document_graph.new_content("root_node", get_self());
+	auto ctnt = document_graph::new_content("root_node", contract);
 	document_graph::content_group cg; 
 	cg.push_back(ctnt);
 	vector<document_graph::content_group> cgs;
 	cgs.push_back(cg);
 	return document_graph::hash_document(cgs);
+}
+
+checksum256 hyphadao::get_root ()
+{
+	return get_root(get_self());
 }
 
 void hyphadao::setconfig(const map<string, name> names,
