@@ -47,15 +47,13 @@ document_graph::content_group hyphadao::create_system_group(const name &proposer
 
 {
     // create the system content_group and populate with system details
-    config_table config_s(get_self(), get_self().value);
-    Config c = config_s.get_or_create(get_self(), Config());
-
+    
     name ballot_id = register_ballot(proposer, decide_title, decide_desc, decide_content);
 
     document_graph::content_group system_cg = document_graph::content_group{};
     system_cg.push_back(_document_graph.new_content("content_group_label", "system"));
-    system_cg.push_back(_document_graph.new_content("client_version", get_string(c.strings, "client_version")));
-    system_cg.push_back(_document_graph.new_content("contract_version", get_string(c.strings, "contract_version")));
+    system_cg.push_back(_document_graph.new_content(common::CLIENT_VERSION, get_setting<string>(common::CLIENT_VERSION)));
+    system_cg.push_back(_document_graph.new_content(common::CONTRACT_VERSION, get_setting<string>(common::CONTRACT_VERSION)));
     system_cg.push_back(_document_graph.new_content("ballot_id", ballot_id));
     system_cg.push_back(_document_graph.new_content("proposer", proposer));
     system_cg.push_back(_document_graph.new_content(common::TYPE, proposal_type));

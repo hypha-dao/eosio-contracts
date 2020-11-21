@@ -1,4 +1,8 @@
 #pragma once
+
+#include <variant>
+#include <optional>
+
 #include <eosio/eosio.hpp>
 #include <eosio/asset.hpp>
 #include <eosio/singleton.hpp>
@@ -23,7 +27,7 @@ namespace hyphaspace
       // v2 data structure will use variants for more generic support
       typedef std::variant<name, string, asset, time_point, uint64_t> flexvalue1;
 
-      //using flexvalue = document_graph::flexvalue;
+      //using flexvalue = document_graph::flexvalue; causes seg fault while compiling
       using flexvalue = std::variant<name, string, asset, time_point, int64_t, checksum256>;
 
       struct [[eosio::table, eosio::contract("hyphadao")]] Config
@@ -366,7 +370,7 @@ namespace hyphaspace
       checksum256 get_root();
       
       document_graph::document get_settings_document();
-
+      
       document_graph::document create_votetally_doc(const name &proposer, std::vector<document_graph::content_group> &content_groups);
       bool did_pass(const name &ballot_id);
       void verify_membership(const name &member);
@@ -395,13 +399,41 @@ namespace hyphaspace
       // Telos Decide related (to be deprecated)
       name register_ballot(const name &proposer, const map<string, string> &strings);
       name register_ballot(const name &proposer, const string &title, const string &description, const string &content);
+      
+      template<class T>
+      T get_setting(const string& setting)
+      {
+         auto settings = get_settings_document();
+         auto group = settings.content_groups[0];
+         
+         auto content = _document_graph.get_content_item(group, setting, true);
 
-      // config related
+         return std::get<T>(content.value);
+      }
+
+      template<class T>
+      std::optional<T> get_setting_opt(const string& setting)
+      {
+         auto settings = get_settings_document();
+         auto group = settings.content_groups[0];
+         
+         auto content = _document_graph.get_content_item(group, setting, false);
+
+         if (auto p = std::get_if<T>(&content.value)) 
+         {
+            return *p;
+         }
+
+         return {};
+      }   
+
+      float get_float(const string& setting);
+      
       float get_float(const std::map<string, uint64_t> ints, string key);
+
       bool is_paused();
       uint64_t get_next_sender_id();
-      string get_string(const std::map<string, string> strings, string key);
-
+      
       // Utilities
       uint64_t hash(std::string str);
       void debug(const string &notes);

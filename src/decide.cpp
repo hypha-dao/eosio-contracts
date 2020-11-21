@@ -9,15 +9,13 @@ name hyphadao::register_ballot(const name &proposer,
 														  proposer.to_string() + "@active or " + get_self().to_string() + "@active.");
 	qualify_owner(proposer);
 
-	config_table config_s(get_self(), get_self().value);
-	Config c = config_s.get_or_create(get_self(), Config());
-
 	// increment the ballot_id
-	name new_ballot_id = name(c.names.at("last_ballot_id").value + 1);
-	c.names["last_ballot_id"] = new_ballot_id;
-	config_s.set(c, get_self());
+	name new_ballot_id = name(get_setting<name>(common::LAST_BALLOT_ID).value + 1);
+	setlastballt(new_ballot_id);
 
-	trailservice::trail::ballots_table b_t(c.names.at("telos_decide_contract"), c.names.at("telos_decide_contract").value);
+	name telos_decide_contract = get_setting<name>(common::TELOS_DECIDE_CONTRACT);
+
+	trailservice::trail::ballots_table b_t(telos_decide_contract, telos_decide_contract.value);
 	auto b_itr = b_t.find(new_ballot_id.value);
 	check(b_itr == b_t.end(), "ballot_id: " + new_ballot_id.to_string() + " has already been used.");
 
@@ -28,7 +26,7 @@ name hyphadao::register_ballot(const name &proposer,
 
 	action(
 		permission_level{get_self(), name("active")},
-		c.names.at("telos_decide_contract"), name("newballot"),
+		telos_decide_contract, name("newballot"),
 		std::make_tuple(
 			new_ballot_id,
 			name("poll"),
@@ -47,7 +45,7 @@ name hyphadao::register_ballot(const name &proposer,
 
 	action(
 		permission_level{get_self(), name("active")},
-		c.names.at("telos_decide_contract"), name("editdetails"),
+		telos_decide_contract, name("editdetails"),
 		std::make_tuple(
 			new_ballot_id,
 			title,
@@ -55,11 +53,11 @@ name hyphadao::register_ballot(const name &proposer,
 			content))
 		.send();
 
-	auto expiration = time_point_sec(current_time_point()) + c.ints.at("voting_duration_sec");
+	auto expiration = time_point_sec(current_time_point()) + get_setting<int64_t>(common::VOTING_DURATION_SEC);
 
 	action(
 		permission_level{get_self(), name("active")},
-		c.names.at("telos_decide_contract"), name("openvoting"),
+		telos_decide_contract, name("openvoting"),
 		std::make_tuple(new_ballot_id, expiration))
 		.send();
 

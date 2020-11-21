@@ -39,9 +39,7 @@ asset hyphadao::get_seeds_amount(const asset &usd_amount,
 {
     asset adjusted_usd_amount = adjust_asset(adjust_asset(usd_amount, deferred_perc), time_share);
 
-    config_table config_s(get_self(), get_self().value);
-    Config c = config_s.get_or_create(get_self(), Config());
-    float seeds_deferral_coeff = get_float(c.ints, "seeds_deferral_factor_x100");
+    float seeds_deferral_coeff = get_float(common::SEEDS_DEFERRAL_FACTOR_X100);
 
     float seeds_price = get_seeds_price_usd(price_time_point);
     // debugx("seeds price: " + std::to_string(seeds_price));
@@ -63,9 +61,7 @@ map<string, asset> hyphadao::get_assets(const asset &usd_amount,
 {
     map<string, asset> assets;
 
-    config_table config_s(get_self(), get_self().value);
-    Config c = config_s.get_or_create(get_self(), Config());
-    float hypha_deferral_coeff = get_float(c.ints, "hypha_deferral_factor_x100");
+    float hypha_deferral_coeff = get_float(common::HYPHA_DEFERRAL_FACTOR_X100);
     asset deferred_adjusted_usd_amount = adjust_asset(usd_amount, deferred_perc);
 
     assets["hypha_amount"] = adjust_asset(asset{deferred_adjusted_usd_amount.amount, common::S_HYPHA}, hypha_deferral_coeff);
@@ -94,10 +90,8 @@ map<string, asset> hyphadao::get_assets(const uint64_t &role_id,
     map<string, asset> assets;
 
     // global ratios
-    config_table config_s(get_self(), get_self().value);
-    Config c = config_s.get_or_create(get_self(), Config());
     // float seeds_deferral_coeff = get_float(c.ints, "seeds_deferral_factor_x100");
-    float hypha_deferral_coeff = get_float(c.ints, "hypha_deferral_factor_x100");
+    float hypha_deferral_coeff = get_float(common::HYPHA_DEFERRAL_FACTOR_X100);
 
     object_table o_t_role(get_self(), name("role").value);
     auto o_itr_role = o_t_role.find(role_id);

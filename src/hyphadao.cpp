@@ -281,14 +281,13 @@ void hyphadao::makepayout(const uint64_t &proposal_id)
 
 bool hyphadao::did_pass(const name &ballot_id)
 {
-	config_table config_s(get_self(), get_self().value);
-	Config c = config_s.get_or_create(get_self(), Config());
+	name telos_decide_contract = get_setting<name>(common::TELOS_DECIDE_CONTRACT);
 
-	trailservice::trail::ballots_table b_t(c.names.at("telos_decide_contract"), c.names.at("telos_decide_contract").value);
+	trailservice::trail::ballots_table b_t(telos_decide_contract, telos_decide_contract.value);
 	auto b_itr = b_t.find(ballot_id.value);
 	check(b_itr != b_t.end(), "ballot_id: " + ballot_id.to_string() + " not found.");
 
-	trailservice::trail::treasuries_table t_t(c.names.at("telos_decide_contract"), c.names.at("telos_decide_contract").value);
+	trailservice::trail::treasuries_table t_t(telos_decide_contract, telos_decide_contract.value);
 	auto t_itr = t_t.find(common::S_HVOICE.code().raw());
 	check(t_itr != t_t.end(), "Treasury: " + common::S_HVOICE.code().to_string() + " not found.");
 
@@ -327,9 +326,6 @@ void hyphadao::closeprop(const uint64_t &proposal_id)
 	check(o_itr != o_t.end(), "Scope: " + name("proposal").to_string() + "; Object ID: " + std::to_string(proposal_id) + " does not exist.");
 	auto prop = *o_itr;
 
-	config_table config_s(get_self(), get_self().value);
-	Config c = config_s.get_or_create(get_self(), Config());
-
 	if (did_pass(prop.names.at("ballot_id")))
 	{
 		prop.strings["Event"] = "Proposal has passed";
@@ -352,7 +348,7 @@ void hyphadao::closeprop(const uint64_t &proposal_id)
 
 	action(
 		permission_level{get_self(), name("active")},
-		c.names.at("telos_decide_contract"), name("closevoting"),
+		get_setting<name>(common::TELOS_DECIDE_CONTRACT), name("closevoting"),
 		std::make_tuple(prop.names.at("ballot_id"), true))
 		.send();
 }

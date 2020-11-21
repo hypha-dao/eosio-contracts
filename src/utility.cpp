@@ -5,10 +5,7 @@ using namespace hyphaspace;
 void hyphadao::event(const name &level,
 					 const map<string, hyphadao::flexvalue1> &values)
 {
-
-	config_table config_s(get_self(), get_self().value);
-	Config c = config_s.get_or_create(get_self(), Config());
-	name publisher_contract = c.names.at("publisher_contract");
+	name publisher_contract = get_setting<name>(common::PUBLISHER_CONTRACT);
 
 	action(
 		permission_level{get_self(), name("active")},
@@ -102,13 +99,13 @@ void hyphadao::debug(const string &notes)
 
 uint64_t hyphadao::get_next_sender_id()
 {
-	config_table config_s(get_self(), get_self().value);
-	Config c = config_s.get_or_create(get_self(), Config());
-	uint64_t return_senderid = c.ints.at("last_sender_id");
+	int64_t return_senderid = get_setting<int64_t>(common::LAST_SENDER_ID);
+	
 	return_senderid++;
-	c.ints["last_sender_id"] = return_senderid;
-	config_s.set(c, get_self());
-	return return_senderid;
+
+	setsetting(common::LAST_SENDER_ID, return_senderid);
+
+	return static_cast<uint64_t>(return_senderid);
 }
 
 void hyphadao::remperiods(const uint64_t &begin_period_id,
@@ -123,6 +120,11 @@ asset hyphadao::adjust_asset(const asset &original_asset, const float &adjustmen
 	return asset{static_cast<int64_t>(original_asset.amount * adjustment), original_asset.symbol};
 }
 
+float hyphadao::get_float(const string& key)
+{
+	return get_setting<int64_t>(key) / 100.f;
+}
+
 float hyphadao::get_float(const map<string, uint64_t> ints, string key)
 {
 	return (float)ints.at(key) / (float)100;
@@ -130,24 +132,15 @@ float hyphadao::get_float(const map<string, uint64_t> ints, string key)
 
 bool hyphadao::is_paused()
 {
-	config_table config_s(get_self(), get_self().value);
-	Config c = config_s.get_or_create(get_self(), Config());
-	check(c.ints.find("paused") != c.ints.end(), "Contract does not have a pause configuration. Assuming it is paused. Please contact administrator.");
-
-	uint64_t paused = c.ints.at("paused");
-	return paused == 1;
-}
-
-string hyphadao::get_string(const map<string, string> strings, string key)
-{
-	if (strings.find(key) != strings.end())
+	if (auto paused = get_setting_opt<int64_t>(common::PAUSED);
+		paused)
 	{
-		return strings.at(key);
+		return *paused == 1;
 	}
-	else
-	{
-		return string{""};
-	}
+
+	check(false, "Contract does not have a pause configuration. Assuming it is paused. Please contact administrator.");
+
+	return false;
 }
 
 void hyphadao::debugx(const string &message)
@@ -341,10 +334,7 @@ uint64_t hyphadao::get_last_period_id()
 
 bool hyphadao::holds_hypha(const name &account)
 {
-    config_table config_s(get_self(), get_self().value);
-    Config c = config_s.get_or_create(get_self(), Config());
-
-    eosiotoken::accounts a_t(c.names.at("hypha_token_contract"), account.value);
+    eosiotoken::accounts a_t(get_setting<name>(common::HYPHA_TOKEN_CONTRACT), account.value);
     auto a_itr = a_t.find(common::S_HYPHA.code().raw());
     if (a_itr == a_t.end())
     {

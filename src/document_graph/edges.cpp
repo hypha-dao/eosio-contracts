@@ -133,6 +133,14 @@ namespace hyphaspace
         return edges;
     }
 
+    void document_graph::update_edge_to(const checksum256 &from_node, const name &edge_name, const checksum256 &new_to_node)
+    {
+        auto edge = get_edge(from_node, edge_name, true);
+
+        remove_edge(from_node, edge.to_node, edge_name, true);
+
+        create_edge(from_node, new_to_node, edge_name, true);
+    }
     // when business rules dictate that there can be only one edge
     document_graph::edge document_graph::get_edge (const checksum256 &from_node, const name &edge_name, const bool strict)
     {
