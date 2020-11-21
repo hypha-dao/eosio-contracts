@@ -1,14 +1,20 @@
 #pragma once
+#include <eosio/name.hpp>
 
 #include <document_graph.hpp>
+#include <hyphadao.hpp>
+#include "../hyphadao.hpp"
 
 namespace hyphaspace {
+
+    class hyphadao : public contract{};
+
     class Proposal
     {
 
     public:
 
-        Proposal (document_graph graph);
+        Proposal (hyphadao dao);
         
         document_graph::document propose(const name &proposer, 
             std::vector<document_graph::content_group> &content_groups);
@@ -17,7 +23,7 @@ namespace hyphaspace {
 
     protected: 
 
-        document_graph m_graph;
+        hyphaspace::hyphadao m_dao;
 
         virtual std::vector<document_graph::content_group> propose_impl(const name &proposer, 
             std::vector<document_graph::content_group> &content_groups) = 0;

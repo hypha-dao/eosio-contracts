@@ -12,7 +12,7 @@ void hyphadao::propose(const name &proposer,
 {
     check(!is_paused(), "Contract is paused for maintenance. Please try again later.");
 
-	Proposal *proposal = ProposalFactory::Factory(_document_graph, proposal_type);
+	Proposal *proposal = ProposalFactory::Factory(this, proposal_type);
 	proposal->propose(proposer, content_groups);
 }
 
@@ -23,7 +23,7 @@ void hyphadao::closedocprop(const checksum256 &proposal_hash)
 	document_graph::document docprop = _document_graph.get_document(proposal_hash); 
     name proposal_type = std::get<name>(_document_graph.get_content(docprop, common::SYSTEM, common::TYPE, true));
 
-	Proposal *proposal = ProposalFactory::Factory(_document_graph, proposal_type);
+	Proposal *proposal = ProposalFactory::Factory(this, proposal_type);
 	proposal->close(docprop);
 }
 

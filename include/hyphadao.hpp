@@ -10,8 +10,8 @@
 #include <trail.hpp>
 #include <document_graph.hpp>
 
-#include <Proposals/ProposalFactory.hpp>
-#include <Proposals/Proposal.hpp>
+#include <proposals/proposal_factory.hpp>
+#include <proposals/proposal.hpp>
 
 using namespace eosio;
 using namespace std;

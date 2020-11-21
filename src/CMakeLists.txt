@@ -14,7 +14,11 @@ add_contract( hyphadao hyphadao
                 object.cpp 
                 utility.cpp 
                 calculation.cpp 
-                Proposals/
+                proposals/proposal.cpp
+                proposals/role_proposal.cpp
+                proposals/badge_proposal.cpp
+                proposals/badge_assignment_proposal.cpp
+                proposals/proposal_factory.cpp
                 document_graph/document_graph.cpp 
                 document_graph/edges.cpp 
                 document_graph/accessors.cpp 

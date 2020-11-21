@@ -1,7 +1,9 @@
 #pragma once
 
+#include <eosio/name.hpp>
 #include <document_graph.hpp>
-#include "Proposal.hpp"
+#include <hyphadao.hpp>
+#include "proposal.hpp"
 
 namespace hyphaspace {
 
@@ -9,7 +11,7 @@ namespace hyphaspace {
     {
 
     public:
-        BadgeProposal (document_graph graph);
+        BadgeProposal (hyphaspace::hyphadao dao);
 
         document_graph::document propose(const name &proposer, std::vector<document_graph::content_group> &content_groups);
         void close(document_graph::document proposal);
