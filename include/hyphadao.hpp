@@ -23,6 +23,9 @@ namespace hyphaspace
       // v2 data structure will use variants for more generic support
       typedef std::variant<name, string, asset, time_point, uint64_t> flexvalue1;
 
+      //using flexvalue = document_graph::flexvalue;
+      using flexvalue = std::variant<name, string, asset, time_point, int64_t, checksum256>;
+
       struct [[eosio::table, eosio::contract("hyphadao")]] Config
       {
          // required configurations:
@@ -37,6 +40,10 @@ namespace hyphaspace
          map<string, float> floats;
       };
 
+      /*
+      * Legacy Config Table
+      * Should be removed after migration grace period
+      */
       typedef singleton<name("config"), Config> config_table;
       typedef multi_index<name("config"), Config> config_table_placeholder;
 
@@ -249,7 +256,8 @@ namespace hyphaspace
       ACTION remconfigatt(const string &key);
       ACTION setlastballt(const name &last_ballot_id);
       ACTION togglepause();
-
+      ACTION setsetting(const string &key, const flexvalue& value);
+      ACTION remsetting(const string& key);
       // These actions are executed only on approval of a proposal.
       // To introduce a new proposal type, we would add another action to the below.
       ACTION newrole(const uint64_t &proposal_id);
@@ -356,6 +364,9 @@ namespace hyphaspace
       // Generation 2 - document graph related
       document_graph _document_graph = document_graph(get_self());
       checksum256 get_root();
+      
+      document_graph::document get_settings_document();
+
       document_graph::document create_votetally_doc(const name &proposer, std::vector<document_graph::content_group> &content_groups);
       bool did_pass(const name &ballot_id);
       void verify_membership(const name &member);

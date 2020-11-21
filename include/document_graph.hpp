@@ -141,6 +141,8 @@ namespace hyphaspace
         document create_document(const name &creator, const content &content);
         document create_document(const name &creator, const string &content_label, const flexvalue &content_value);
 
+        document update_document(const name &updater, const checksum256 &doc_hash, vector<content_group> content_groups);
+
         document get_or_create(const name &creator, const vector<content_group> &content_groups);
         document get_or_create(const name &creator, const content_group &content_group);
         document get_or_create(const name &creator, const content &content);
@@ -160,6 +162,8 @@ namespace hyphaspace
 
         certificate new_certificate(const name &certifier, const string &notes);
         content new_content(const string &label, const flexvalue &fv);
+
+        static void insert_or_replace(content_group &content_group, content& new_content);
 
         // accessors
         document get_document (const checksum256 &hash);

@@ -1,13 +1,24 @@
 #include <hyphadao.hpp>
 
+#include <algorithm>
+
 using namespace hyphaspace;
 
 void hyphadao::createroot (const string &notes)
 {
 	require_auth (get_self());
 
-	document_graph::document root = _document_graph.get_or_create (get_self(), _document_graph.new_content("root_node", get_self()));
-	setconfigatt("root_node", _document_graph.readable_hash(root.hash));
+	document_graph::document root = _document_graph.get_or_create (get_self(), 
+																   _document_graph.new_content(common::ROOT_NODE, get_self()));
+
+	//Create the settings document as well and add an edge to it
+	document_graph::document settings = _document_graph.get_or_create(get_self(), 
+																	  _document_graph.new_content(common::ROOT_NODE, _document_graph.readable_hash(root.hash)));
+
+	_document_graph.create_edge(root.hash, settings.hash, common::SETTINGS_EDGE);
+	/* Legacy Config Table
+	* setconfigatt("root_node", _document_graph.readable_hash(root.hash));
+	*/
 }
 
 checksum256 hyphadao::get_root ()
@@ -18,6 +29,15 @@ checksum256 hyphadao::get_root ()
 	vector<document_graph::content_group> cgs;
 	cgs.push_back(cg);
 	return document_graph::hash_document(cgs);
+}
+
+document_graph::document hyphadao::get_settings_document()
+{
+	auto root = get_root();
+	
+	auto settings_edge = _document_graph.get_edge(root, common::SETTINGS_EDGE, true);
+
+	return _document_graph.get_document(settings_edge.to_node);
 }
 
 void hyphadao::setconfig(const map<string, name> names,
@@ -126,6 +146,48 @@ void hyphadao::remconfigatt(const string& key)
  	config_s.set(c, get_self());
 }
 
+void hyphadao::setsetting(const string &key, const flexvalue& value)
+{
+	require_auth(get_self());
+
+	auto document = get_settings_document();
+	
+	auto& content_group = document.content_groups.at(0);
+
+	auto setting_content = document_graph::content{key, value};
+
+	document_graph::insert_or_replace(content_group, setting_content);
+	
+	auto updated_setting_content = document_graph::content{common::UPDATED_DATE, current_time_point()};
+
+	document_graph::insert_or_replace(content_group, updated_setting_content);
+
+	_document_graph.update_document(get_self(), document.hash, std::move(document.content_groups));
+}
+
+void hyphadao::remsetting(const string &key)
+{
+	require_auth(get_self());
+
+	auto document = get_settings_document();
+
+	auto& content_group = document.content_groups.at(0);
+
+	auto is_key = [&key](auto &c) 
+	{
+		return c.label == key;
+	};
+
+	//First let's check if key already exists
+	auto content_itr = std::find_if(content_group.begin(), content_group.end(), is_key);
+
+	if (content_itr != content_group.end())
+	{
+		content_group.erase(content_itr);
+		
+	}
+	//Should we assert if setting doesn't exits ?
+}
 
 void hyphadao::setalert (const name &level, const string &content)
 {

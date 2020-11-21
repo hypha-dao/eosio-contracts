@@ -1,5 +1,7 @@
 #include <document_graph.hpp>
 
+#include <string>
+
 namespace hyphaspace {
 
     checksum256 document_graph::hash_document (const vector<content_group> &content_groups)
@@ -71,6 +73,35 @@ namespace hyphaspace {
     document_graph::document document_graph::create_document(const name &creator, const string &content_label, const flexvalue &content_value) 
     {
         return create_document (creator, new_content(content_label, content_value));
+    }
+
+    document_graph::document document_graph::update_document(const name &updater, const checksum256 &doc_hash, vector<content_group> content_groups)
+    {
+        require_auth(updater);
+
+        /*
+        * TODO: Error out if content is empty
+        */
+        //check(content_groups.size() > 0 && content_groups[0].size() > 0, "document can't be empty");
+        
+        document_table d_t(contract, contract.value);
+        auto hash_index = d_t.get_index<name("idhash")>();
+        auto doc_itr = hash_index.find(doc_hash);
+
+        //Check if document actually exists
+        check(doc_itr != hash_index.end(), "document does not exist: " + readable_hash(doc_hash));
+                
+        checksum256 new_hash = hash_document(content_groups);
+
+        //if the new content exists already, error out
+        check(hash_index.find(new_hash) == hash_index.end(), "document exists already: " + readable_hash(new_hash));
+
+        hash_index.modify(doc_itr, contract, [&](auto &document){
+            document.content_groups = std::move(content_groups);
+            document.hash = new_hash;
+        });
+
+        return hash_index.get(new_hash);
     }
 
     document_graph::document document_graph::get_or_create(const name &creator, const vector<content_group> &content_groups)

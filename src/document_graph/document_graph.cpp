@@ -11,6 +11,25 @@ namespace hyphaspace
         return c;
     }
 
+    void document_graph::insert_or_replace(content_group &content_group, content& new_content)
+    {
+        auto is_key = [&new_content](auto& c) 
+        {
+            return c.label == new_content.label;
+        };
+        //First let's check if key already exists
+        auto content_itr = std::find_if(content_group.begin(), content_group.end(), is_key);
+
+        if (content_itr == content_group.end())
+        {
+            content_group.push_back(content{new_content.label, new_content.value});
+        }
+        else 
+        {
+            content_itr->value = new_content.value;
+        }        
+    }
+
     // unsure how erasing documents should be handled, re: approvals 
     // for now, permissions should be handled in the contract action rather than this class
     void document_graph::erase_document(const checksum256 &document_hash) 

@@ -255,8 +255,6 @@ void hyphadao::propose(const name &proposer,
     config_table config_s(get_self(), get_self().value);
     Config c = config_s.get_or_create(get_self(), Config());
 
-    const uint64_t new_proposal_id = o_t.rbegin()->id;
-
     const uint64_t delay_sec_buffer = 1;
 
     const uint64_t num_seconds_delay = c.ints.at("voting_duration_sec") + delay_sec_buffer;

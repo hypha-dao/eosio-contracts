@@ -43,7 +43,13 @@ namespace common {
     static const string         BALLOT_ID                   = string ("ballot_id");
     static const string         BALLOT_TYPE                 = string ("ballot_type");
     
+    //setting document
+    static const string         CLIENT_VERSION              = string ("client_version");
+    static const string         UPDATED_DATE                = string ("updated_date");
+    static const string         ROOT_NODE                   = string ("root_node");
+
     // graph edge names
+    static constexpr name       SETTINGS_EDGE               = name ("settings");
     static constexpr name       HOLDS_BADGE                 = name ("holdsbadge");
     static constexpr name       HELD_BY                     = name ("heldby");
     static constexpr name       OWNED_BY                    = name ("ownedby");
