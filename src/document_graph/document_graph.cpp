@@ -3,7 +3,7 @@
 
 namespace hyphaspace
 {
-    static document_graph::flexvalue not_found() 
+    document_graph::flexvalue document_graph::not_found() 
     {
         // arbitrary, lazy, hopefully never used value
         return document_graph::flexvalue(-4206942069);  

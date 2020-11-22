@@ -1,6 +1,8 @@
 package dao_test
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestRoleProposalDocument(t *testing.T) {
 	teardownTestCase := setupTestCase(t)
@@ -11,7 +13,7 @@ func TestRoleProposalDocument(t *testing.T) {
 
 	// roles
 	proposer := env.Members[0]
-	assignee := env.Members[1]
+	// assignee := env.Members[1]
 	closer := env.Members[2]
 
 	t.Run("Configuring the DAO environment: ", func(t *testing.T) {
@@ -21,13 +23,29 @@ func TestRoleProposalDocument(t *testing.T) {
 
 	t.Run("Test Roles Document Proposal", func(t *testing.T) {
 
+		tests := []struct {
+			name  string
+			title string
+			role  string
+		}{
+			{
+				name:  "Basketweaver",
+				title: "Underwater Basketweaver",
+				role:  role1_document,
+			},
+		}
+
 		// call propose with a role proposal
 		// vote on the proposal
 		// close the proposal
 		// ensure that the proposal closed and the appropriate edges exist
+		for _, test := range tests {
 
+			t.Log("\n\nStarting test: ", test.name)
+			CreateRole(t, env, proposer, closer, test.title, test.role)
+
+		}
 	})
-
 }
 
 const role1 = `{

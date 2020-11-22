@@ -141,6 +141,23 @@ namespace hyphaspace
         return edges[0];
     }
 
+    document_graph::edge document_graph::get_edge (const checksum256 &from_node, const checksum256 &to_node, const name &edge_name, const bool strict)
+    {
+        //add the edge
+        edge_table e_t (contract, contract.value);
+        auto new_edge_id = edge_id (from_node, to_node, edge_name);
+        
+        if (auto e_itr = e_t.find(new_edge_id); 
+            e_itr != e_t.end()) {
+            return *e_itr;
+        } else if (strict) {  
+            // ensure the edge does not already exist
+            check (false, "Strict get_edge: an edge named " + edge_name.to_string() + " does not exist " +
+                " from " + readable_hash(from_node) + " to " + readable_hash(to_node));
+        }
+        return edge{}; 
+    }
+
 
     // find the specific edge of this from_node, to_node, and edge_name
     // if strict, the function will assert failure if no edge is found

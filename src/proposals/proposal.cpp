@@ -4,7 +4,8 @@
 
 namespace hyphaspace
 {
-    Proposal::Proposal(hyphadao dao) : m_dao{dao} {}
+    Proposal::Proposal(hyphadao &dao) : m_dao{dao} {}
+    Proposal::~Proposal() {}
 
     document_graph::document Proposal::propose(const name &proposer, std::vector<document_graph::content_group> &content_groups)
     {
@@ -30,7 +31,7 @@ namespace hyphaspace
         m_dao._document_graph.create_edge(proposal_doc.hash, m_dao.get_member_doc(proposer).hash, common::OWNED_BY);
 
         // the DHO also links to the document as a proposal, another graph EDGE
-        m_dao._document_graph.create_edge(hyphadao::get_root(m_dao._document_graph.contract), proposal_doc.hash, common::PROPOSAL);
+        m_dao._document_graph.create_edge(m_dao.get_root(m_dao._document_graph.contract), proposal_doc.hash, common::PROPOSAL);
 
         return proposal_doc;
     }
@@ -44,7 +45,7 @@ namespace hyphaspace
         if (did_pass(ballot_id))
         {
             // INVOKE child class close logic
-            close_impl(proposal);
+            pass_impl(proposal);
 
             // if proposal passes, create an edge for PASSED_PROPS
             m_dao._document_graph.create_edge(root_hash, proposal.hash, common::PASSED_PROPS);

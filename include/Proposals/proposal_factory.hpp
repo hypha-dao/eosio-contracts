@@ -2,15 +2,16 @@
 
 #include <eosio/name.hpp>
 #include <document_graph.hpp>
-#include <hyphadao.hpp>
-#include "proposal.hpp"
 
 namespace hyphaspace {
 
- class ProposalFactory
+    class hyphadao;
+    class Proposal;
+
+    class ProposalFactory
     {
     public:
-        static hyphaspace::Proposal* Factory(const hyphaspace::hyphadao &dao, const name &proposal_type);
+        static Proposal* Factory(hyphadao &dao, const name &proposal_type);
     };
 }
 

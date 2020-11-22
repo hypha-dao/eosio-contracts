@@ -4,46 +4,44 @@
 
 namespace hyphaspace
 {
-    BadgeAssignmentProposal::BadgeAssignmentProposal (hyphaspace::hyphadao dao) : Proposal { dao } { }
 
     std::vector<document_graph::content_group> BadgeAssignmentProposal::propose_impl(const name &proposer, std::vector<document_graph::content_group> &content_groups)
     {
-       // grab the proposal details - enforce required (strict) inputs
+        // grab the proposal details - enforce required (strict) inputs
         document_graph::content_group details = m_dao._document_graph.get_content_group(content_groups, common::DETAILS, true);
 
         // badge assignee must exist
         name assignee = std::get<name>(m_dao._document_graph.get_content(details, common::ASSIGNEE, true));
 
         // badge assignee must be a DHO member
-        m_dao.verify_membership (assignee);
+        verify_membership(assignee);
 
         // TODO: Additional input cleansing
         // start_period and end_period must be valid, no more than X periods in between
 
         // badge assignment proposal must link to a valid badge
         document_graph::document badge = m_dao._document_graph.get_document(std::get<checksum256>(m_dao._document_graph.get_content(details, common::BADGE_STRING, true)));
-        string badge_title = std::get<string>(document_graph::get_content(badge, common::DETAILS, common::TITLE, true));
 
         // badge in the proposal must be of type: badge
-        check(std::get<name>(document_graph::get_content(badge, common::SYSTEM, common::TYPE, true)) == common::BADGE_NAME,
-            "badge document hash provided in assignment proposal is not of type badge");
-
+        if (std::get<name>(document_graph::get_content(badge, common::SYSTEM, common::TYPE, true)) == common::BADGE_NAME) {
+            string badge_title = std::get<string>(document_graph::get_content(badge, common::DETAILS, common::TITLE, true));
+            check (false, "badge document hash provided in assignment proposal is not of type badge");
+        }
+ 
         return content_groups;
     }
 
-    document_graph::document BadgeAssignmentProposal::close_impl(document_graph::document proposal)
+    document_graph::document BadgeAssignmentProposal::pass_impl(document_graph::document proposal)
     {
-
-
         return proposal;
     }
 
-    string GetBallotContent (document_graph::content_group proposal_details)
+    string BadgeAssignmentProposal::GetBallotContent(document_graph::content_group proposal_details)
     {
         return std::get<string>(document_graph::get_content(proposal_details, common::TITLE, true));
     }
-    
-    name GetProposalType () 
+
+    name BadgeAssignmentProposal::GetProposalType()
     {
         return common::ASSIGN_BADGE;
     }

@@ -56,6 +56,10 @@ type Environment struct {
 	NumPeriods     int
 	PeriodDuration time.Duration
 
+	PeriodPause        time.Duration
+	VotingPause        time.Duration
+	ChainResponsePause time.Duration
+
 	Members []Member
 }
 
@@ -107,7 +111,7 @@ func SetupEnvironment(t *testing.T) *Environment {
 		devHome = "."
 	}
 	devHome = devHome + "/dev"
-	daoHome = devHome + "/hypha/eosio-contracts"
+	daoHome = devHome + "/hypha/eosio-contracts/build"
 	daoWasm = daoHome + "/hyphadao/hyphadao.wasm"
 	daoAbi = daoHome + "/hyphadao/hyphadao.abi"
 
@@ -151,6 +155,11 @@ func SetupEnvironment(t *testing.T) *Environment {
 
 	env.PeriodDuration, _ = time.ParseDuration("6s")
 	env.NumPeriods = 10
+
+	// pauses
+	env.ChainResponsePause = time.Second
+	env.VotingPause = time.Duration(env.VotingDurationSeconds)*time.Second + time.Second + env.ChainResponsePause
+	env.PeriodPause = env.PeriodDuration + time.Second
 
 	var bankKey ecc.PublicKey
 	env.DAO, _ = eostest.CreateAccountFromString(env.ctx, &env.api, "dao.hypha", defaultKey)

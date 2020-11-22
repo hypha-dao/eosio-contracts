@@ -9,10 +9,12 @@
 #include <common.hpp>
 #include <trail.hpp>
 #include <document_graph.hpp>
-
+/**
+ * We don't need to declare this on hpp since we are not using it anywhere here, it
+ * should go into cpp
 #include <proposals/proposal_factory.hpp>
 #include <proposals/proposal.hpp>
-
+*/
 using namespace eosio;
 using namespace std;
 
@@ -341,7 +343,7 @@ namespace hyphaspace
       ACTION resetperiods();
 
       // users can claim their salary pay
-      ACTION payassign(const uint64_t &assignment_id, const uint64_t &period_id);
+      ACTION payassign(const checksum256 &assignment_hash, const uint64_t &period_id);
 
       document_graph _document_graph = document_graph(get_self());
       

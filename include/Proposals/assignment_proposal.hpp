@@ -6,11 +6,10 @@
 
 namespace hyphaspace {
 
-    class RoleProposal : public Proposal
+    class AssignmentProposal : public Proposal
     {
     
     public:
-        //RoleProposal (hyphadao& dao);
         using Proposal::Proposal;
 
         document_graph::document propose(const name &proposer, std::vector<document_graph::content_group> &content_groups);

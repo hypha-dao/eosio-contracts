@@ -131,6 +131,7 @@ namespace hyphaspace
         vector<edge> get_edges_from_to (const checksum256 &from_node, const checksum256 &to_node, const bool strict);
 
         edge get_edge (const checksum256 &from_node, const name &edge_name, const bool strict);
+        edge get_edge (const checksum256 &from_node, const checksum256 &to_node, const name &edge_name, const bool strict);
         edge get_edge_from_name (const checksum256 &from_node, const name &edge_name, const bool strict);
         edge get_edge_to_name (const checksum256 &to_node, const name &edge_name, const bool strict);
         edge get_edge_from_to (const checksum256 &from_node, const checksum256 &to_node, const bool strict);

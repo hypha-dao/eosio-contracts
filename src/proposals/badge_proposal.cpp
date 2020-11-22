@@ -1,10 +1,8 @@
 #include <proposals/badge_proposal.hpp>
-#include <document_graph.hpp>
 #include <hyphadao.hpp>
+
 namespace hyphaspace
 {
-    BadgeProposal::BadgeProposal (hyphaspace::hyphadao dao) : Proposal { dao } { }
-
     std::vector<document_graph::content_group> BadgeProposal::propose_impl(const name &proposer, std::vector<document_graph::content_group> &content_groups)
     {
         // grab the proposal details - enforce required (strict) inputs
@@ -20,7 +18,7 @@ namespace hyphaspace
         return content_groups;
     }
 
-    document_graph::document BadgeProposal::close_impl(document_graph::document proposal)
+    document_graph::document BadgeProposal::pass_impl(document_graph::document proposal)
     {
         m_dao._document_graph.create_edge(hyphadao::get_root(m_dao._document_graph.contract), proposal.hash, common::BADGE_NAME);
         return proposal;
@@ -38,12 +36,12 @@ namespace hyphaspace
         }
     }
 
-    string GetBallotContent (document_graph::content_group proposal_details)
+    string BadgeProposal::GetBallotContent (document_graph::content_group proposal_details)
     {
         return std::get<string>(m_dao._document_graph.get_content(proposal_details, common::ICON, true));
     }
     
-    name GetProposalType () 
+    name BadgeProposal::GetProposalType () 
     {
         return common::BADGE_NAME;
     }
