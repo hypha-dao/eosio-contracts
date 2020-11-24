@@ -10,7 +10,13 @@ name hyphadao::register_ballot(const name &proposer,
 	qualify_owner(proposer);
 
 	// increment the ballot_id
-	name new_ballot_id = name(get_setting<name>(common::LAST_BALLOT_ID).value + 1);
+	name new_ballot_id = name(name{}.value + 1);
+
+	if (auto last_ballot = get_setting_opt<name>(common::LAST_BALLOT_ID))
+	{
+		new_ballot_id = name((*last_ballot).value + 1);
+	}
+
 	setlastballt(new_ballot_id);
 
 	name telos_decide_contract = get_setting<name>(common::TELOS_DECIDE_CONTRACT);
