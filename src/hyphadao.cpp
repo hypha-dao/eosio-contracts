@@ -4,7 +4,7 @@
 #include <proposals/proposal_factory.hpp>
 #include <proposals/proposal.hpp>
 
-using namespace hyphaspace;
+using namespace hypha;
 
 hyphadao::hyphadao(name self, name code, datastream<const char *> ds) : contract(self, code, ds) {}
 
@@ -12,7 +12,7 @@ hyphadao::~hyphadao() {}
 
 void hyphadao::propose(const name &proposer,
                        const name &proposal_type,
-                       std::vector<document_graph::content_group> &content_groups)
+                       ContentGroups &content_groups)
 {
     check(!is_paused(), "Contract is paused for maintenance. Please try again later.");
 	//We might want to use smart pointers to avoid memory leaks. std::unique_ptr<>
@@ -25,7 +25,7 @@ void hyphadao::closedocprop(const checksum256 &proposal_hash)
 {
     check(!is_paused(), "Contract is paused for maintenance. Please try again later.");
 
-	document_graph::document docprop = _document_graph.get_document(proposal_hash); 
+	Document docprop = _document_graph.get_document(proposal_hash); 
     name proposal_type = std::get<name>(_document_graph.get_content(docprop, common::SYSTEM, common::TYPE, true));
 
 	Proposal *proposal = ProposalFactory::Factory(*this, proposal_type);
@@ -181,10 +181,10 @@ void hyphadao::created(const name &creator, const checksum256 &hash)
 	require_auth(get_self());
 }
 
-void hyphadao::createdoc(const name &creator, const vector<document_graph::content_group> &content_groups)
-{
-	_document_graph.create_document(creator, content_groups);
-}
+// void hyphadao::createdoc(const name &creator, const vector<ContentGroup> &content_groups)
+// {
+// 	_document_graph.create_document(creator, content_groups);
+// }
 
 void hyphadao::exectrx(const uint64_t &proposal_id)
 {
@@ -354,8 +354,8 @@ void hyphadao::payassign(const checksum256 &assignment_hash, const uint64_t &per
 {
 	check(!is_paused(), "Contract is paused for maintenance. Please try again later.");
 
-	// document_graph::document assignment = _document_graph.get_document(assignment_hash); 
-    // document_graph::content_group assignment_details = _document_graph.get_content_group(assignment, common::DETAILS, true);
+	// Document assignment = _document_graph.get_document(assignment_hash); 
+    // ContentGroup assignment_details = _document_graph.get_content_group(assignment, common::DETAILS, true);
 
     // name assignee = std::get<name>(m_dao._document_graph.get_content(details, common::ASSIGNEE, true));
 
@@ -364,7 +364,7 @@ void hyphadao::payassign(const checksum256 &assignment_hash, const uint64_t &per
 	// require_auth(assignee);
 
 	// // get the role
-	// document_graph::document role = _document_graph.get_document(std::get<checksum256>(_document_graph.get_content(details, common::ROLE_STRING, true)));
+	// Document role = _document_graph.get_document(std::get<checksum256>(_document_graph.get_content(details, common::ROLE_STRING, true)));
 	// string badge_title = std::get<string>(document_graph::get_content(badge, common::DETAILS, common::TITLE, true));
 
 

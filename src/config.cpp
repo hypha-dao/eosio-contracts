@@ -1,21 +1,21 @@
 #include <hyphadao.hpp>
 
-using namespace hyphaspace;
+using namespace hypha;
 
 void hyphadao::createroot (const string &notes)
 {
 	require_auth (get_self());
 
-	document_graph::document root = _document_graph.get_or_create (get_self(), _document_graph.new_content("root_node", get_self()));
+	Document root = _document_graph.get_or_create (get_self(), _document_graph.new_content("root_node", get_self()));
 	setconfigatt("root_node", _document_graph.readable_hash(root.hash));
 }
 
 checksum256 hyphadao::get_root (const name &contract)
 {
 	auto ctnt = document_graph::new_content("root_node", contract);
-	document_graph::content_group cg; 
+	ContentGroup cg; 
 	cg.push_back(ctnt);
-	vector<document_graph::content_group> cgs;
+	vector<ContentGroup> cgs;
 	cgs.push_back(cg);
 	return document_graph::hash_document(cgs);
 }

@@ -1,7 +1,7 @@
 
 #include <hyphadao.hpp>
 
-using namespace hyphaspace;
+using namespace hypha;
 
 void hyphadao::set(const name &scope, const uint64_t &id, const string &key, const hyphadao::flexvalue1 &value)
 {
@@ -325,8 +325,8 @@ void hyphadao::new_document(const name &creator,
 							const map<string, time_point> time_points,
 							const map<string, uint64_t> ints)
 {
-	// vector<document_graph::content_group> content_groups;
-	// document_graph::content_group cg{};
+	// vector<ContentGroup> content_groups;
+	// ContentGroup cg{};
 
 	// document_graph::content c{};
 	// c.label = "scope";

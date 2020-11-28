@@ -6,9 +6,9 @@
 #include <proposals/assignment_proposal.hpp>
 #include <common.hpp>
 
-namespace hyphaspace
+namespace hypha
 {
-    //We don't have to specify the namespace hyphaspace:: since we are already inside that namespace
+    //We don't have to specify the namespace hypha:: since we are already inside that namespace
 
     Proposal* ProposalFactory::Factory(hyphadao &dao, const name &proposal_type)
     {
@@ -30,4 +30,4 @@ namespace hyphaspace
         check(false, "Unknown proposal_type");
         return nullptr;
     }
-} // namespace hyphaspace
+} // namespace hypha

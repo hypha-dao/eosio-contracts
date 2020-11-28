@@ -1,6 +1,6 @@
 #include <hyphadao.hpp>
 
-using namespace hyphaspace;
+using namespace hypha;
 
 void hyphadao::new_proposal(const name &owner,
                             map<string, name> &names,

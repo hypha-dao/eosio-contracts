@@ -1,42 +1,36 @@
 #include <proposals/badge_proposal.hpp>
+#include <document_graph/content_group.hpp>
 #include <hyphadao.hpp>
 
-namespace hyphaspace
+namespace hypha
 {
-    std::vector<document_graph::content_group> BadgeProposal::propose_impl(const name &proposer, std::vector<document_graph::content_group> &content_groups)
+    ContentGroups BadgeProposal::propose_impl(const name &proposer, ContentGroups &contentGroups)
     {
-        // grab the proposal details - enforce required (strict) inputs
-        document_graph::content_group proposal_details = m_dao._document_graph.get_content_group(content_groups, common::DETAILS, true);
-
         // check coefficients
         // TODO: move coeffecient thresholds to be configuration values
-        check_coefficient(proposal_details, "husd_coefficient_x10000");
-        check_coefficient(proposal_details, "hypha_coefficient_x10000");
-        check_coefficient(proposal_details, "hvoice_coefficient_x10000");
-        check_coefficient(proposal_details, "seeds_coefficient_x10000");
+        checkCoefficient(ContentGroupWrapper::getValue(contentGroups, common::DETAILS, common::HUSD_COEFFICIENT));
+        checkCoefficient(ContentGroupWrapper::getValue(contentGroups, common::DETAILS, common::HYPHA_COEFFICIENT));
+        checkCoefficient(ContentGroupWrapper::getValue(contentGroups, common::DETAILS, common::HVOICE_COEFFICIENT));
+        checkCoefficient(ContentGroupWrapper::getValue(contentGroups, common::DETAILS, common::SEEDS_COEFFICIENT));
 
         return content_groups;
     }
 
-    document_graph::document BadgeProposal::pass_impl(document_graph::document proposal)
+    Document BadgeProposal::pass_impl(Document proposal)
     {
         m_dao._document_graph.create_edge(hyphadao::get_root(m_dao._document_graph.contract), proposal.hash, common::BADGE_NAME);
         return proposal;
     }
 
-    void BadgeProposal::check_coefficient(document_graph::content_group &content_group, const string &coefficient_key)
+    void BadgeProposal::checkCoefficient(Content& coefficient)
     {
-        document_graph::flexvalue coefficient_x10000 = document_graph::get_content(content_group, coefficient_key, false);
-        if (coefficient_x10000 != document_graph::not_found())
-        {
-            check(std::holds_alternative<int64_t>(coefficient_x10000), "fatal error: coefficient must be an int64_t type: " + coefficient_key);
-            check(std::get<int64_t>(coefficient_x10000) >= 7000 &&
-                      std::get<int64_t>(coefficient_x10000) <= 13000,
-                  "fatal error: coefficient_x10000 must be between 7000 and 13000, inclusive: " + coefficient_key);
-        }
+        eosio::check(std::holds_alternative<int64_t>(coefficient.value), "fatal error: coefficient must be an int64_t type: " + coefficient.label);
+        eosio::check(std::get<int64_t>(coefficient.value) >= 7000 &&
+                     std::get<int64_t>(coefficient.value) <= 13000,
+                  "fatal error: coefficient_x10000 must be between 7000 and 13000, inclusive: " + coefficient.label);
     }
 
-    string BadgeProposal::GetBallotContent (document_graph::content_group proposal_details)
+    string BadgeProposal::GetBallotContent (ContentGroup proposal_details)
     {
         return std::get<string>(m_dao._document_graph.get_content(proposal_details, common::ICON, true));
     }
@@ -46,4 +40,4 @@ namespace hyphaspace
         return common::BADGE_NAME;
     }
 
-} // namespace hyphaspace
+} // namespace hypha

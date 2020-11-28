@@ -1,8 +1,8 @@
 #include <hyphadao.hpp>
 
-using namespace hyphaspace;
+using namespace hypha;
 
-// void hyphadao::check_coefficient(document_graph::content_group &content_group, const string &coefficient_key)
+// void hyphadao::check_coefficient(ContentGroup &content_group, const string &coefficient_key)
 // {
 //     document_graph::flexvalue coefficient_x10000 = _document_graph.get_content(content_group, coefficient_key, false);
 //     if (coefficient_x10000 != _document_graph.DOES_NOT_EXIST)
@@ -14,20 +14,20 @@ using namespace hyphaspace;
 //     }
 // }
 
-// document_graph::document hyphadao::create_votetally_doc(const name &proposer, std::vector<document_graph::content_group> &content_groups)
+// Document hyphadao::create_votetally_doc(const name &proposer, ContentGroups &content_groups)
 // {
-//     std::vector<document_graph::content_group> option_groups = _document_graph.get_content_groups_of_type(content_groups, common::GROUP_TYPE_OPTION, false);
+//     ContentGroups option_groups = _document_graph.get_content_groups_of_type(content_groups, common::GROUP_TYPE_OPTION, false);
 
 //     // if options are not included in proposal doc, default to pass/fail
 //     if (option_groups.size() == 0)
 //     {
-//         document_graph::content_group pass_option_cg = document_graph::content_group{};
+//         ContentGroup pass_option_cg = ContentGroup{};
 //         pass_option_cg.push_back(_document_graph.new_content("content_group_type", common::GROUP_TYPE_OPTION));
 //         pass_option_cg.push_back(_document_graph.new_content("option_key", string("Pass")));
 //         pass_option_cg.push_back(_document_graph.new_content("vote_power", asset{0, common::S_HVOICE}));
 //         pass_option_cg.push_back(_document_graph.new_content("description", string("Voting for this option is a vote to pass/approve the proposal")));
 
-//         document_graph::content_group fail_option_cg = document_graph::content_group{};
+//         ContentGroup fail_option_cg = ContentGroup{};
 //         fail_option_cg.push_back(_document_graph.new_content("content_group_type", common::GROUP_TYPE_OPTION));
 //         fail_option_cg.push_back(_document_graph.new_content("option_key", string("Fail")));
 //         fail_option_cg.push_back(_document_graph.new_content("vote_power", asset{0, common::S_HVOICE}));
@@ -41,10 +41,10 @@ using namespace hyphaspace;
 
 
 
-// document_graph::document hyphadao::propose_badge(const name &proposer, std::vector<document_graph::content_group> &content_groups)
+// Document hyphadao::propose_badge(const name &proposer, ContentGroups &content_groups)
 // {
 //     // grab the proposal details - enforce required (strict) inputs
-//     document_graph::content_group proposal_details = _document_graph.get_content_group(content_groups, common::DETAILS, true);
+//     ContentGroup proposal_details = _document_graph.get_content_group(content_groups, common::DETAILS, true);
 
 //     // check coefficients
 //     // TODO: move coeffecient thresholds to be configuration values
@@ -55,7 +55,7 @@ using namespace hyphaspace;
 
 //     // handle ballot type - specific functionality
 //     document_graph::flexvalue ballot_type = _document_graph.get_content(proposal_details, common::BALLOT_TYPE, false);
-//     document_graph::document vote_tally_document;
+//     Document vote_tally_document;
 //     bool add_vote_tally_edge = false;
 //     name ballot_type_name;
 
@@ -91,7 +91,7 @@ using namespace hyphaspace;
 //     }
     
 //     // creates the document, or the graph NODE
-//     document_graph::document proposal_doc = _document_graph.create_document(proposer, content_groups);
+//     Document proposal_doc = _document_graph.create_document(proposer, content_groups);
 
 //     // the proposer OWNS the proposal; this creates the graph EDGE
 //     _document_graph.create_edge(get_member_doc(proposer).hash, proposal_doc.hash, common::OWNS);
@@ -110,25 +110,25 @@ using namespace hyphaspace;
 //     return proposal_doc;
 // }
 
-// void hyphadao::create_badge(const document_graph::document &badge)
+// void hyphadao::create_badge(const Document &badge)
 // {
 //     _document_graph.create_edge(get_root(), badge.hash, common::BADGE_NAME);
 // }
-// document_graph::document hyphadao::propose_badge_assignment(const name &proposer,
-//                                                             std::vector<document_graph::content_group> &content_groups)
+// Document hyphadao::propose_badge_assignment(const name &proposer,
+//                                                             ContentGroups &content_groups)
 // {
    
 // }
 
-// void hyphadao::assign_badge(const document_graph::document &badge_assignment)
+// void hyphadao::assign_badge(const Document &badge_assignment)
 // {
 //     // document nodes we need: 
 //     //      badge, 
 //     //      badge_assignment, and 
 //     //      member 
 
-//     document_graph::content_group details = _document_graph.get_content_group(badge_assignment, common::DETAILS, true);
-//     document_graph::document badge = _document_graph.get_document(std::get<checksum256>(_document_graph.get_content(
+//     ContentGroup details = _document_graph.get_content_group(badge_assignment, common::DETAILS, true);
+//     Document badge = _document_graph.get_document(std::get<checksum256>(_document_graph.get_content(
 //                     details, common::BADGE_STRING, true)));
 //     name assignee = std::get<name>(_document_graph.get_content(details, common::ASSIGNEE, true));
 //     checksum256 member_doc_hash = get_member_doc(assignee).hash;

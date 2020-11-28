@@ -4,7 +4,7 @@
 
 #include "proposal.hpp"
 
-namespace hyphaspace {
+namespace hypha {
 
     class RoleProposal : public Proposal
     {
@@ -13,14 +13,14 @@ namespace hyphaspace {
         //RoleProposal (hyphadao& dao);
         using Proposal::Proposal;
 
-        document_graph::document propose(const name &proposer, std::vector<document_graph::content_group> &content_groups);
-        void close(document_graph::document proposal);
+        Document propose(const name &proposer, ContentGroups &content_groups);
+        void close(Document proposal);
 
     protected:
 
-        std::vector<document_graph::content_group> propose_impl(const name &proposer, std::vector<document_graph::content_group> &content_groups) override;
-        document_graph::document pass_impl(document_graph::document proposal) override;
-        string GetBallotContent (document_graph::content_group proposal_details) override;
+        ContentGroups propose_impl(const name &proposer, ContentGroups &content_groups) override;
+        Document pass_impl(Document proposal) override;
+        string GetBallotContent (ContentGroups proposal_details) override;
         name GetProposalType () override;
 
     };

@@ -8,7 +8,7 @@
 
 #include <common.hpp>
 #include <trail.hpp>
-#include <document_graph.hpp>
+#include <document_graph/content_group.hpp>
 /**
  * We don't need to declare this on hpp since we are not using it anywhere here, it
  * should go into cpp
@@ -18,7 +18,7 @@
 using namespace eosio;
 using namespace std;
 
-namespace hyphaspace
+namespace hypha
 {
    CONTRACT hyphadao : public contract
    {
@@ -201,22 +201,22 @@ namespace hyphaspace
          asset husd = asset{0, common::S_HUSD};
       };
 
-      typedef multi_index<name("documents"), document_graph::document,
-                          indexed_by<name("idhash"), const_mem_fun<document_graph::document, checksum256, &document_graph::document::by_hash>>,
-                          indexed_by<name("bycreator"), const_mem_fun<document_graph::document, uint64_t, &document_graph::document::by_creator>>,
-                          indexed_by<name("bycreated"), const_mem_fun<document_graph::document, uint64_t, &document_graph::document::by_created>>>
-          document_table;
+      // typedef multi_index<name("documents"), Document,
+      //                     indexed_by<name("idhash"), const_mem_fun<Document, checksum256, &Document::by_hash>>,
+      //                     indexed_by<name("bycreator"), const_mem_fun<Document, uint64_t, &Document::by_creator>>,
+      //                     indexed_by<name("bycreated"), const_mem_fun<Document, uint64_t, &Document::by_created>>>
+      //     document_table;
 
-      typedef multi_index<name("edges"), document_graph::edge,
-                          indexed_by<name("fromnode"), const_mem_fun<document_graph::edge, checksum256, &document_graph::edge::by_from>>,
-                          indexed_by<name("tonode"), const_mem_fun<document_graph::edge, checksum256, &document_graph::edge::by_to>>,
-                          indexed_by<name("edgename"), const_mem_fun<document_graph::edge, uint64_t, &document_graph::edge::by_edge_name>>,
-                          indexed_by<name("byfromname"), const_mem_fun<document_graph::edge, uint64_t, &document_graph::edge::by_from_node_edge_name_index>>,
-                          indexed_by<name("byfromto"), const_mem_fun<document_graph::edge, uint64_t, &document_graph::edge::by_from_node_to_node_index>>,
-                          indexed_by<name("bytoname"), const_mem_fun<document_graph::edge, uint64_t, &document_graph::edge::by_to_node_edge_name_index>>,
-                          indexed_by<name("bycreated"), const_mem_fun<document_graph::edge, uint64_t, &document_graph::edge::by_created>>,
-                          indexed_by<name("bycreator"), const_mem_fun<document_graph::edge, uint64_t, &document_graph::edge::by_creator>>>
-          edge_table;
+      // typedef multi_index<name("edges"), document_graph::edge,
+      //                     indexed_by<name("fromnode"), const_mem_fun<document_graph::edge, checksum256, &document_graph::edge::by_from>>,
+      //                     indexed_by<name("tonode"), const_mem_fun<document_graph::edge, checksum256, &document_graph::edge::by_to>>,
+      //                     indexed_by<name("edgename"), const_mem_fun<document_graph::edge, uint64_t, &document_graph::edge::by_edge_name>>,
+      //                     indexed_by<name("byfromname"), const_mem_fun<document_graph::edge, uint64_t, &document_graph::edge::by_from_node_edge_name_index>>,
+      //                     indexed_by<name("byfromto"), const_mem_fun<document_graph::edge, uint64_t, &document_graph::edge::by_from_node_to_node_index>>,
+      //                     indexed_by<name("bytoname"), const_mem_fun<document_graph::edge, uint64_t, &document_graph::edge::by_to_node_edge_name_index>>,
+      //                     indexed_by<name("bycreated"), const_mem_fun<document_graph::edge, uint64_t, &document_graph::edge::by_created>>,
+      //                     indexed_by<name("bycreator"), const_mem_fun<document_graph::edge, uint64_t, &document_graph::edge::by_creator>>>
+      //     edge_table;
 
       const uint64_t MICROSECONDS_PER_HOUR = (uint64_t)60 * (uint64_t)60 * (uint64_t)1000000;
       const uint64_t MICROSECONDS_PER_YEAR = MICROSECONDS_PER_HOUR * (uint64_t)24 * (uint64_t)365;
@@ -298,21 +298,20 @@ namespace hyphaspace
       ///  BEGIN - Generation 2 Actions
       /// **********************************
 
-      ACTION propose(const name &proposer, const name &proposal_type, std::vector<document_graph::content_group> &content_groups);
-      ACTION created(const name &creator, const checksum256 &hash);
-      // document_graph
-      ACTION createdoc(const name &creator, const vector<document_graph::content_group> &content_groups);
+      ACTION propose(const name &proposer, const name &proposal_type, ContentGroups &content_groups);
+      ACTION closedocprop(const checksum256 &proposal_hash);
+
+      // ADMIN
       ACTION erasedochash(const checksum256 &doc);
       ACTION erasedocs(const uint64_t &begin_id, const uint64_t &batch_size);
       ACTION erasealldocs(const string &notes);
-
       ACTION eraseedges(const string &notes);
       ACTION erasedocbyid(const uint64_t &id);
-      ACTION closedocprop(const checksum256 &proposal_hash);
       // create the initial rootnode document
       ACTION createroot(const string &notes);
       // make member documents from the members table
       ACTION makememdocs(const string &notes);
+      // ACTION createdoc(const name &creator, const vector<ContentGroup> &content_groups);
 
       /// **********************************
       ///  END - Generation 2 Actions
@@ -351,8 +350,8 @@ namespace hyphaspace
       // static void verify_membership(const name &member);
 
       static checksum256 get_member_hash(const name &member);
-      document_graph::document get_member_doc(const name &member);
-      document_graph::document get_member_doc(const name &creator, const name &member);
+      Document get_member_doc(const name &member);
+      Document get_member_doc(const name &creator, const name &member);
 
       static asset adjust_asset(const asset &original_asset, const float &adjustment);
       static string get_string(const std::map<string, string> strings, string key);
@@ -372,32 +371,32 @@ namespace hyphaspace
       asset get_seeds_amount(const asset &usd_amount, const time_point &price_time_point, const float &time_share, const float &deferred_perc);
 
       // Generation 2 - document graph related
-      document_graph::document create_votetally_doc(const name &proposer, std::vector<document_graph::content_group> &content_groups);
+      Document create_votetally_doc(const name &proposer, ContentGroups &content_groups);
       // bool did_pass(const name &ballot_id);
 
       // // badge-related functions
-      // document_graph::document propose_badge(const name &proposer, std::vector<document_graph::content_group> &content_groups);
-      // void create_badge(const document_graph::document &badge);
-      // document_graph::document propose_badge_assignment(const name &proposer, std::vector<document_graph::content_group> &content_groups);
-      // void assign_badge(const document_graph::document &badge_assignment);
+      // Document propose_badge(const name &proposer, ContentGroups &content_groups);
+      // void create_badge(const Document &badge);
+      // Document propose_badge_assignment(const name &proposer, ContentGroups &content_groups);
+      // void assign_badge(const Document &badge_assignment);
 
-      // void check_coefficient(document_graph::content_group & content_group, const string &coefficient_key);
-      asset apply_coefficient(const document_graph::document &badge, const asset &base, const string &coefficient_key);
+      // void check_coefficient(ContentGroup & content_group, const string &coefficient_key);
+      asset apply_coefficient(const Document &badge, const asset &base, const string &coefficient_key);
       asset_batch apply_badge_coefficients(const uint64_t period_id, const name &member, const asset_batch ab);
-      vector<document_graph::document> get_current_badges(const uint64_t &period_id, const name &member);
+      vector<Document> get_current_badges(const uint64_t &period_id, const name &member);
 
-      // document_graph::content_group create_system_group(const name &proposer,
+      // ContentGroup create_system_group(const name &proposer,
       //                                                   const name &proposal_type,
       //                                                   const string &decide_title,
       //                                                   const string &decide_desc,
       //                                                   const string &decide_content);
       checksum256 get_root();
 
-      // document_graph::document propose_role(const name &proposer, std::vector<document_graph::content_group> &content_groups);
-      // void create_role(const document_graph::document &role);
-      // document_graph::document propose_role_assignment(const name &proposer,
-      //                                                    std::vector<document_graph::content_group> &content_groups);
-      // void assign_role(const document_graph::document &role_assignment);
+      // Document propose_role(const name &proposer, ContentGroups &content_groups);
+      // void create_role(const Document &role);
+      // Document propose_role_assignment(const name &proposer,
+      //                                                    ContentGroups &content_groups);
+      // void assign_role(const Document &role_assignment);
 
       void defcloseprop(const uint64_t &proposal_id);
       void qualify_owner(const name &proposer);
@@ -469,4 +468,4 @@ namespace hyphaspace
                                     const float &deferred_perc,
                                     const float &time_share_perc);
    };
-} // namespace hyphaspace
+} // namespace hypha

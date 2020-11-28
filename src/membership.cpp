@@ -1,6 +1,6 @@
 #include <hyphadao.hpp>
 
-using namespace hyphaspace;
+using namespace hypha;
 
 void hyphadao::apply(const name &applicant,
 					 const string &content)
@@ -78,7 +78,7 @@ void hyphadao::enroll(const name &enroller,
 
 	// update the graph
 	checksum256 root_hash = get_root();
-	document_graph::document member_doc = get_member_doc(enroller, applicant);
+	Document member_doc = get_member_doc(enroller, applicant);
 	_document_graph.create_edge(root_hash, member_doc.hash, common::MEMBER);
 	_document_graph.create_edge(member_doc.hash, root_hash, common::MEMBER_OF);
 
@@ -93,25 +93,25 @@ void hyphadao::enroll(const name &enroller,
 	a_t.erase(a_itr);
 }
 
-checksum256 hyphadao::get_member_hash (const name &member)
-{
-	auto ctnt = document_graph::new_content("member", member);
-	document_graph::content_group cg; 
-	cg.push_back(ctnt);
-	vector<document_graph::content_group> cgs;
-	cgs.push_back(cg);
-	return document_graph::hash_document(cgs);
-}
+// checksum256 hyphadao::get_member_hash (const name &member)
+// {
+// 	auto ctnt = document_graph::new_content("member", member);
+// 	ContentGroup cg; 
+// 	cg.push_back(ctnt);
+// 	vector<ContentGroup> cgs;
+// 	cgs.push_back(cg);
+// 	return document_graph::hash_document(cgs);
+// }
 
-document_graph::document hyphadao::get_member_doc (const name& member)
-{
-	return _document_graph.get_document(get_member_hash(member));
-}
+// Document hyphadao::get_member_doc (const name& member)
+// {
+// 	return _document_graph.get_document(get_member_hash(member));
+// }
 
-document_graph::document hyphadao::get_member_doc (const name& creator, const name& member)
-{
-	return _document_graph.get_or_create (creator, document_graph::new_content(common::MEMBER_STRING, member));
-}
+// Document hyphadao::get_member_doc (const name& creator, const name& member)
+// {
+// 	return _document_graph.get_or_create (creator, document_graph::new_content(common::MEMBER_STRING, member));
+// }
 
 void hyphadao::makememdocs (const string &notes)
 {

@@ -1,6 +1,6 @@
 #include <hyphadao.hpp>
 
-using namespace hyphaspace;
+using namespace hypha;
 
 void hyphadao::make_payment(const uint64_t &period_id,
                             const name &recipient,

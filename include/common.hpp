@@ -21,6 +21,12 @@ namespace common {
     static const float          PHASE_TO_YEAR_RATIO             = 0.02026009582;
 
     // content keys
+    // keys used with settings
+    static const string         ROOT_NODE                   = string ("root_node");
+    static const string         HYPHA_DEFERRAL_FACTOR       = string ("hypha_deferral_factor_x100");
+    static const string         CLIENT_VERSION              = string ("client_version");
+    static const string         CONTRACT_VERSION            = string ("contract_version");
+
     static const string         TITLE                       = string ("title");
     static const string         DESCRIPTION                 = string ("description");
     static const string         CONTENT                     = string ("content");
@@ -43,7 +49,19 @@ namespace common {
     static const string         BALLOT_ID                   = string ("ballot_id");
     static const string         BALLOT_TYPE                 = string ("ballot_type");
     static const string         ROLE_STRING                 = string ("role");
-    
+
+    static const string         FULL_TIME_CAPACITY          = string ("fulltime_capacity_x100");
+    static const string         ANNUAL_USD_SALARY           = string ("annual_usd_salary");
+    static const string         TIME_SHARE                  = string ("time_share_x100");
+    static const string         MIN_TIME_SHARE              = string ("min_time_share_x100");
+    static const string         MIN_DEFERRED                = string ("min_deferred_x100");
+    static const string         DEFERRED                    = string ("deferred_perc_x100");
+
+    static const string         USD_SALARY_PER_PERIOD       = string ("usd_salary_value_per_phase");
+    static const string         HYPHA_SALARY_PER_PERIOD     = string ("hypha_salary_per_phase");
+    static const string         HUSD_SALARY_PER_PERIOD      = string ("husd_salary_per_phase");
+    static const string         HVOICE_SALARY_PER_PERIOD    = string ("hvoice_salary_per_phase");
+
     // graph edge names
     static constexpr name       HOLDS_BADGE                 = name ("holdsbadge");
     static constexpr name       HELD_BY                     = name ("heldby");

@@ -1,6 +1,6 @@
 #include <hyphadao.hpp>
 
-using namespace hyphaspace;
+using namespace hypha;
 
 // retrieve the seeds price as of a specific point in time
 float hyphadao::get_seeds_price_usd(const time_point &price_time_point)
@@ -86,60 +86,60 @@ map<string, asset> hyphadao::get_assets(const asset &usd_amount,
     return assets;
 }
 
-// this is used when calculating the assets for an assignment proposal
-map<string, asset> hyphadao::get_assets(const uint64_t &role_id,
-                                        const float &deferred_perc,
-                                        const float &time_share_perc)
+// // this is used when calculating the assets for an assignment proposal
+// map<string, asset> hyphadao::get_assets(const uint64_t &role_id,
+//                                         const float &deferred_perc,
+//                                         const float &time_share_perc)
+// {
+//     map<string, asset> assets;
+
+//     // global ratios
+//     config_table config_s(get_self(), get_self().value);
+//     Config c = config_s.get_or_create(get_self(), Config());
+//     // float seeds_deferral_coeff = get_float(c.ints, "seeds_deferral_factor_x100");
+//     float hypha_deferral_coeff = get_float(c.ints, "hypha_deferral_factor_x100");
+
+//     object_table o_t_role(get_self(), name("role").value);
+//     auto o_itr_role = o_t_role.find(role_id);
+//     checkx(o_itr_role != o_t_role.end(), "Role ID: " + std::to_string(role_id) + " does not exist.");
+
+//     // NEW: Hard copy the annual_usd_salary from the role to the assignment as a period amount
+//     asset usd_salary_value_per_phase = adjust_asset(o_itr_role->assets.at("annual_usd_salary"), common::PHASE_TO_YEAR_RATIO);
+//     assets["usd_salary_value_per_phase"] = usd_salary_value_per_phase;
+
+//     // calculate HUSD salary amount
+//     // 1. normalize annual salary to the time commitment of this proposal
+//     // 2. multiply (1) by 0.02026 to calculate a single moon phase; avg. phase is 7.4 days, 49.36 phases per year
+//     // 3. multiply (2) by 1 - deferral perc
+//     asset commitment_adjusted_usd_annual = adjust_asset(o_itr_role->assets.at("annual_usd_salary"), time_share_perc);
+//     asset commitment_adjusted_usd_phase = adjust_asset(commitment_adjusted_usd_annual, common::PHASE_TO_YEAR_RATIO);
+//     asset nondeferred_and_commitment_adj_usd_phase = adjust_asset(commitment_adjusted_usd_phase, (float)1 - (float)deferred_perc);
+
+//     // convert symbol
+//     asset husd_salary_per_phase = asset{nondeferred_and_commitment_adj_usd_phase.amount, common::S_HUSD};
+//     assets["husd_salary_per_phase"] = husd_salary_per_phase;
+
+//     // calculate HYPHA phase salary amount
+//     asset deferred_and_commitment_adj_usd_phase = adjust_asset(commitment_adjusted_usd_phase, (float)deferred_perc);
+//     assets["hypha_salary_per_phase"] = adjust_asset(asset{deferred_and_commitment_adj_usd_phase.amount, common::S_HYPHA}, hypha_deferral_coeff);
+
+//     // calculate HVOICE phase salary amount, which is $1.00 USD == 2 HVOICE
+//     assets["hvoice_salary_per_phase"] = asset{commitment_adjusted_usd_phase.amount * 2, common::S_HVOICE};
+
+//     debug("Calculations for get_assets: INPUT: Role: " + std::to_string(role_id) +
+//           ", INPUT: deferred_perc: " + std::to_string(deferred_perc) +
+//           ", INPUT: time_share_perc: " + std::to_string(time_share_perc) +
+//           ", CALC: usd_salary_value_per_phase: " + assets["usd_salary_value_per_phase"].to_string() +
+//           ", CALC: hypha_salary_per_phase: " + assets["hypha_salary_per_phase"].to_string() +
+//           ", CALC: husd_salary_per_phase: " + assets["husd_salary_per_phase"].to_string() +
+//           ", CALC: hvoice_salary_per_phase: " + assets["hvoice_salary_per_phase"].to_string());
+
+//     return assets;
+// }
+
+vector<Document> hyphadao::get_current_badges(const uint64_t &period_id, const name &member)
 {
-    map<string, asset> assets;
-
-    // global ratios
-    config_table config_s(get_self(), get_self().value);
-    Config c = config_s.get_or_create(get_self(), Config());
-    // float seeds_deferral_coeff = get_float(c.ints, "seeds_deferral_factor_x100");
-    float hypha_deferral_coeff = get_float(c.ints, "hypha_deferral_factor_x100");
-
-    object_table o_t_role(get_self(), name("role").value);
-    auto o_itr_role = o_t_role.find(role_id);
-    checkx(o_itr_role != o_t_role.end(), "Role ID: " + std::to_string(role_id) + " does not exist.");
-
-    // NEW: Hard copy the annual_usd_salary from the role to the assignment as a period amount
-    asset usd_salary_value_per_phase = adjust_asset(o_itr_role->assets.at("annual_usd_salary"), common::PHASE_TO_YEAR_RATIO);
-    assets["usd_salary_value_per_phase"] = usd_salary_value_per_phase;
-
-    // calculate HUSD salary amount
-    // 1. normalize annual salary to the time commitment of this proposal
-    // 2. multiply (1) by 0.02026 to calculate a single moon phase; avg. phase is 7.4 days, 49.36 phases per year
-    // 3. multiply (2) by 1 - deferral perc
-    asset commitment_adjusted_usd_annual = adjust_asset(o_itr_role->assets.at("annual_usd_salary"), time_share_perc);
-    asset commitment_adjusted_usd_phase = adjust_asset(commitment_adjusted_usd_annual, common::PHASE_TO_YEAR_RATIO);
-    asset nondeferred_and_commitment_adj_usd_phase = adjust_asset(commitment_adjusted_usd_phase, (float)1 - (float)deferred_perc);
-
-    // convert symbol
-    asset husd_salary_per_phase = asset{nondeferred_and_commitment_adj_usd_phase.amount, common::S_HUSD};
-    assets["husd_salary_per_phase"] = husd_salary_per_phase;
-
-    // calculate HYPHA phase salary amount
-    asset deferred_and_commitment_adj_usd_phase = adjust_asset(commitment_adjusted_usd_phase, (float)deferred_perc);
-    assets["hypha_salary_per_phase"] = adjust_asset(asset{deferred_and_commitment_adj_usd_phase.amount, common::S_HYPHA}, hypha_deferral_coeff);
-
-    // calculate HVOICE phase salary amount, which is $1.00 USD == 2 HVOICE
-    assets["hvoice_salary_per_phase"] = asset{commitment_adjusted_usd_phase.amount * 2, common::S_HVOICE};
-
-    debug("Calculations for get_assets: INPUT: Role: " + std::to_string(role_id) +
-          ", INPUT: deferred_perc: " + std::to_string(deferred_perc) +
-          ", INPUT: time_share_perc: " + std::to_string(time_share_perc) +
-          ", CALC: usd_salary_value_per_phase: " + assets["usd_salary_value_per_phase"].to_string() +
-          ", CALC: hypha_salary_per_phase: " + assets["hypha_salary_per_phase"].to_string() +
-          ", CALC: husd_salary_per_phase: " + assets["husd_salary_per_phase"].to_string() +
-          ", CALC: hvoice_salary_per_phase: " + assets["hvoice_salary_per_phase"].to_string());
-
-    return assets;
-}
-
-vector<document_graph::document> hyphadao::get_current_badges(const uint64_t &period_id, const name &member)
-{
-    vector<document_graph::document> current_badges;
+    vector<Document> current_badges;
 
     // get edges for member named "assignbadge"
     auto member_doc = get_member_doc(member);
@@ -147,7 +147,7 @@ vector<document_graph::document> hyphadao::get_current_badges(const uint64_t &pe
     vector<document_graph::edge> badge_assignment_edges = _document_graph.get_edges(member_doc.hash, common::ASSIGN_BADGE, false);
     for (const document_graph::edge e : badge_assignment_edges)
     {
-        document_graph::document badge_assignment = _document_graph.get_document(e.to_node);
+        Document badge_assignment = _document_graph.get_document(e.to_node);
         auto start_period = _document_graph.get_content(badge_assignment, common::DETAILS, common::START_PERIOD, true);
         auto end_period = _document_graph.get_content(badge_assignment, common::DETAILS, common::END_PERIOD, true);
 
@@ -167,7 +167,7 @@ vector<document_graph::document> hyphadao::get_current_badges(const uint64_t &pe
     return current_badges;
 }
 
-asset hyphadao::apply_coefficient(const document_graph::document &badge, const asset &base, const string &coefficient_key)
+asset hyphadao::apply_coefficient(const Document &badge, const asset &base, const string &coefficient_key)
 {
     auto coefficient = _document_graph.get_content(badge, common::DETAILS, coefficient_key, false);
     check(std::holds_alternative<int64_t>(coefficient), "fatal error: coefficient must be an int; badge: " +

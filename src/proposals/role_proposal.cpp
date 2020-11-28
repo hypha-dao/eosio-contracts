@@ -1,26 +1,40 @@
-#include <proposals/role_proposal.hpp>
-#include <document_graph.hpp>
-#include <hyphadao.hpp>
+#include <eosio/asset.hpp>
+#include <eosio/crypto.hpp>
 
-namespace hyphaspace
+#include <common.hpp>
+#include <proposals/role_proposal.hpp>
+#include <document_graph/content_group.hpp>
+
+namespace hypha
 {
 
-    //RoleProposal::RoleProposal (hyphadao &dao) : Proposal (dao) { }
-
-    std::vector<document_graph::content_group> RoleProposal::propose_impl(const name &proposer, std::vector<document_graph::content_group> &content_groups)
+    ContentGroups RoleProposal::propose_impl(const name &proposer, ContentGroups &content_groups)
     {
+        // capacity is no longer enforced; commenting check
+        // int64_t capacity = std::get<int64_t>(m_dao._document_graph.get_content(details, common::FULL_TIME_CAPACITY, true));
+        // check(capacity > 0, "fulltime_capacity_x100 must be greater than zero. You submitted: " + std::to_string(capacity));
+
+        eosio::asset annual_usd_salary = ContentGroupWrapper::getAsset (content_groups, common::DETAILS, common::ANNUAL_USD_SALARY);
+        check (annual_usd_salary.amount > 0, common::ANNUAL_USD_SALARY + " must be greater than zero. You submitted: " + annual_usd_salary.to_string());
+        
         return content_groups;
     }
 
-    document_graph::document RoleProposal::pass_impl(document_graph::document proposal)
+    Document RoleProposal::pass_impl(Document proposal)
     {
-        m_dao._document_graph.create_edge(m_dao.get_root(m_dao._document_graph.contract), proposal.hash, common::ROLE_NAME);
+        ContentGroups cgs = Document::rollup(Content(common::ROOT_NODE, m_contract));
+        eosio::checksum256 rootNode = Document::hashContents(cgs);
+        
+        // TODO: check to see if get_first_signer() is accurate here
+        Edge rootRoleEdge (m_contract, m_contract, rootNode, proposal.getHash(), common::ROLE_NAME);
+        rootRoleEdge.emplace();
+        
         return proposal;
     }
 
-    string RoleProposal::GetBallotContent (document_graph::content_group proposal_details)
+    std::string RoleProposal::GetBallotContent (ContentGroups contentGroups)
     {
-        return std::get<string>(m_dao._document_graph.get_content(proposal_details, common::TITLE, true));
+        return ContentGroupWrapper::getString (contentGroups, common::DETAILS, common::TITLE);
     }
     
     name RoleProposal::GetProposalType () 
@@ -28,4 +42,4 @@ namespace hyphaspace
         return common::ROLE_NAME;
     }
 
-} // namespace hyphaspace
+} // namespace hypha

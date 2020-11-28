@@ -1,6 +1,6 @@
 #include <hyphadao.hpp>
 
-using namespace hyphaspace;
+using namespace hypha;
 
 void hyphadao::event(const name &level,
 					 const map<string, hyphadao::flexvalue1> &values)

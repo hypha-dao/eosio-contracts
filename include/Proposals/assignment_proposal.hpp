@@ -1,10 +1,11 @@
 #pragma once 
 
 #include <eosio/name.hpp>
+#include <eosio/asset.hpp>
 
 #include "proposal.hpp"
 
-namespace hyphaspace {
+namespace hypha {
 
     class AssignmentProposal : public Proposal
     {
@@ -12,15 +13,21 @@ namespace hyphaspace {
     public:
         using Proposal::Proposal;
 
-        document_graph::document propose(const name &proposer, std::vector<document_graph::content_group> &content_groups);
-        void close(document_graph::document proposal);
+        Document propose(const name &proposer, ContentGroups &content_groups);
+        void close(Document proposal);
 
     protected:
 
-        std::vector<document_graph::content_group> propose_impl(const name &proposer, std::vector<document_graph::content_group> &content_groups) override;
-        document_graph::document pass_impl(document_graph::document proposal) override;
-        string GetBallotContent (document_graph::content_group proposal_details) override;
+        ContentGroups propose_impl(const name &proposer, ContentGroups &content_groups) override;
+        Document pass_impl(Document proposal) override;
+        string GetBallotContent (ContentGroup proposal_details) override;
         name GetProposalType () override;
 
+    private: 
+
+        asset calculateTimeShareUsdPerPeriod(const asset &annualUsd, const int64_t &timeShare);
+        asset calculateHusd(const asset &annualUsd, const int64_t &timeShare, const int64_t &deferred);
+        asset calculateHypha(const asset &annualUsd, const int64_t &timeShare, const int64_t &deferred);
+        asset calculateHvoice(const asset &annualUsd, const int64_t &timeShare);
     };
 }

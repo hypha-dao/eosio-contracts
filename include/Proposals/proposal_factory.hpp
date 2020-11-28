@@ -3,7 +3,7 @@
 #include <eosio/name.hpp>
 #include <document_graph.hpp>
 
-namespace hyphaspace {
+namespace hypha {
 
     class hyphadao;
     class Proposal;

@@ -14,6 +14,7 @@ add_contract( hyphadao hyphadao
                 object.cpp 
                 utility.cpp 
                 calculation.cpp 
+                member.cpp
                 proposals/proposal.cpp
                 proposals/role_proposal.cpp
                 proposals/badge_proposal.cpp
@@ -21,9 +22,11 @@ add_contract( hyphadao hyphadao
                 proposals/assignment_proposal.cpp
                 proposals/proposal_factory.cpp
                 document_graph/document_graph.cpp 
-                document_graph/edges.cpp 
-                document_graph/accessors.cpp 
-                document_graph/creators.cpp )
+                document_graph/document.cpp 
+                document_graph/content_group.cpp
+                document_graph/content.cpp
+                document_graph/edge.cpp
+                document_graph/util.cpp )
 
 target_include_directories( hyphadao PUBLIC ${CMAKE_SOURCE_DIR}/../include ) # ${CMAKE_SOURCE_DIR}/../include/proposals )
 
