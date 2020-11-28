@@ -1,28 +1,34 @@
 #include <proposals/proposal.hpp>
-#include <document_graph.hpp>
+#include <document_graph/content_group.hpp>
+#include <document_graph/document.hpp>
+#include <member.hpp>
+#include <common.hpp>
+#include <document_graph/edge.hpp>
 #include <hyphadao.hpp>
 
 namespace hypha
 {
-    Proposal::Proposal(name &contract) : m_contract{contract} {}
+    Proposal::Proposal(const eosio::name &contract) : m_contract{contract} {}
     Proposal::~Proposal() {}
 
-    Document Proposal::propose(const name &proposer, ContentGroups &contentGroups)
+    Document Proposal::propose(const eosio::name &proposer, ContentGroups &contentGroups)
     {
         verify_membership(proposer);
         contentGroups = propose_impl(proposer, contentGroups);
 
         contentGroups.push_back(create_system_group(proposer,
                                                     GetProposalType(),
-                                                    ContentGroupWrapper::getString(contentGroups, common::DETAILS, common::TITLE),
-                                                    ContentGroupWrapper::getString(contentGroups, common::DETAILS, common::DESCRIPTION),
+                                                    ContentWrapper::getString(contentGroups, common::DETAILS, common::TITLE),
+                                                    ContentWrapper::getString(contentGroups, common::DETAILS, common::DESCRIPTION),
                                                     GetBallotContent(contentGroups)));
 
         // creates the document, or the graph NODE
         auto memberHash = Member::hash(proposer);
-        auto rootNode = Document::hashContents(Document::rollup(Content(common::ROOT_NODE, m_contract)));
+        ContentGroups rootCgs = Document::rollup(Content(common::ROOT_NODE, m_contract));
+        auto rootNode = Document::hashContents(rootCgs);
 
-        Document proposalNode(m_contract, proposer, contentGroups).emplace();
+        Document proposalNode(m_contract, proposer, contentGroups);
+        proposalNode.emplace();
         // proposalNode.emplace();
 
         // the proposer OWNS the proposal; this creates the graph EDGE
@@ -42,22 +48,26 @@ namespace hypha
 
     void Proposal::close(Document proposal)
     {
-        auto rootNode = Document::hashContents(Document::rollup(Content(common::ROOT_NODE, m_contract)));
-        Edge(m_contract, rootNode, proposal.getHash(), common::PROPOSAL).erase();
+        ContentGroups rootCgs = Document::rollup(Content(common::ROOT_NODE, m_contract));
+        auto rootNode = Document::hashContents(rootCgs);
+        Edge edge (m_contract, m_contract, rootNode, proposal.getHash(), common::PROPOSAL);
+        edge.erase();
 
-        name ballot_id = ContentGroupWrapper::getValue(proposal.content_groups, common::SYSTEM, common::BALLOT_ID);
+        name ballot_id = ContentWrapper::getName(proposal.content_groups, common::SYSTEM, common::BALLOT_ID);
         if (did_pass(ballot_id))
         {
             // INVOKE child class close logic
             pass_impl(proposal);
 
             // if proposal passes, create an edge for PASSED_PROPS
-            Edge rootPassedProposal(m_contract, rootNode, proposal.getHash(), common::PASSED_PROPS).emplace();
+            Edge rootPassedProposal(m_contract, m_contract, rootNode, proposal.getHash(), common::PASSED_PROPS);
+            rootPassedProposal.emplace();
         }
         else
         {
             // create edge for FAILED_PROPS
-            Edge rootPassedProposal(m_contract, rootNode, proposal.getHash(), common::FAILED_PROPS).emplace();
+            Edge rootFailedProposal(m_contract, m_contract, rootNode, proposal.getHash(), common::FAILED_PROPS);
+            rootFailedProposal.emplace();
         }
 
         hyphadao::config_table config_s(m_contract, m_contract.value);
@@ -88,7 +98,7 @@ namespace hypha
         system_cg.push_back(Content(common::CLIENT_VERSION, ""));   // TODO: call get_setting
         system_cg.push_back(Content(common::CONTRACT_VERSION, "")); // TODO call get_setting
         system_cg.push_back(Content(common::BALLOT_ID, ballot_id));
-        system_cg.push_back(Content(common::PROPOSER, proposer));
+        // system_cg.push_back(Content(common::OWNED_BY, proposer));
         system_cg.push_back(Content(common::TYPE, proposal_type));
         return system_cg;
     }
@@ -96,8 +106,9 @@ namespace hypha
     void Proposal::verify_membership(const name &member)
     {
         // create hash to represent this member account
-        auto memberHash = Member::hash(proposer);
-        auto rootNode = Document::hashContents(Document::rollup(Content(common::ROOT_NODE, m_contract)));
+        auto memberHash = Member::hash(member);
+        ContentGroups rootCgs = Document::rollup(Content(common::ROOT_NODE, m_contract));
+        auto rootNode = Document::hashContents(rootCgs);
 
         Edge::get(m_contract, rootNode, memberHash, common::MEMBER);
 

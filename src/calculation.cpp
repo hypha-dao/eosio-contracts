@@ -1,4 +1,5 @@
 #include <hyphadao.hpp>
+#include <document_graph/util.hpp>
 
 using namespace hypha;
 
@@ -144,24 +145,20 @@ vector<Document> hyphadao::get_current_badges(const uint64_t &period_id, const n
     // get edges for member named "assignbadge"
     auto member_doc = get_member_doc(member);
 
-    vector<document_graph::edge> badge_assignment_edges = _document_graph.get_edges(member_doc.hash, common::ASSIGN_BADGE, false);
-    for (const document_graph::edge e : badge_assignment_edges)
+    vector<Edge> badge_assignment_edges = m_documentGraph.getEdgesFrom(member_doc.hash, common::ASSIGN_BADGE);
+    for (const Edge e : badge_assignment_edges)
     {
-        Document badge_assignment = _document_graph.get_document(e.to_node);
-        auto start_period = _document_graph.get_content(badge_assignment, common::DETAILS, common::START_PERIOD, true);
-        auto end_period = _document_graph.get_content(badge_assignment, common::DETAILS, common::END_PERIOD, true);
-
-        check(std::holds_alternative<int64_t>(start_period), "fatal error: start_period must be a uint; badge: " +
-                                                                 _document_graph.readable_hash(badge_assignment.hash));
-
-        check(std::holds_alternative<int64_t>(end_period), "fatal error: end_period must be an int; badge: " +
-                                                               _document_graph.readable_hash(badge_assignment.hash));
+        Document badge_assignment (get_self(), e.to_node);
+        ContentWrapper badgeAssignment (badge_assignment.content_groups);
+        int64_t start_period = badgeAssignment.getInt(common::DETAILS, common::START_PERIOD);
+        int64_t end_period = badgeAssignment.getInt(common::DETAILS, common::END_PERIOD);
 
         // check that period_id falls within start_period and end_period
-        if (period_id >= std::get<int64_t>(start_period) && period_id <= std::get<int64_t>(end_period))
+        if (period_id >= start_period && period_id <= end_period)
         {
-            auto badge_edge = _document_graph.get_edge(badge_assignment.hash, common::BADGE_NAME, true);
-            current_badges.push_back(_document_graph.get_document(badge_edge.to_node));
+            Edge badge_edge = Edge::get(get_self(), badge_assignment.hash, common::BADGE_NAME);
+            Document badge (get_self(), badge_edge.to_node);
+            current_badges.push_back(badge);
         }
     }
     return current_badges;
@@ -169,14 +166,16 @@ vector<Document> hyphadao::get_current_badges(const uint64_t &period_id, const n
 
 asset hyphadao::apply_coefficient(const Document &badge, const asset &base, const string &coefficient_key)
 {
-    auto coefficient = _document_graph.get_content(badge, common::DETAILS, coefficient_key, false);
-    check(std::holds_alternative<int64_t>(coefficient), "fatal error: coefficient must be an int; badge: " +
-                                                            _document_graph.readable_hash(badge.hash) + "; coefficient_key: " + coefficient_key);
+    Content::FlexValue coefficient = ContentWrapper::getValue(badge.content_groups, common::DETAILS, coefficient_key);
 
-    if (coefficient == document_graph::not_found())
+    if (std::holds_alternative<std::monostate>(coefficient)) 
     {
         return asset {0, base.symbol};
     }
+    
+    check(std::holds_alternative<int64_t>(coefficient), "fatal error: coefficient must be an int; badge: " +
+                                                            readableHash(badge.hash) + "; coefficient_key: " + coefficient_key);
+
 
     float coeff_float = (float)((float)std::get<int64_t>(coefficient) / (float)10000);
     float adjustment = (float)coeff_float - (float)1;

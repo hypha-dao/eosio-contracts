@@ -34,6 +34,21 @@ namespace hypha
         return *itr;
     }
 
+    Edge Edge::get (const eosio::name &_contract,
+                    const eosio::checksum256 &_from_node, 
+                    const eosio::name &_edge_name)
+    {
+        edge_table e_t (_contract, _contract.value);
+        auto fromEdgeIndex = e_t.get_index<eosio::name("byfromname")>();
+        auto index = concatHash (_from_node, _edge_name);
+        auto itr = fromEdgeIndex.find (index);
+
+        eosio::check (itr != fromEdgeIndex.end() && itr->from_node_edge_name_index == index, "edge does not exist: from " + readableHash(_from_node) 
+                + " with edge name of " + _edge_name.to_string());
+
+        return *itr;
+    }
+
     bool Edge::exists (const eosio::name &_contract,
                         const eosio::checksum256 &_from_node, 
                         const eosio::checksum256 &_to_node, 

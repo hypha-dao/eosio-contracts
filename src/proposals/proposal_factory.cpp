@@ -8,9 +8,7 @@
 
 namespace hypha
 {
-    //We don't have to specify the namespace hypha:: since we are already inside that namespace
-
-    Proposal* ProposalFactory::Factory(hyphadao &dao, const name &proposal_type)
+    Proposal* ProposalFactory::Factory(const eosio::name& dao, const name &proposal_type)
     {
         switch (proposal_type.value)
         {

@@ -55,9 +55,9 @@ namespace hypha
         void setCreator(eosio::name & creator);
         eosio::name getCreator();
         eosio::checksum256 getHash();
-        std::vector<ContentGroupWrapper> getContentGroups();
-        std::pair<int64_t, ContentGroupWrapper *> getContentGroup(const std::string &label);
-        ContentGroupWrapper *getContentGroupOrFail(const std::string &label, const std::string &error);
+        std::vector<ContentWrapper> getContentGroups();
+        std::pair<int64_t, ContentWrapper *> getContentGroup(const std::string &label);
+        ContentWrapper *getContentGroupOrFail(const std::string &label, const std::string &error);
         Content::FlexValue getValueOrFail(const std::string &contentGroupLabel, const std::string &contentLabel, const std::string &error);
         void add(ContentGroup cg);
 

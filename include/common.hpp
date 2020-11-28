@@ -31,6 +31,7 @@ namespace common {
     static const string         DESCRIPTION                 = string ("description");
     static const string         CONTENT                     = string ("content");
     static const string         ICON                        = string ("icon");
+    // static const string         PROPOSER                    = string ("proposer");
 
     static const string         START_PERIOD                = string ("start_period");
     static const string         END_PERIOD                  = string ("end_period");

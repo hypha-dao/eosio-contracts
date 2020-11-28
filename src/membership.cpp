@@ -79,8 +79,11 @@ void hyphadao::enroll(const name &enroller,
 	// update the graph
 	checksum256 root_hash = get_root();
 	Document member_doc = get_member_doc(enroller, applicant);
-	_document_graph.create_edge(root_hash, member_doc.hash, common::MEMBER);
-	_document_graph.create_edge(member_doc.hash, root_hash, common::MEMBER_OF);
+	Edge rootMemberEdge(get_self(), get_self(), root_hash, member_doc.getHash(), common::MEMBER);
+    rootMemberEdge.emplace();
+
+	Edge memberRootEdge(get_self(), get_self(), member_doc.getHash(), root_hash, common::MEMBER_OF);
+    memberRootEdge.emplace();
 
 	// broadcast event
 	map<string, hyphadao::flexvalue1> event_data;
@@ -121,11 +124,12 @@ void hyphadao::makememdocs (const string &notes)
 	auto m_itr = m_t.begin();
 	while (m_itr != m_t.end()) {
 		auto member = get_member_doc (get_self(), m_itr->member); 
-		// the root node holds the member as on a member EDGE
-		_document_graph.create_edge (root, member.hash, common::MEMBER);
 
-		// the member is a member of EDGE the root
-		_document_graph.create_edge (member.hash, root, common::MEMBER_OF);
+		Edge rootMemberEdge(get_self(), get_self(), root, member.getHash(), common::MEMBER);
+    	rootMemberEdge.emplace();
+
+		Edge memberRootEdge(get_self(), get_self(), member.getHash(), root, common::MEMBER_OF);
+    	memberRootEdge.emplace();
    
 		m_itr++;
 	}

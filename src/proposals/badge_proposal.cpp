@@ -8,21 +8,26 @@ namespace hypha
     {
         // check coefficients
         // TODO: move coeffecient thresholds to be configuration values
-        checkCoefficient(ContentGroupWrapper::getValue(contentGroups, common::DETAILS, common::HUSD_COEFFICIENT));
-        checkCoefficient(ContentGroupWrapper::getValue(contentGroups, common::DETAILS, common::HYPHA_COEFFICIENT));
-        checkCoefficient(ContentGroupWrapper::getValue(contentGroups, common::DETAILS, common::HVOICE_COEFFICIENT));
-        checkCoefficient(ContentGroupWrapper::getValue(contentGroups, common::DETAILS, common::SEEDS_COEFFICIENT));
+        checkCoefficient(ContentWrapper::getContent(contentGroups, common::DETAILS, common::HUSD_COEFFICIENT));
+        checkCoefficient(ContentWrapper::getContent(contentGroups, common::DETAILS, common::HYPHA_COEFFICIENT));
+        checkCoefficient(ContentWrapper::getContent(contentGroups, common::DETAILS, common::HVOICE_COEFFICIENT));
+        checkCoefficient(ContentWrapper::getContent(contentGroups, common::DETAILS, common::SEEDS_COEFFICIENT));
 
-        return content_groups;
+        return contentGroups;
     }
 
     Document BadgeProposal::pass_impl(Document proposal)
     {
-        m_dao._document_graph.create_edge(hyphadao::get_root(m_dao._document_graph.contract), proposal.hash, common::BADGE_NAME);
+        ContentGroups cgs = Document::rollup(Content(common::ROOT_NODE, m_contract));
+        eosio::checksum256 rootNode = Document::hashContents(cgs);
+
+        Edge rootBadgeEdge(m_contract, m_contract, rootNode, proposal.getHash(), common::BADGE_NAME);
+        rootBadgeEdge.emplace();
+
         return proposal;
     }
 
-    void BadgeProposal::checkCoefficient(Content& coefficient)
+    void BadgeProposal::checkCoefficient(Content coefficient)
     {
         eosio::check(std::holds_alternative<int64_t>(coefficient.value), "fatal error: coefficient must be an int64_t type: " + coefficient.label);
         eosio::check(std::get<int64_t>(coefficient.value) >= 7000 &&
@@ -30,9 +35,9 @@ namespace hypha
                   "fatal error: coefficient_x10000 must be between 7000 and 13000, inclusive: " + coefficient.label);
     }
 
-    string BadgeProposal::GetBallotContent (ContentGroup proposal_details)
+    string BadgeProposal::GetBallotContent (ContentGroups contentGroups)
     {
-        return std::get<string>(m_dao._document_graph.get_content(proposal_details, common::ICON, true));
+        return ContentWrapper::getString (contentGroups, common::DETAILS, common::ICON);
     }
     
     name BadgeProposal::GetProposalType () 

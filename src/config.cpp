@@ -1,4 +1,6 @@
 #include <hyphadao.hpp>
+#include <document_graph/util.hpp>
+#include <document_graph/content_group.hpp>
 
 using namespace hypha;
 
@@ -6,18 +8,16 @@ void hyphadao::createroot (const string &notes)
 {
 	require_auth (get_self());
 
-	Document root = _document_graph.get_or_create (get_self(), _document_graph.new_content("root_node", get_self()));
-	setconfigatt("root_node", _document_graph.readable_hash(root.hash));
+	ContentGroups cgs = Document::rollup(Content(common::ROOT_NODE, get_self()));
+    eosio::checksum256 rootNode = Document::hashContents(cgs);
+
+	setconfigatt("root_node", readableHash(rootNode));
 }
 
 checksum256 hyphadao::get_root (const name &contract)
 {
-	auto ctnt = document_graph::new_content("root_node", contract);
-	ContentGroup cg; 
-	cg.push_back(ctnt);
-	vector<ContentGroup> cgs;
-	cgs.push_back(cg);
-	return document_graph::hash_document(cgs);
+	ContentGroups cgs = Document::rollup(Content(common::ROOT_NODE, contract));
+    return Document::hashContents(cgs);
 }
 
 checksum256 hyphadao::get_root ()

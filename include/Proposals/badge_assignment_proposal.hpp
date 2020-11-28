@@ -17,11 +17,10 @@ namespace hypha {
         void close(Document proposal);
 
     protected:
-        ContentGroups propose_impl(const name &proposer, ContentGroups &content_groups);
-        Document pass_impl(Document proposal);
-
-        string GetBallotContent (ContentGroup proposal_details);
-        name GetProposalType ();
-
+        
+        ContentGroups propose_impl(const name &proposer, ContentGroups &content_groups) override;
+        Document pass_impl(Document proposal) override;
+        string GetBallotContent (ContentGroups contentGroups) override;
+        name GetProposalType () override;
     };
 }

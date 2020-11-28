@@ -1,6 +1,7 @@
 #include <memory>
 #include <hyphadao.hpp>
 
+#include <document_graph/content_group.hpp>
 #include <proposals/proposal_factory.hpp>
 #include <proposals/proposal.hpp>
 
@@ -15,8 +16,9 @@ void hyphadao::propose(const name &proposer,
                        ContentGroups &content_groups)
 {
     check(!is_paused(), "Contract is paused for maintenance. Please try again later.");
-	//We might want to use smart pointers to avoid memory leaks. std::unique_ptr<>
-	std::unique_ptr<Proposal> proposal = std::unique_ptr<Proposal>(ProposalFactory::Factory(*this, proposal_type));
+	
+	eosio::name self = get_self();
+	std::unique_ptr<Proposal> proposal = std::unique_ptr<Proposal>(ProposalFactory::Factory(self, proposal_type));
 	proposal->propose(proposer, content_groups);
 	// delete proposal; 
 }
@@ -25,10 +27,10 @@ void hyphadao::closedocprop(const checksum256 &proposal_hash)
 {
     check(!is_paused(), "Contract is paused for maintenance. Please try again later.");
 
-	Document docprop = _document_graph.get_document(proposal_hash); 
-    name proposal_type = std::get<name>(_document_graph.get_content(docprop, common::SYSTEM, common::TYPE, true));
+	Document docprop (get_self(), proposal_hash); 
+    name proposal_type = ContentWrapper::getName(docprop.content_groups, common::SYSTEM, common::TYPE);
 
-	Proposal *proposal = ProposalFactory::Factory(*this, proposal_type);
+	Proposal *proposal = ProposalFactory::Factory(get_self(), proposal_type);
 	proposal->close(docprop);
 	// delete proposal;
 }
@@ -173,12 +175,6 @@ void hyphadao::create(const name &scope,
 	{
 		new_proposal(owner, names, strings, assets, time_points, temp_ints, trxs);
 	}
-}
-
-void hyphadao::created(const name &creator, const checksum256 &hash)
-{
-	// only the contract can announce this
-	require_auth(get_self());
 }
 
 // void hyphadao::createdoc(const name &creator, const vector<ContentGroup> &content_groups)

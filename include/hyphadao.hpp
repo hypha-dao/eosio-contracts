@@ -9,6 +9,7 @@
 #include <common.hpp>
 #include <trail.hpp>
 #include <document_graph/content_group.hpp>
+#include <document_graph/document_graph.hpp>
 /**
  * We don't need to declare this on hpp since we are not using it anywhere here, it
  * should go into cpp
@@ -344,7 +345,7 @@ namespace hypha
       // users can claim their salary pay
       ACTION payassign(const checksum256 &assignment_hash, const uint64_t &period_id);
 
-      document_graph _document_graph = document_graph(get_self());
+      DocumentGraph m_documentGraph = DocumentGraph(get_self());
       
       static checksum256 get_root(const name &contract);
       // static void verify_membership(const name &member);

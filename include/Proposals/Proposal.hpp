@@ -4,24 +4,25 @@
 
 using std::string;
 using eosio::name;
+using eosio::asset;
 
 namespace hypha {
 
-    class hyphadao;
+    // class hyphadao;
 
     class Proposal
     {
 
     public:
 
-        Proposal (name& contract);
+        Proposal (const name& contract);
         virtual ~Proposal ();
         
         Document propose(const eosio::name &proposer, ContentGroups &content_groups);
         
         void close(Document proposal);
 
-        name& m_contract;
+        const name& m_contract;
     protected: 
 
         virtual ContentGroups propose_impl(const name &proposer, 
@@ -44,10 +45,11 @@ namespace hypha {
         bool did_pass(const name &ballot_id);
 
         name register_ballot(const name &proposer,
-							   const map<string, string> &strings);
+							   const std::map<string, string> &strings);
 
         name register_ballot(const name &proposer,
                             const string &title, const string &description, const string &content);
+
         asset adjustAsset(const asset &originalAsset, const float &adjustment);
     };
 }

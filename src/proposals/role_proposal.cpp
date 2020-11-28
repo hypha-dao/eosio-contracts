@@ -14,7 +14,7 @@ namespace hypha
         // int64_t capacity = std::get<int64_t>(m_dao._document_graph.get_content(details, common::FULL_TIME_CAPACITY, true));
         // check(capacity > 0, "fulltime_capacity_x100 must be greater than zero. You submitted: " + std::to_string(capacity));
 
-        eosio::asset annual_usd_salary = ContentGroupWrapper::getAsset (content_groups, common::DETAILS, common::ANNUAL_USD_SALARY);
+        eosio::asset annual_usd_salary = ContentWrapper::getAsset (content_groups, common::DETAILS, common::ANNUAL_USD_SALARY);
         check (annual_usd_salary.amount > 0, common::ANNUAL_USD_SALARY + " must be greater than zero. You submitted: " + annual_usd_salary.to_string());
         
         return content_groups;
@@ -28,13 +28,13 @@ namespace hypha
         // TODO: check to see if get_first_signer() is accurate here
         Edge rootRoleEdge (m_contract, m_contract, rootNode, proposal.getHash(), common::ROLE_NAME);
         rootRoleEdge.emplace();
-        
+
         return proposal;
     }
 
     std::string RoleProposal::GetBallotContent (ContentGroups contentGroups)
     {
-        return ContentGroupWrapper::getString (contentGroups, common::DETAILS, common::TITLE);
+        return ContentWrapper::getString (contentGroups, common::DETAILS, common::TITLE);
     }
     
     name RoleProposal::GetProposalType () 

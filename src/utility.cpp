@@ -208,13 +208,13 @@ void hyphadao::check_capacity(const uint64_t &role_id, const uint64_t &req_time_
 void hyphadao::erasedochash (const checksum256 &doc) 
 {
 	require_auth (get_self());
-	_document_graph.erase_document(doc);
+	m_documentGraph.eraseDocument(doc);
 }
 
 void hyphadao::erasedocbyid (const uint64_t &id) 
 {
 	require_auth (get_self());
-	document_table d_t (get_self(), get_self().value);
+	Document::document_table d_t (get_self(), get_self().value);
 	auto d_itr = d_t.find (id);
 	check (d_itr != d_t.end(), "Document with ID is not found: " + std::to_string(id));
 	d_t.erase (d_itr);
@@ -223,7 +223,7 @@ void hyphadao::erasedocbyid (const uint64_t &id)
 void hyphadao::eraseedges (const string &notes) 
 {
 	require_auth (get_self());
-	edge_table e_t (get_self(), get_self().value);
+	Edge::edge_table e_t (get_self(), get_self().value);
 	auto e_itr = e_t.begin();
 	while (e_itr != e_t.end()) {
 		e_itr = e_t.erase (e_itr);
@@ -233,7 +233,7 @@ void hyphadao::eraseedges (const string &notes)
 void hyphadao::erasedocs(const uint64_t &begin_id, const uint64_t &batch_size) 
 {
 	require_auth(get_self());
-	document_table d_t (get_self(), get_self().value);
+	Document::document_table d_t (get_self(), get_self().value);
 	auto d_itr = d_t.find (begin_id);
 	check (d_itr != d_t.end(), "begin_id not found: " + std::to_string(begin_id));
 	
@@ -257,7 +257,7 @@ void hyphadao::erasedocs(const uint64_t &begin_id, const uint64_t &batch_size)
 void hyphadao::erasealldocs (const string &notes)
 {
 	require_auth(get_self());
-	document_table d_t (get_self(), get_self().value);
+	Document::document_table d_t (get_self(), get_self().value);
 	auto d_itr = d_t.begin ();
 	while (d_itr != d_t.end()) {
 

@@ -1,4 +1,5 @@
 #pragma once
+
 #include <variant>
 #include <eosio/name.hpp>
 #include <eosio/asset.hpp>
@@ -9,7 +10,7 @@ namespace hypha
 {
     struct Content
     {
-        typedef std::variant<eosio::name, std::string, eosio::asset, eosio::time_point,
+        typedef std::variant<std::monostate, eosio::name, std::string, eosio::asset, eosio::time_point,
                              std::int64_t, eosio::checksum256>
             FlexValue;
 

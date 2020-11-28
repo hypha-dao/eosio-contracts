@@ -20,7 +20,7 @@ namespace hypha {
 
         ContentGroups propose_impl(const name &proposer, ContentGroups &content_groups) override;
         Document pass_impl(Document proposal) override;
-        string GetBallotContent (ContentGroup proposal_details) override;
+        string GetBallotContent (ContentGroups contentGroups) override;
         name GetProposalType () override;
 
     private: 

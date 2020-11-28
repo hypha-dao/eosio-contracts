@@ -10,7 +10,6 @@ namespace hypha {
     {
     
     public:
-        //RoleProposal (hyphadao& dao);
         using Proposal::Proposal;
 
         Document propose(const name &proposer, ContentGroups &content_groups);
