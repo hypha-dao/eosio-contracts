@@ -1,0 +1,4 @@
+[submodule "document-graph"]
+	path = document-graph
+	url = git@github.com:hypha-dao/document-graph.git
+	branch = class-refactor

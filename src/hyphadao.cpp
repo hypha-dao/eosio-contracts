@@ -28,7 +28,7 @@ void hyphadao::closedocprop(const checksum256 &proposal_hash)
     check(!is_paused(), "Contract is paused for maintenance. Please try again later.");
 
 	Document docprop (get_self(), proposal_hash); 
-    name proposal_type = ContentWrapper::getName(docprop.content_groups, common::SYSTEM, common::TYPE);
+    name proposal_type = ContentWrapper::getContent(docprop.getContentGroups(), common::SYSTEM, common::TYPE).getAs<eosio::name>();
 
 	Proposal *proposal = ProposalFactory::Factory(get_self(), proposal_type);
 	proposal->close(docprop);

@@ -11,54 +11,54 @@ namespace hypha
         ContentWrapper assignment(contentGroups);
 
         // assignee must exist and be a DHO member
-        name assignee = assignment.getName(common::DETAILS, common::ASSIGNEE);
+        name assignee = assignment.getContent(common::DETAILS, common::ASSIGNEE).getAs<eosio::name>();
         verify_membership(assignee);
 
         // TODO: Additional input cleansing
         // start_period and end_period must be valid, no more than X periods in between
 
         // assignment proposal must link to a valid role
-        Document roleDocument(m_contract, assignment.getChecksum(common::DETAILS, common::ROLE_STRING));
+        Document roleDocument(m_contract, assignment.getContent(common::DETAILS, common::ROLE_STRING).getAs<eosio::checksum256>());
         ContentWrapper role(roleDocument.content_groups);
 
         // role in the proposal must be of type: role
-        eosio::check (role.getName(common::SYSTEM, common::TYPE) != common::ROLE_NAME, 
+        eosio::check (role.getContent(common::SYSTEM, common::TYPE).getAs<eosio::name>() != common::ROLE_NAME, 
             "role document hash provided in assignment proposal is not of type: role");
 
         // time_share_x100 is required and must be greater than zero and less than 100%
-        int64_t time_share = assignment.getInt(common::DETAILS, common::TIME_SHARE);
+        int64_t time_share = assignment.getContent(common::DETAILS, common::TIME_SHARE).getAs<int64_t>();
         check(time_share > 0, common::TIME_SHARE + " must be greater than zero. You submitted: " + std::to_string(time_share));
         check(time_share <= 10000, common::TIME_SHARE + " must be less than or equal to 10000 (=100%). You submitted: " + std::to_string(time_share));
 
         // retrieve the minimum time_share from the role, if it exists, and check the assignment against it
         if (role.exists(common::DETAILS, common::MIN_TIME_SHARE))
         {
-            int64_t min_time_share = role.getInt(common::DETAILS, common::MIN_TIME_SHARE);
+            int64_t min_time_share = role.getContent(common::DETAILS, common::MIN_TIME_SHARE).getAs<int64_t>();
             check(time_share >= min_time_share, common::TIME_SHARE + " must be greater than or equal to the role configuration. Role value for " + common::MIN_TIME_SHARE + " is " + std::to_string(min_time_share) + ", and you submitted: " + std::to_string(time_share));
         }
 
         // deferred_x100 is required and must be greater than or equal to zero and less than or equal to 10000
-        int64_t deferred = assignment.getInt(common::DETAILS, common::DEFERRED);
+        int64_t deferred = assignment.getContent(common::DETAILS, common::DEFERRED).getAs<int64_t>();
         check(deferred >= 0, common::DEFERRED + " must be greater than or equal to zero. You submitted: " + std::to_string(deferred));
         check(deferred <= 10000, common::DEFERRED + " must be less than or equal to 10000 (=100%). You submitted: " + std::to_string(deferred));
 
         // retrieve the minimum deferred from the role, if it exists, and check the assignment against it
         if (role.exists(common::DETAILS, common::MIN_DEFERRED))
         {
-            auto min_deferred = role.getInt(common::DETAILS, common::MIN_DEFERRED);
+            auto min_deferred = role.getContent (common::DETAILS, common::MIN_DEFERRED).getAs<int64_t>();
             check(deferred >= min_deferred, common::DEFERRED + " must be greater than or equal to the role configuration. Role value for " + common::MIN_DEFERRED + " is " + std::to_string(min_deferred) + ", and you submitted: " + std::to_string(deferred));
         }
 
         // start_period and end_period are required and must be greater than or equal to zero, and end_period >= start_period
-        int64_t start_period = assignment.getInt(common::DETAILS, common::START_PERIOD);
+        int64_t start_period = assignment.getContent(common::DETAILS, common::START_PERIOD).getAs<int64_t>();
         check(start_period >= 0, common::START_PERIOD + " must be greater than or equal to zero. You submitted: " + std::to_string(start_period));
-        int64_t end_period = assignment.getInt(common::DETAILS, common::END_PERIOD);
+        int64_t end_period = assignment.getContent(common::DETAILS, common::END_PERIOD).getAs<int64_t>();
         check(end_period >= 0, common::END_PERIOD + " must be greater than or equal to zero. You submitted: " + std::to_string(end_period));
         check(end_period >= start_period, common::END_PERIOD + " must be greater than or equal to " + common::START_PERIOD +
                                               ". You submitted: " + common::START_PERIOD + ": " + std::to_string(start_period) +
                                               " and " + common::END_PERIOD + ": " + std::to_string(end_period));
 
-        asset annual_usd_salary = role.getAsset(common::DETAILS, common::ANNUAL_USD_SALARY);
+        asset annual_usd_salary = role.getContent(common::DETAILS, common::ANNUAL_USD_SALARY).getAs<eosio::asset>();
 
         //**************************
         // we must add calculations into the contentGroups for this assignment proposal
@@ -79,9 +79,9 @@ namespace hypha
     Document AssignmentProposal::pass_impl(Document proposal)
     {
         ContentWrapper assignment(proposal.content_groups);
-        eosio::checksum256 assignee = Member::hash(assignment.getName(common::DETAILS, common::ASSIGNEE));
+        eosio::checksum256 assignee = Member::hash(assignment.getContent(common::DETAILS, common::ASSIGNEE).getAs<eosio::name>());
 
-        Document role(m_contract, assignment.getChecksum(common::DETAILS, common::ROLE_STRING));
+        Document role(m_contract, assignment.getContent(common::DETAILS, common::ROLE_STRING).getAs<eosio::checksum256>());
 
         // update graph edges:
         //  member          ---- assigned           ---->   role_assignment
@@ -114,7 +114,7 @@ namespace hypha
 
     string AssignmentProposal::GetBallotContent(ContentGroups contentGroups)
     {
-        return ContentWrapper::getString(contentGroups, common::DETAILS, common::TITLE);
+        return ContentWrapper::getContent(contentGroups, common::DETAILS, common::TITLE).getAs<std::string>();
     }
 
     name AssignmentProposal::GetProposalType()

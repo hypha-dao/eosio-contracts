@@ -248,7 +248,7 @@ void hyphadao::erasedocs(const uint64_t &begin_id, const uint64_t &batch_size)
 		eosio::transaction out{};
 		out.actions.emplace_back(permission_level{get_self(), name("active")},
 								get_self(), name("erasedocs"),
-			std::make_tuple(d_itr->id, batch_size));
+			std::make_tuple(d_itr->primary_key(), batch_size));
 		out.delay_sec = 1;
 		out.send(get_next_sender_id(), get_self());
 	}
@@ -264,7 +264,7 @@ void hyphadao::erasealldocs (const string &notes)
 		eosio::transaction out{};
 		out.actions.emplace_back(permission_level{get_self(), name("active")},
 								get_self(), name("erasedochash"),
-			std::make_tuple(d_itr->hash));
+			std::make_tuple(d_itr->getHash()));
 		out.delay_sec = 1;
 		out.send(get_next_sender_id(), get_self());
 

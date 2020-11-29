@@ -37,7 +37,7 @@ namespace hypha
 
     string BadgeProposal::GetBallotContent (ContentGroups contentGroups)
     {
-        return ContentWrapper::getString (contentGroups, common::DETAILS, common::ICON);
+        return ContentWrapper::getContent (contentGroups, common::DETAILS, common::ICON).getAs<std::string>();
     }
     
     name BadgeProposal::GetProposalType () 

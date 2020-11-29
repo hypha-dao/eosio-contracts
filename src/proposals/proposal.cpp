@@ -18,8 +18,8 @@ namespace hypha
 
         contentGroups.push_back(create_system_group(proposer,
                                                     GetProposalType(),
-                                                    ContentWrapper::getString(contentGroups, common::DETAILS, common::TITLE),
-                                                    ContentWrapper::getString(contentGroups, common::DETAILS, common::DESCRIPTION),
+                                                    ContentWrapper::getContent(contentGroups, common::DETAILS, common::TITLE).getAs<std::string>(),
+                                                    ContentWrapper::getContent(contentGroups, common::DETAILS, common::DESCRIPTION).getAs<std::string>(),
                                                     GetBallotContent(contentGroups)));
 
         // creates the document, or the graph NODE
@@ -53,7 +53,7 @@ namespace hypha
         Edge edge (m_contract, m_contract, rootNode, proposal.getHash(), common::PROPOSAL);
         edge.erase();
 
-        name ballot_id = ContentWrapper::getName(proposal.content_groups, common::SYSTEM, common::BALLOT_ID);
+        name ballot_id = ContentWrapper::getContent(proposal.content_groups, common::SYSTEM, common::BALLOT_ID).getAs<eosio::name>();
         if (did_pass(ballot_id))
         {
             // INVOKE child class close logic

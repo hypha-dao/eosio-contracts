@@ -21,14 +21,14 @@ add_contract( hyphadao hyphadao
                 proposals/badge_assignment_proposal.cpp
                 proposals/assignment_proposal.cpp
                 proposals/proposal_factory.cpp
-                document_graph/document_graph.cpp 
-                document_graph/document.cpp 
-                document_graph/content_group.cpp
-                document_graph/content.cpp
-                document_graph/edge.cpp
-                document_graph/util.cpp )
+                ../document-graph/src/document_graph/document_graph.cpp 
+                ../document-graph/src/document_graph/document.cpp 
+                ../document-graph/src/document_graph/content_group.cpp
+                ../document-graph/src/document_graph/content.cpp
+                ../document-graph/src/document_graph/edge.cpp
+                ../document-graph/src/document_graph/util.cpp )
 
-target_include_directories( hyphadao PUBLIC ${CMAKE_SOURCE_DIR}/../include ) # ${CMAKE_SOURCE_DIR}/../include/proposals )
+target_include_directories( hyphadao PUBLIC ${CMAKE_SOURCE_DIR}/../include ${CMAKE_SOURCE_DIR}/../../document-graph/include )
 
 target_compile_options(hyphadao PUBLIC -R${CMAKE_CURRENT_SOURCE_DIR}/resources)
 # target_ricardian_directory( hyphadao ${CMAKE_SOURCE_DIR}/../resources )
