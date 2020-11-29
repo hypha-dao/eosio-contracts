@@ -52,8 +52,8 @@ document_graph::content_group hyphadao::create_system_group(const name &proposer
 
     document_graph::content_group system_cg = document_graph::content_group{};
     system_cg.push_back(_document_graph.new_content("content_group_label", "system"));
-    system_cg.push_back(_document_graph.new_content(common::CLIENT_VERSION, get_setting<string>(common::CLIENT_VERSION)));
-    system_cg.push_back(_document_graph.new_content(common::CONTRACT_VERSION, get_setting<string>(common::CONTRACT_VERSION)));
+    system_cg.push_back(_document_graph.new_content(common::CLIENT_VERSION, getSettingOrDefault<string>(common::CLIENT_VERSION, "0")));
+    system_cg.push_back(_document_graph.new_content(common::CONTRACT_VERSION, getSettingOrDefault<string>(common::CONTRACT_VERSION, "0")));
     system_cg.push_back(_document_graph.new_content("ballot_id", ballot_id));
     system_cg.push_back(_document_graph.new_content("proposer", proposer));
     system_cg.push_back(_document_graph.new_content(common::TYPE, proposal_type));

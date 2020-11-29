@@ -369,7 +369,7 @@ namespace hyphaspace
       document_graph _document_graph = document_graph(get_self());
       checksum256 get_root();
       
-      document_graph::document get_settings_document();
+      document_graph::document getSettingsDocument();
       
       document_graph::document create_votetally_doc(const name &proposer, std::vector<document_graph::content_group> &content_groups);
       bool did_pass(const name &ballot_id);
@@ -401,9 +401,9 @@ namespace hyphaspace
       name register_ballot(const name &proposer, const string &title, const string &description, const string &content);
       
       template<class T>
-      T get_setting(const string& setting)
+      T getSettingOrFail(const string& setting)
       {
-         auto settings = get_settings_document();
+         auto settings = getSettingsDocument();
          auto group = settings.content_groups[0];
          
          auto content = _document_graph.get_content_item(group, setting, true);
@@ -412,9 +412,9 @@ namespace hyphaspace
       }
 
       template<class T>
-      std::optional<T> get_setting_opt(const string& setting)
+      std::optional<T> getSettingOpt(const string &setting)
       {
-         auto settings = get_settings_document();
+         auto settings = getSettingsDocument();
          auto group = settings.content_groups[0];
          
          auto content = _document_graph.get_content_item(group, setting, false);
@@ -425,7 +425,18 @@ namespace hyphaspace
          }
 
          return {};
-      }   
+      }
+
+      template<class T>
+      T getSettingOrDefault(const string &setting, const T &def = T{})
+      {
+         if (auto content = getSettingOpt<T>(setting))
+         {
+            return *content;
+         }
+
+         return def;
+      }
 
       float get_float(const string& setting);
       

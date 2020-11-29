@@ -10,16 +10,11 @@ name hyphadao::register_ballot(const name &proposer,
 	qualify_owner(proposer);
 
 	// increment the ballot_id
-	name new_ballot_id = name(name{}.value + 1);
-
-	if (auto last_ballot = get_setting_opt<name>(common::LAST_BALLOT_ID))
-	{
-		new_ballot_id = name((*last_ballot).value + 1);
-	}
+	name new_ballot_id = name(getSettingOrDefault<name>(common::LAST_BALLOT_ID).value + 1);
 
 	setlastballt(new_ballot_id);
 
-	name telos_decide_contract = get_setting<name>(common::TELOS_DECIDE_CONTRACT);
+	name telos_decide_contract = getSettingOrFail<name>(common::TELOS_DECIDE_CONTRACT);
 
 	trailservice::trail::ballots_table b_t(telos_decide_contract, telos_decide_contract.value);
 	auto b_itr = b_t.find(new_ballot_id.value);
@@ -59,7 +54,7 @@ name hyphadao::register_ballot(const name &proposer,
 			content))
 		.send();
 
-	auto expiration = time_point_sec(current_time_point()) + get_setting<int64_t>(common::VOTING_DURATION_SEC);
+	auto expiration = time_point_sec(current_time_point()) + getSettingOrFail<int64_t>(common::VOTING_DURATION_SEC);
 
 	action(
 		permission_level{get_self(), name("active")},

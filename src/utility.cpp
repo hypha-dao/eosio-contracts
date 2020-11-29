@@ -5,7 +5,7 @@ using namespace hyphaspace;
 void hyphadao::event(const name &level,
 					 const map<string, hyphadao::flexvalue1> &values)
 {
-	name publisher_contract = get_setting<name>(common::PUBLISHER_CONTRACT);
+	name publisher_contract = getSettingOrFail<name>(common::PUBLISHER_CONTRACT);
 
 	action(
 		permission_level{get_self(), name("active")},
@@ -99,7 +99,7 @@ void hyphadao::debug(const string &notes)
 
 uint64_t hyphadao::get_next_sender_id()
 {
-	int64_t return_senderid = get_setting<int64_t>(common::LAST_SENDER_ID);
+	int64_t return_senderid = getSettingOrDefault<int64_t>(common::LAST_SENDER_ID);
 	
 	return_senderid++;
 
@@ -122,7 +122,7 @@ asset hyphadao::adjust_asset(const asset &original_asset, const float &adjustmen
 
 float hyphadao::get_float(const string& key)
 {
-	return get_setting<int64_t>(key) / 100.f;
+	return getSettingOrFail<int64_t>(key) / 100.f;
 }
 
 float hyphadao::get_float(const map<string, uint64_t> ints, string key)
@@ -132,8 +132,7 @@ float hyphadao::get_float(const map<string, uint64_t> ints, string key)
 
 bool hyphadao::is_paused()
 {
-	if (auto paused = get_setting_opt<int64_t>(common::PAUSED);
-		paused)
+	if (auto paused = getSettingOpt<int64_t>(common::PAUSED))
 	{
 		return *paused == 1;
 	}
@@ -334,7 +333,7 @@ uint64_t hyphadao::get_last_period_id()
 
 bool hyphadao::holds_hypha(const name &account)
 {
-    eosiotoken::accounts a_t(get_setting<name>(common::HYPHA_TOKEN_CONTRACT), account.value);
+    eosiotoken::accounts a_t(getSettingOrFail<name>(common::HYPHA_TOKEN_CONTRACT), account.value);
     auto a_itr = a_t.find(common::S_HYPHA.code().raw());
     if (a_itr == a_t.end())
     {

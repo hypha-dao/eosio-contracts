@@ -52,7 +52,7 @@ void hyphadao::enroll(const name &enroller,
 	string memo{"Welcome to Hypha DAO!"};
 	action(
 		permission_level{get_self(), name("active")},
-		get_setting<name>(common::TELOS_DECIDE_CONTRACT), name("mint"),
+		getSettingOrFail<name>(common::TELOS_DECIDE_CONTRACT), name("mint"),
 		make_tuple(applicant, one_hvoice, memo))
 		.send();
 

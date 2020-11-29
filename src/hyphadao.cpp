@@ -281,7 +281,7 @@ void hyphadao::makepayout(const uint64_t &proposal_id)
 
 bool hyphadao::did_pass(const name &ballot_id)
 {
-	name telos_decide_contract = get_setting<name>(common::TELOS_DECIDE_CONTRACT);
+	name telos_decide_contract = getSettingOrFail<name>(common::TELOS_DECIDE_CONTRACT);
 
 	trailservice::trail::ballots_table b_t(telos_decide_contract, telos_decide_contract.value);
 	auto b_itr = b_t.find(ballot_id.value);
@@ -348,7 +348,7 @@ void hyphadao::closeprop(const uint64_t &proposal_id)
 
 	action(
 		permission_level{get_self(), name("active")},
-		get_setting<name>(common::TELOS_DECIDE_CONTRACT), name("closevoting"),
+		getSettingOrFail<name>(common::TELOS_DECIDE_CONTRACT), name("closevoting"),
 		std::make_tuple(prop.names.at("ballot_id"), true))
 		.send();
 }

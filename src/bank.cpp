@@ -20,7 +20,7 @@ void hyphadao::make_payment(const uint64_t &period_id,
     {
         action(
             permission_level{get_self(), name("active")},
-            get_setting<name>(common::TELOS_DECIDE_CONTRACT), name("mint"),
+            getSettingOrFail<name>(common::TELOS_DECIDE_CONTRACT), name("mint"),
             std::make_tuple(recipient, quantity, memo))
             .send();
     }
@@ -30,14 +30,14 @@ void hyphadao::make_payment(const uint64_t &period_id,
         {
             action(
                 permission_level{get_self(), name("active")},
-                get_setting<name>(common::SEEDS_TOKEN_CONTRACT), 
+                getSettingOrFail<name>(common::SEEDS_TOKEN_CONTRACT), 
                 name("transfer"),
-                std::make_tuple(get_self(), get_setting<name>(common::SEEDS_ESCROW_CONTRACT), quantity, memo))
+                std::make_tuple(get_self(), getSettingOrFail<name>(common::SEEDS_ESCROW_CONTRACT), quantity, memo))
                 .send();
 
             action(
                 permission_level{get_self(), name("active")},
-                get_setting<name>(common::SEEDS_ESCROW_CONTRACT), name("lock"),
+                getSettingOrFail<name>(common::SEEDS_ESCROW_CONTRACT), name("lock"),
                 std::make_tuple(name("event"),
                                 get_self(),
                                 recipient,
@@ -53,19 +53,19 @@ void hyphadao::make_payment(const uint64_t &period_id,
         {
             action(
                 permission_level{get_self(), name("active")},
-                get_setting<name>(common::SEEDS_TOKEN_CONTRACT), name("transfer"),
+                getSettingOrFail<name>(common::SEEDS_TOKEN_CONTRACT), name("transfer"),
                 std::make_tuple(get_self(), recipient, quantity, memo))
                 .send();
         }
     }
     else if (quantity.symbol == common::S_HUSD)
     {
-        issuetoken(get_setting<name>(common::HUSD_TOKEN_CONTRACT), 
-                   get_setting<name>(common::TREASURY_CONTRACT), recipient, quantity, memo);
+        issuetoken(getSettingOrFail<name>(common::HUSD_TOKEN_CONTRACT), 
+                   getSettingOrFail<name>(common::TREASURY_CONTRACT), recipient, quantity, memo);
     }
     else
     {
-        issuetoken(get_setting<name>(common::HYPHA_TOKEN_CONTRACT), get_self(), recipient, quantity, memo);
+        issuetoken(getSettingOrFail<name>(common::HYPHA_TOKEN_CONTRACT), get_self(), recipient, quantity, memo);
     }
 
     payment_table payment_t(get_self(), get_self().value);

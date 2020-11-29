@@ -85,8 +85,8 @@ void hyphadao::new_proposal(const name &owner,
 {
     hyphadao::object_table o_t(get_self(), name("proposal").value);
     
-    strings[common::CLIENT_VERSION] = get_setting<string>(common::CLIENT_VERSION);
-    strings[common::CONTRACT_VERSION] = get_setting<string>(common::CONTRACT_VERSION);
+    strings[common::CLIENT_VERSION] = getSettingOrDefault<string>(common::CLIENT_VERSION, "0");
+    strings[common::CONTRACT_VERSION] = getSettingOrDefault<string>(common::CONTRACT_VERSION, "0");
 
     check(names.find("type") != names.end(), "Name value with the key of 'type' is required for proposals.");
     name proposal_type = names.at("type");
@@ -219,7 +219,7 @@ void hyphadao::new_proposal(const name &owner,
 
     const uint64_t delay_sec_buffer = 1;
 
-    const uint64_t num_seconds_delay = get_setting<int64_t>(common::VOTING_DURATION_SEC) + delay_sec_buffer;
+    const uint64_t num_seconds_delay = getSettingOrFail<int64_t>(common::VOTING_DURATION_SEC) + delay_sec_buffer;
 
     transaction trx(time_point_sec(current_time_point()) + num_seconds_delay + delay_sec_buffer);
     trx.actions.emplace_back(
@@ -253,7 +253,7 @@ void hyphadao::propose(const name &proposer,
 
     const uint64_t delay_sec_buffer = 1;
 
-    const uint64_t num_seconds_delay = get_setting<int64_t>(common::VOTING_DURATION_SEC) + delay_sec_buffer;
+    const uint64_t num_seconds_delay = getSettingOrFail<int64_t>(common::VOTING_DURATION_SEC) + delay_sec_buffer;
 
     transaction trx(time_point_sec(current_time_point()) + num_seconds_delay + delay_sec_buffer);
     trx.actions.emplace_back(
@@ -305,7 +305,7 @@ void hyphadao::closedocprop(const checksum256 &proposal_hash)
 
     action(
         permission_level{get_self(), name("active")},
-        get_setting<name>(common::TELOS_DECIDE_CONTRACT), name("closevoting"),
+        getSettingOrFail<name>(common::TELOS_DECIDE_CONTRACT), name("closevoting"),
         std::make_tuple(ballot_id, true))
         .send();
 }

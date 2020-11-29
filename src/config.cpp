@@ -150,7 +150,7 @@ void hyphadao::setsetting(const string &key, const flexvalue& value)
 {
 	require_auth(get_self());
 
-	auto document = get_settings_document();
+	auto document = getSettingsDocument();
 	
 	auto& content_group = document.content_groups.at(0);
 
@@ -172,7 +172,7 @@ void hyphadao::remsetting(const string &key)
 {
 	require_auth(get_self());
 
-	auto document = get_settings_document();
+	auto document = getSettingsDocument();
 
 	auto& content_group = document.content_groups.at(0);
 
@@ -253,13 +253,7 @@ void hyphadao::setlastballt(const name &last_ballot_id)
 
 void hyphadao::togglepause()
 {
-	int64_t new_state = 1;
-
-	if (auto paused = get_setting_opt<int64_t>(common::PAUSED); 
-		paused)
-	{
-		new_state = !*paused;
-	}	
+	int64_t new_state = !getSettingOrDefault<int64_t>(common::PAUSED);
 
 	setsetting(common::PAUSED, new_state);
 }
