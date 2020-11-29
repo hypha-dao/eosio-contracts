@@ -31,7 +31,7 @@ checksum256 hyphadao::get_root ()
 	return document_graph::hash_document(cgs);
 }
 
-document_graph::document hyphadao::get_settings_document()
+document_graph::document hyphadao::getSettingsDocument()
 {
 	auto root = get_root();
 	
