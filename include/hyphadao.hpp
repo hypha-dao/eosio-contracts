@@ -47,6 +47,8 @@ namespace hypha
       typedef singleton<name("config"), Config> config_table;
       typedef multi_index<name("config"), Config> config_table_placeholder;
 
+      DECLARE_DOCUMENT_GRAPH(hyphadao)
+
       struct [[eosio::table, eosio::contract("hyphadao")]] Member
       {
          name member;
