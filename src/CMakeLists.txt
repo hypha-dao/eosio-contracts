@@ -27,7 +27,7 @@ add_contract( hyphadao hyphadao
                 ../document-graph/src/document_graph/edge.cpp
                 ../document-graph/src/document_graph/util.cpp )
 
-target_include_directories( hyphadao PUBLIC ${CMAKE_SOURCE_DIR}/../include ${CMAKE_SOURCE_DIR}/../../document-graph/include )
+target_include_directories( hyphadao PUBLIC ${CMAKE_SOURCE_DIR}/../include ${CMAKE_SOURCE_DIR}/../document-graph/include )
 
 target_compile_options(hyphadao PUBLIC -R${CMAKE_CURRENT_SOURCE_DIR}/resources)
 # target_ricardian_directory( hyphadao ${CMAKE_SOURCE_DIR}/../resources )
