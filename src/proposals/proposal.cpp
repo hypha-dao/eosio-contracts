@@ -53,7 +53,7 @@ namespace hypha
         Edge edge (m_contract, m_contract, rootNode, proposal.getHash(), common::PROPOSAL);
         edge.erase();
 
-        name ballot_id = ContentWrapper::getContent(proposal.content_groups, common::SYSTEM, common::BALLOT_ID).getAs<eosio::name>();
+        name ballot_id = ContentWrapper::getContent(proposal.getContentGroups(), common::SYSTEM, common::BALLOT_ID).getAs<eosio::name>();
         if (did_pass(ballot_id))
         {
             // INVOKE child class close logic

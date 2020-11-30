@@ -2,14 +2,14 @@
 
 using namespace hypha;
 
-void hyphadao::new_proposal(const name &owner,
-                            map<string, name> &names,
-                            map<string, string> &strings,
-                            map<string, asset> &assets,
-                            map<string, time_point> &time_points,
-                            map<string, uint64_t> &ints,
-                            map<string, transaction> &trxs)
-{
+// void hyphadao::new_proposal(const name &owner,
+//                             map<string, name> &names,
+//                             map<string, string> &strings,
+//                             map<string, asset> &assets,
+//                             map<string, time_point> &time_points,
+//                             map<string, uint64_t> &ints,
+//                             map<string, transaction> &trxs)
+// {
     // hyphadao::object_table o_t(get_self(), name("proposal").value);
     // config_table config_s(get_self(), get_self().value);
     // Config c = config_s.get_or_create(get_self(), Config());
@@ -143,5 +143,5 @@ void hyphadao::new_proposal(const name &owner,
     // }
     // new_object(owner, name("proposal"), names, strings, assets, time_points, ints, trxs);
     // event(name("high"), variant_helper(names, strings, assets, time_points, ints));
-}
+// }
 

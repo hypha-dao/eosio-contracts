@@ -202,23 +202,6 @@ namespace hypha
          asset husd = asset{0, common::S_HUSD};
       };
 
-      // typedef multi_index<name("documents"), Document,
-      //                     indexed_by<name("idhash"), const_mem_fun<Document, checksum256, &Document::by_hash>>,
-      //                     indexed_by<name("bycreator"), const_mem_fun<Document, uint64_t, &Document::by_creator>>,
-      //                     indexed_by<name("bycreated"), const_mem_fun<Document, uint64_t, &Document::by_created>>>
-      //     document_table;
-
-      // typedef multi_index<name("edges"), document_graph::edge,
-      //                     indexed_by<name("fromnode"), const_mem_fun<document_graph::edge, checksum256, &document_graph::edge::by_from>>,
-      //                     indexed_by<name("tonode"), const_mem_fun<document_graph::edge, checksum256, &document_graph::edge::by_to>>,
-      //                     indexed_by<name("edgename"), const_mem_fun<document_graph::edge, uint64_t, &document_graph::edge::by_edge_name>>,
-      //                     indexed_by<name("byfromname"), const_mem_fun<document_graph::edge, uint64_t, &document_graph::edge::by_from_node_edge_name_index>>,
-      //                     indexed_by<name("byfromto"), const_mem_fun<document_graph::edge, uint64_t, &document_graph::edge::by_from_node_to_node_index>>,
-      //                     indexed_by<name("bytoname"), const_mem_fun<document_graph::edge, uint64_t, &document_graph::edge::by_to_node_edge_name_index>>,
-      //                     indexed_by<name("bycreated"), const_mem_fun<document_graph::edge, uint64_t, &document_graph::edge::by_created>>,
-      //                     indexed_by<name("bycreator"), const_mem_fun<document_graph::edge, uint64_t, &document_graph::edge::by_creator>>>
-      //     edge_table;
-
       const uint64_t MICROSECONDS_PER_HOUR = (uint64_t)60 * (uint64_t)60 * (uint64_t)1000000;
       const uint64_t MICROSECONDS_PER_YEAR = MICROSECONDS_PER_HOUR * (uint64_t)24 * (uint64_t)365;
 
@@ -226,24 +209,24 @@ namespace hypha
       ///  Generation 1 Actions
       /// **********************************
 
-      ACTION create(const name &scope,
-                    map<string, name> names,
-                    map<string, string> strings,
-                    map<string, asset> assets,
-                    map<string, time_point> time_points,
-                    map<string, uint64_t> ints,
-                    const map<string, float> floats,
-                    map<string, transaction> trxs);
+      // ACTION create(const name &scope,
+      //               map<string, name> names,
+      //               map<string, string> strings,
+      //               map<string, asset> assets,
+      //               map<string, time_point> time_points,
+      //               map<string, uint64_t> ints,
+      //               const map<string, float> floats,
+      //               map<string, transaction> trxs);
 
-      ACTION edit(const name &scope,
-                  const uint64_t &id,
-                  const map<string, name> names,
-                  map<string, string> strings,
-                  map<string, asset> assets,
-                  map<string, time_point> time_points,
-                  const map<string, uint64_t> ints,
-                  const map<string, float> floats,
-                  map<string, transaction> trxs);
+      // ACTION edit(const name &scope,
+      //             const uint64_t &id,
+      //             const map<string, name> names,
+      //             map<string, string> strings,
+      //             map<string, asset> assets,
+      //             map<string, time_point> time_points,
+      //             const map<string, uint64_t> ints,
+      //             const map<string, float> floats,
+      //             map<string, transaction> trxs);
 
       ACTION setconfig(const map<string, name> names,
                        const map<string, string> strings,
@@ -262,17 +245,15 @@ namespace hypha
       ACTION newrole(const uint64_t &proposal_id);
       ACTION assign(const uint64_t &proposal_id);
       ACTION makepayout(const uint64_t &proposal_id);
-      ACTION exectrx(const uint64_t &proposal_id);
-      ACTION mergeobject(const uint64_t &proposal_id);
       ACTION suspend(const uint64_t &proposal_id);
 
       // anyone can call closeprop, it executes the transaction if the voting passed
       ACTION closeprop(const uint64_t &proposal_id);
 
-      ACTION copytodraft(const name &copier, const name &scope, const uint64_t &id);
-      ACTION propdraft(const uint64_t &id);
-      ACTION erasedraft(const uint64_t &id);
-      ACTION recreate(const name &scope, const uint64_t &id);
+      // ACTION copytodraft(const name &copier, const name &scope, const uint64_t &id);
+      // ACTION propdraft(const uint64_t &id);
+      // ACTION erasedraft(const uint64_t &id);
+      // ACTION recreate(const name &scope, const uint64_t &id);
 
       ACTION propsuspend(const name &proposer, const name &scope, const uint64_t &id);
       ACTION withdraw(const name &withdrawer, const uint64_t &assignment_id, const string &notes);
@@ -303,11 +284,11 @@ namespace hypha
       ACTION closedocprop(const checksum256 &proposal_hash);
 
       // ADMIN
-      ACTION erasedochash(const checksum256 &doc);
-      ACTION erasedocs(const uint64_t &begin_id, const uint64_t &batch_size);
-      ACTION erasealldocs(const string &notes);
-      ACTION eraseedges(const string &notes);
-      ACTION erasedocbyid(const uint64_t &id);
+      // ACTION erasedochash(const checksum256 &doc);
+      // ACTION erasedocs(const uint64_t &begin_id, const uint64_t &batch_size);
+      // ACTION erasealldocs(const string &notes);
+      // ACTION eraseedges(const string &notes);
+      // ACTION erasedocbyid(const uint64_t &id);
       // create the initial rootnode document
       ACTION createroot(const string &notes);
       // make member documents from the members table
@@ -330,8 +311,6 @@ namespace hypha
       ACTION updversion(const string &component, const string &version);
       // ACTION updassets(const uint64_t &proposal_id);
       ACTION set(const name &scope, const uint64_t &id, const string &key, const flexvalue1 &flexvalue);
-      // ACTION updassassets(const uint64_t &assignment_id); // temporary fix
-      // ACTION fixseedsprec(const uint64_t &proposal_id);   // temporary fix
 
       // alerts Group
       ACTION setalert(const name &level, const string &content);
@@ -339,8 +318,6 @@ namespace hypha
 
       // Calendar actions
       ACTION addperiod(const time_point &start_time, const time_point &end_time, const string &phase);
-      ACTION remperiods(const uint64_t &begin_period_id, const uint64_t &end_period_id);
-      ACTION resetperiods();
 
       // users can claim their salary pay
       ACTION payassign(const checksum256 &assignment_hash, const uint64_t &period_id);
@@ -350,21 +327,15 @@ namespace hypha
       static checksum256 get_root(const name &contract);
       // static void verify_membership(const name &member);
 
-      static checksum256 get_member_hash(const name &member);
-      Document get_member_doc(const name &member);
-      Document get_member_doc(const name &creator, const name &member);
-
       static asset adjust_asset(const asset &original_asset, const float &adjustment);
       static string get_string(const std::map<string, string> strings, string key);
 
    private:
       // bank-related functions
-      void remove_periods(const uint64_t &begin_period_id, const uint64_t &end_period_id);
-      void reset_periods();
+      // void remove_periods(const uint64_t &begin_period_id, const uint64_t &end_period_id);
       void make_payment(const uint64_t &period_id, const name &recipient, const asset &quantity, const string &memo, const uint64_t &assignment_id, const uint64_t &bypass_escrow);
       void issuetoken(const name &token_contract, const name &issuer, const name &to, const asset &token_amount, const string &memo);
 
-      bool holds_hypha(const name &account);
       uint64_t get_last_period_id();
 
       float get_seeds_price_usd();
@@ -375,36 +346,14 @@ namespace hypha
       Document create_votetally_doc(const name &proposer, ContentGroups &content_groups);
       // bool did_pass(const name &ballot_id);
 
-      // // badge-related functions
-      // Document propose_badge(const name &proposer, ContentGroups &content_groups);
-      // void create_badge(const Document &badge);
-      // Document propose_badge_assignment(const name &proposer, ContentGroups &content_groups);
-      // void assign_badge(const Document &badge_assignment);
-
       // void check_coefficient(ContentGroup & content_group, const string &coefficient_key);
       asset apply_coefficient(const Document &badge, const asset &base, const string &coefficient_key);
       asset_batch apply_badge_coefficients(const uint64_t period_id, const name &member, const asset_batch ab);
       vector<Document> get_current_badges(const uint64_t &period_id, const name &member);
 
-      // ContentGroup create_system_group(const name &proposer,
-      //                                                   const name &proposal_type,
-      //                                                   const string &decide_title,
-      //                                                   const string &decide_desc,
-      //                                                   const string &decide_content);
       checksum256 get_root();
 
-      // Document propose_role(const name &proposer, ContentGroups &content_groups);
-      // void create_role(const Document &role);
-      // Document propose_role_assignment(const name &proposer,
-      //                                                    ContentGroups &content_groups);
-      // void assign_role(const Document &role_assignment);
-
-      void defcloseprop(const uint64_t &proposal_id);
       void qualify_owner(const name &proposer);
-
-      // Telos Decide related (to be deprecated)
-      // static name register_ballot(const name &proposer, const map<string, string> &strings);
-      // static name register_ballot(const name &proposer, const string &title, const string &description, const string &content);
 
       // config related
       float get_float(const std::map<string, uint64_t> ints, string key);
@@ -415,18 +364,16 @@ namespace hypha
       uint64_t hash(std::string str);
       void debug(const string &notes);
       void debugx(const string &message);
-      bool is_proposal_direct_assets(const map<string, asset> &assets); // ??
-      void checkx(const bool &condition, const string &message);
       void check_capacity(const uint64_t &role_id, const uint64_t &req_time_share_x100);
 
-      void new_object(const name &creator,
-                      const name &scope,
-                      const map<string, name> names,
-                      const map<string, string> strings,
-                      const map<string, asset> assets,
-                      const map<string, time_point> time_points,
-                      const map<string, uint64_t> ints,
-                      const map<string, transaction> trxs);
+      // void new_object(const name &creator,
+      //                 const name &scope,
+      //                 const map<string, name> names,
+      //                 const map<string, string> strings,
+      //                 const map<string, asset> assets,
+      //                 const map<string, time_point> time_points,
+      //                 const map<string, uint64_t> ints,
+      //                 const map<string, transaction> trxs);
 
       void new_document(const name &creator,
                         const name &scope,
@@ -436,37 +383,24 @@ namespace hypha
                         const map<string, time_point> time_points,
                         const map<string, uint64_t> ints);
 
-      void new_proposal(const name &owner,
-                        map<string, name> &names,
-                        map<string, string> &strings,
-                        map<string, asset> &assets,
-                        map<string, time_point> &time_points,
-                        map<string, uint64_t> &ints,
-                        map<string, transaction> &trxs);
+      // void new_proposal(const name &owner,
+      //                   map<string, name> &names,
+      //                   map<string, string> &strings,
+      //                   map<string, asset> &assets,
+      //                   map<string, time_point> &time_points,
+      //                   map<string, uint64_t> &ints,
+      //                   map<string, transaction> &trxs);
 
-      void merge(const name &scope,
-                 const uint64_t &id,
-                 const map<string, name> names,
-                 const map<string, string> strings,
-                 const map<string, asset> assets,
-                 const map<string, time_point> time_points,
-                 const map<string, uint64_t> ints,
-                 const map<string, transaction> trxs);
+      // void merge(const name &scope,
+      //            const uint64_t &id,
+      //            const map<string, name> names,
+      //            const map<string, string> strings,
+      //            const map<string, asset> assets,
+      //            const map<string, time_point> time_points,
+      //            const map<string, uint64_t> ints,
+      //            const map<string, transaction> trxs);
 
       void event(const name &level, const map<string, flexvalue1> &values);
 
-      map<string, flexvalue1> variant_helper(const map<string, name> &names,
-                                             const map<string, string> &strings,
-                                             const map<string, asset> &assets,
-                                             const map<string, time_point> &time_points,
-                                             const map<string, uint64_t> &ints);
-
-      map<string, asset> get_assets(const asset &usd_amount,
-                                    const float &deferred_perc,
-                                    const time_point &price_time_point);
-
-      map<string, asset> get_assets(const uint64_t &role_id,
-                                    const float &deferred_perc,
-                                    const float &time_share_perc);
-   };
+        };
 } // namespace hypha

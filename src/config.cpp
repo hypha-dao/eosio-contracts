@@ -1,12 +1,19 @@
 #include <hyphadao.hpp>
 #include <document_graph/util.hpp>
 #include <document_graph/content_group.hpp>
+#include <document_graph/document.hpp>
 
 using namespace hypha;
 
 void hyphadao::createroot (const string &notes)
 {
-	require_auth (get_self());
+	// require_auth (get_self());
+
+	// Content c (common::ROOT_NODE, get_self());
+	// ContentGroup cg {};
+	// cg.push_back(c);
+	// ContentGroups cgs {};
+	// cgs.push_back (cg);
 
 	ContentGroups cgs = Document::rollup(Content(common::ROOT_NODE, get_self()));
     eosio::checksum256 rootNode = Document::hashContents(cgs);

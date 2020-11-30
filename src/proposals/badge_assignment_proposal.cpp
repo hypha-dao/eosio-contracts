@@ -19,7 +19,7 @@ namespace hypha
 
         // badge assignment proposal must link to a valid badge
         Document badgeDocument (m_contract, badgeAssignment.getContent(common::DETAILS, common::BADGE_STRING).getAs<eosio::checksum256>());
-        ContentWrapper badge (badgeDocument.content_groups);
+        ContentWrapper badge (badgeDocument.getContentGroups());
 
         // badge in the proposal must be of type: badge
         eosio::check (badge.getContent(common::SYSTEM, common::TYPE).getAs<eosio::name>() == common::BADGE_NAME, 

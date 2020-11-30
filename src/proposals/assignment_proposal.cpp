@@ -19,7 +19,7 @@ namespace hypha
 
         // assignment proposal must link to a valid role
         Document roleDocument(m_contract, assignment.getContent(common::DETAILS, common::ROLE_STRING).getAs<eosio::checksum256>());
-        ContentWrapper role(roleDocument.content_groups);
+        ContentWrapper role(roleDocument.getContentGroups());
 
         // role in the proposal must be of type: role
         eosio::check (role.getContent(common::SYSTEM, common::TYPE).getAs<eosio::name>() != common::ROLE_NAME, 
@@ -78,7 +78,7 @@ namespace hypha
 
     Document AssignmentProposal::pass_impl(Document proposal)
     {
-        ContentWrapper assignment(proposal.content_groups);
+        ContentWrapper assignment(proposal.getContentGroups());
         eosio::checksum256 assignee = Member::hash(assignment.getContent(common::DETAILS, common::ASSIGNEE).getAs<eosio::name>());
 
         Document role(m_contract, assignment.getContent(common::DETAILS, common::ROLE_STRING).getAs<eosio::checksum256>());

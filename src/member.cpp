@@ -9,7 +9,7 @@ namespace hypha
 {
     Member::Member (eosio::name member) : m_member{member} {}
 
-    const eosio::checksum256 hash (const eosio::name &member) 
+    const eosio::checksum256 Member::hash (const eosio::name &member) 
     {
         ContentGroups contentGroups = Document::rollup (Content (common::MEMBER_STRING, member));
         return Document::hashContents(contentGroups);
@@ -25,4 +25,8 @@ namespace hypha
         return Edge::exists (rootNode, rootNodeHash, memberHash, common::MEMBER);
     }
 
+    Document Member::getOrNew (const eosio::name& contract, const eosio::name &creator, const eosio::name &member)
+    {
+        return Document::getOrNew(contract, creator, common::MEMBER_STRING, member);
+    }
 }

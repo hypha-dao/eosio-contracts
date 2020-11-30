@@ -8,7 +8,6 @@ add_contract( hyphadao hyphadao
                 hyphadao.cpp 
                 legacy_proposal.cpp 
                 config.cpp 
-                badge.cpp 
                 membership.cpp 
                 bank.cpp
                 object.cpp 

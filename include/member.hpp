@@ -11,6 +11,7 @@ namespace hypha
     public:
         Member(eosio::name member);
 
+        static Document getOrNew (const eosio::name& contract, const eosio::name &creator, const eosio::name &member);
         static const eosio::checksum256 hash(const eosio::name &member);
         static const bool isMember(const eosio::name &rootNode, const eosio::name &member);
 
