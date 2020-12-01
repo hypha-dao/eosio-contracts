@@ -14,7 +14,12 @@ void hyphadao::createroot (const string &notes)
 	rootDoc.emplace();
 
 	//Create the settings document as well and add an edge to it
-	Document settingsDoc(get_self(), get_self(), Content(common::ROOT_NODE, readableHash(rootDoc.getHash())))
+	ContentGroups settingCgs{{
+		Content(CONTENT_GROUP_LABEL, common::SETTINGS),
+		Content(common::ROOT_NODE, readableHash(rootDoc.getHash()))
+	}};
+
+	Document settingsDoc(get_self(), get_self(), std::move(settingCgs));
 	settingsDoc.emplace();
 
 	Edge rootToSettings(get_self(), get_self(), rootDoc.getHash(), settingsDoc.getHash(), common::SETTINGS_EDGE);
@@ -32,13 +37,15 @@ checksum256 hyphadao::get_root ()
 	return get_root(get_self());
 }
 
-document_graph::document hyphadao::getSettingsDocument()
+Document hyphadao::getSettingsDocument()
 {
 	auto root = get_root();
 	
-	auto settings_edge = _document_graph.get_edge(root, common::SETTINGS_EDGE, true);
+	auto edges = m_documentGraph.getEdgesFromOrFail(root, common::SETTINGS_EDGE);
+	
+	check(edges.size() == 1, "There should only exists only 1 settings edge from root node");
 
-	return _document_graph.get_document(settings_edge.to_node);
+	return Document(get_self(), edges[0].to_node);
 }
 
 void hyphadao::setconfig(const map<string, name> names,
@@ -152,21 +159,25 @@ void hyphadao::setsetting(const string &key, const flexvalue& value)
 	require_auth(get_self());
 
 	auto document = getSettingsDocument();
+
+	auto oldHash = document.getHash();
 	
-	auto& content_group = document.content_groups.at(0);
+	auto settingContent = Content(key, value);
 
-	auto setting_content = document_graph::content{key, value};
+	auto updateDateContent = Content(common::UPDATED_DATE, current_time_point());
 
-	document_graph::insert_or_replace(content_group, setting_content);
-	
-	auto updated_setting_content = document_graph::content{common::UPDATED_DATE, current_time_point()};
+	//Might want to return by & instead of const &
+	auto contentGroups = document.getContentGroups();
 
-	document_graph::insert_or_replace(content_group, updated_setting_content);
+	auto& settingsGroup = contentGroups[0];
 
-	document = _document_graph.update_document(get_self(), document.hash, std::move(document.content_groups));
+	ContentWrapper::insertOrReplace(settingsGroup, settingContent);
+	ContentWrapper::insertOrReplace(settingsGroup, updateDateContent);
 
-	//Update edges
-	_document_graph.update_edge_to(get_root(), common::SETTINGS_EDGE, document.hash);
+	//We could to change ContentWrapper to store a regulare reference instead of a constant
+	//Maybe also a ref to Document so we can rehashContents on data changes
+
+	m_documentGraph.updateDocument(get_self(), oldHash, std::move(contentGroups));
 }
 
 void hyphadao::remsetting(const string &key)
@@ -175,28 +186,29 @@ void hyphadao::remsetting(const string &key)
 
 	auto document = getSettingsDocument();
 
-	auto& content_group = document.content_groups.at(0);
+	auto oldHash = document.getHash();
 
-	auto is_key = [&key](auto &c) 
+	auto contentGroups = document.getContentGroups();
+
+	auto& settingsGroup = contentGroups[0];
+
+	auto isKey = [&key](auto &c) 
 	{
 		return c.label == key;
 	};
 
 	//First let's check if key exists
-	auto content_itr = std::find_if(content_group.begin(), content_group.end(), is_key);
+	auto contentItr = std::find_if(settingsGroup.begin(), settingsGroup.end(), isKey);
 
-	if (content_itr != content_group.end())
+	if (contentItr != settingsGroup.end())
 	{	
-		content_group.erase(content_itr);
+		settingsGroup.erase(contentItr);
 		
-		auto updated_setting_content = document_graph::content{common::UPDATED_DATE, current_time_point()};
+		auto updateDateContent = Content(common::UPDATED_DATE, current_time_point());
 
-		document_graph::insert_or_replace(content_group, updated_setting_content);
+		ContentWrapper::insertOrReplace(settingsGroup, updateDateContent);
 
-		document = _document_graph.update_document(get_self(), document.hash, std::move(document.content_groups));
-
-		//Update edges
-		_document_graph.update_edge_to(get_root(), common::SETTINGS_EDGE, document.hash);
+		m_documentGraph.updateDocument(get_self(), oldHash, std::move(contentGroups));
 	}
 	//Should we assert if setting doesn't exits ?
 }

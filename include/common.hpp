@@ -81,6 +81,7 @@ namespace common {
     static const string         HYPHA_SALARY_PER_PERIOD     = string ("hypha_salary_per_phase");
     static const string         HUSD_SALARY_PER_PERIOD      = string ("husd_salary_per_phase");
     static const string         HVOICE_SALARY_PER_PERIOD    = string ("hvoice_salary_per_phase");
+    static const string         SETTINGS                    = string ("settings");
 
     // graph edge names
     static constexpr name       SETTINGS_EDGE               = name ("settings");

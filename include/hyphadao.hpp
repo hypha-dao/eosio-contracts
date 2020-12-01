@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <variant>
 #include <optional>
 
@@ -34,8 +35,10 @@ namespace hypha
       // v2 data structure will use variants for more generic support
       typedef std::variant<name, string, asset, time_point, uint64_t> flexvalue1;
 
-      //using flexvalue = document_graph::flexvalue; causes seg fault while compiling
-      using flexvalue = std::variant<name, string, asset, time_point, int64_t, checksum256>;
+      //causes seg fault while compiling
+      using flexvalue = Content::FlexValue; 
+      //using flexvalue = std::variant<std::monostate,name, string, asset, time_point, int64_t, checksum256>;
+
 
       struct [[eosio::table, eosio::contract("hyphadao")]] Config
       {
@@ -357,16 +360,9 @@ namespace hypha
       asset get_seeds_amount(const asset &usd_amount, const time_point &price_time_point, const float &time_share, const float &deferred_perc);
 
       // Generation 2 - document graph related
-      document_graph _document_graph = document_graph(get_self());
-      checksum256 get_root();
-      
+            
       Document getSettingsDocument();
       
-      void assign_badge(const document_graph::document &badge_assignment);
-      void check_coefficient(document_graph::content_group & content_group, const string &coefficient_key);
-      asset apply_coefficient(const document_graph::document &badge, const asset &base, const string &coefficient_key);
-      asset_batch apply_badge_coefficients(const uint64_t period_id, const name &member, const asset_batch ab);
-      vector<document_graph::document> get_current_badges(const uint64_t &period_id, const name &member);
       Document create_votetally_doc(const name &proposer, ContentGroups &content_groups);
       // bool did_pass(const name &ballot_id);
 
@@ -378,18 +374,16 @@ namespace hypha
       checksum256 get_root();
 
       void qualify_owner(const name &proposer);
-
-      // Telos Decide related (to be deprecated)
-      name register_ballot(const name &proposer, const map<string, string> &strings);
-      name register_ballot(const name &proposer, const string &title, const string &description, const string &content);
       
       template<class T>
       T getSettingOrFail(const string& setting)
       {
          auto settings = getSettingsDocument();
-         auto group = settings.content_groups[0];
          
-         auto content = _document_graph.get_content_item(group, setting, true);
+         auto wrapper = ContentWrapper(settings.getContentGroups());
+
+         //TODO: Add getContent function which only receives the content label
+         auto content = wrapper.getContent(common::SETTINGS, setting);
 
          return std::get<T>(content.value);
       }
@@ -398,9 +392,11 @@ namespace hypha
       std::optional<T> getSettingOpt(const string &setting)
       {
          auto settings = getSettingsDocument();
-         auto group = settings.content_groups[0];
          
-         auto content = _document_graph.get_content_item(group, setting, false);
+         auto wrapper = ContentWrapper(settings.getContentGroups());
+
+         //TODO: Add getGroupOpt or not cheking version
+         auto content = wrapper.getContent(common::SETTINGS, setting);
 
          if (auto p = std::get_if<T>(&content.value)) 
          {

@@ -79,6 +79,7 @@ namespace hypha
 		// update the graph
 		checksum256 root_hash = get_root();
 		Document member_doc = Document::getOrNew(get_self(), enroller, common::MEMBER_STRING, applicant);
+		member_doc.emplace();
 		Edge rootMemberEdge(get_self(), get_self(), root_hash, member_doc.getHash(), common::MEMBER);
 		rootMemberEdge.emplace();
 
