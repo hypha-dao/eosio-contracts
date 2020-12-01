@@ -1,4 +1,9 @@
 #pragma once
+
+#include <algorithm>
+#include <variant>
+#include <optional>
+
 #include <eosio/eosio.hpp>
 #include <eosio/asset.hpp>
 #include <eosio/singleton.hpp>
@@ -30,6 +35,11 @@ namespace hypha
       // v2 data structure will use variants for more generic support
       typedef std::variant<name, string, asset, time_point, uint64_t> flexvalue1;
 
+      //causes seg fault while compiling
+      using flexvalue = Content::FlexValue; 
+      //using flexvalue = std::variant<std::monostate,name, string, asset, time_point, int64_t, checksum256>;
+
+
       struct [[eosio::table, eosio::contract("hyphadao")]] Config
       {
          // required configurations:
@@ -44,6 +54,10 @@ namespace hypha
          map<string, float> floats;
       };
 
+      /*
+      * Legacy Config Table
+      * Should be removed after migration grace period
+      */
       typedef singleton<name("config"), Config> config_table;
       typedef multi_index<name("config"), Config> config_table_placeholder;
 
@@ -241,7 +255,8 @@ namespace hypha
       ACTION remconfigatt(const string &key);
       ACTION setlastballt(const name &last_ballot_id);
       ACTION togglepause();
-
+      ACTION setsetting(const string &key, const flexvalue& value);
+      ACTION remsetting(const string& key);
       // These actions are executed only on approval of a proposal.
       // To introduce a new proposal type, we would add another action to the below.
       ACTION newrole(const uint64_t &proposal_id);
@@ -257,8 +272,8 @@ namespace hypha
       // ACTION erasedraft(const uint64_t &id);
       // ACTION recreate(const name &scope, const uint64_t &id);
 
-      ACTION propsuspend(const name &proposer, const name &scope, const uint64_t &id);
-      ACTION withdraw(const name &withdrawer, const uint64_t &assignment_id, const string &notes);
+      ACTION propsuspend (const name &proposer, const name &scope, const uint64_t &id, const string &notes);
+      ACTION withdraw (const name &withdrawer, const uint64_t &assignment_id, const string& notes);
 
       ACTION removemember(const name &member_to_remove);
       ACTION addmember(const name &member);
@@ -345,6 +360,9 @@ namespace hypha
       asset get_seeds_amount(const asset &usd_amount, const time_point &price_time_point, const float &time_share, const float &deferred_perc);
 
       // Generation 2 - document graph related
+            
+      Document getSettingsDocument();
+      
       Document create_votetally_doc(const name &proposer, ContentGroups &content_groups);
       // bool did_pass(const name &ballot_id);
 
@@ -356,12 +374,56 @@ namespace hypha
       checksum256 get_root();
 
       void qualify_owner(const name &proposer);
+      
+      template<class T>
+      T getSettingOrFail(const string& setting)
+      {
+         auto settings = getSettingsDocument();
+         
+         auto wrapper = ContentWrapper(settings.getContentGroups());
 
-      // config related
+         //TODO: Add getContent function which only receives the content label
+         auto content = wrapper.getContent(common::SETTINGS, setting);
+
+         return std::get<T>(content.value);
+      }
+
+      template<class T>
+      std::optional<T> getSettingOpt(const string &setting)
+      {
+         auto settings = getSettingsDocument();
+         
+         auto wrapper = ContentWrapper(settings.getContentGroups());
+
+         //TODO: Add getGroupOpt or not cheking version
+         auto content = wrapper.getContent(common::SETTINGS, setting);
+
+         if (auto p = std::get_if<T>(&content.value)) 
+         {
+            return *p;
+         }
+
+         return {};
+      }
+
+      template<class T>
+      T getSettingOrDefault(const string &setting, const T &def = T{})
+      {
+         if (auto content = getSettingOpt<T>(setting))
+         {
+            return *content;
+         }
+
+         return def;
+      }
+
+      float get_float(const string& setting);
+      
       float get_float(const std::map<string, uint64_t> ints, string key);
+
       bool is_paused();
       uint64_t get_next_sender_id();
-
+      
       // Utilities
       uint64_t hash(std::string str);
       void debug(const string &notes);

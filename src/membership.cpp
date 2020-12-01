@@ -51,14 +51,11 @@ namespace hypha
 		auto a_itr = a_t.find(applicant.value);
 		check(a_itr != a_t.end(), "Applicant not found: " + applicant.to_string());
 
-		config_table config_s(get_self(), get_self().value);
-		Config c = config_s.get_or_create(get_self(), Config());
-
 		asset one_hvoice = asset{100, common::S_HVOICE};
 		string memo{"Welcome to Hypha DAO!"};
 		action(
 			permission_level{get_self(), name("active")},
-			c.names.at("telos_decide_contract"), name("mint"),
+			getSettingOrFail<name>(common::TELOS_DECIDE_CONTRACT), name("mint"),
 			make_tuple(applicant, one_hvoice, memo))
 			.send();
 
@@ -82,6 +79,7 @@ namespace hypha
 		// update the graph
 		checksum256 root_hash = get_root();
 		Document member_doc = Document::getOrNew(get_self(), enroller, common::MEMBER_STRING, applicant);
+		member_doc.emplace();
 		Edge rootMemberEdge(get_self(), get_self(), root_hash, member_doc.getHash(), common::MEMBER);
 		rootMemberEdge.emplace();
 

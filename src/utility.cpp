@@ -7,9 +7,7 @@ namespace hypha
 						 const map<string, hyphadao::flexvalue1> &values)
 	{
 
-		config_table config_s(get_self(), get_self().value);
-		Config c = config_s.get_or_create(get_self(), Config());
-		name publisher_contract = c.names.at("publisher_contract");
+		name publisher_contract = getSettingOrFail<name>(common::PUBLISHER_CONTRACT);
 
 		action(
 			permission_level{get_self(), name("active")},
@@ -70,6 +68,22 @@ namespace hypha
 	// 	remove_periods(begin_period_id, end_period_id);
 	// }
 
+	float hyphadao::get_float(const string& key)
+	{
+		return getSettingOrFail<int64_t>(key) / 100.f;
+	}
+
+	bool hyphadao::is_paused()
+	{
+		if (auto paused = getSettingOpt<int64_t>(common::PAUSED))
+		{
+			return *paused == 1;
+		}
+
+		check(false, "Contract does not have a pause configuration. Assuming it is paused. Please contact administrator.");
+
+		return false;
+	}
 	asset hyphadao::adjust_asset(const asset &original_asset, const float &adjustment)
 	{
 		return asset{static_cast<int64_t>(original_asset.amount * adjustment), original_asset.symbol};
@@ -78,16 +92,6 @@ namespace hypha
 	float hyphadao::get_float(const map<string, uint64_t> ints, string key)
 	{
 		return (float)ints.at(key) / (float)100;
-	}
-
-	bool hyphadao::is_paused()
-	{
-		config_table config_s(get_self(), get_self().value);
-		Config c = config_s.get_or_create(get_self(), Config());
-		check(c.ints.find("paused") != c.ints.end(), "Contract does not have a pause configuration. Assuming it is paused. Please contact administrator.");
-
-		uint64_t paused = c.ints.at("paused");
-		return paused == 1;
 	}
 
 	string hyphadao::get_string(const map<string, string> strings, string key)

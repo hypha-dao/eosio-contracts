@@ -41,13 +41,9 @@ namespace hypha
     {
         asset adjusted_usd_amount = adjust_asset(adjust_asset(usd_amount, deferred_perc), time_share);
 
-        config_table config_s(get_self(), get_self().value);
-        Config c = config_s.get_or_create(get_self(), Config());
-        float seeds_deferral_coeff = get_float(c.ints, "seeds_deferral_factor_x100");
-
+        float seeds_deferral_coeff = get_float(common::SEEDS_DEFERRAL_FACTOR_X100);
         float seeds_price = get_seeds_price_usd(price_time_point);
         // debugx("seeds price: " + std::to_string(seeds_price));
-
         debug("get_seeds_amount: INPUT: USD Amount: " + usd_amount.to_string() +
               ", INPUT: deferred_perc: " + std::to_string(deferred_perc) +
               ", INPUT: time_share: " + std::to_string(time_share) +

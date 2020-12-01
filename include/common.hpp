@@ -4,7 +4,7 @@
 
 using namespace eosio;
 using std::string;
-
+//TODO: Refacto into a Lazy load system to avoid allocating many strings that are not actually used
 namespace common {
 
     static const symbol         S_HYPHA                         ("HYPHA", 2);
@@ -49,6 +49,25 @@ namespace common {
     static const string         SYSTEM                      = string ("system");
     static const string         BALLOT_ID                   = string ("ballot_id");
     static const string         BALLOT_TYPE                 = string ("ballot_type");
+    
+    //setting document
+    //static const string         CLIENT_VERSION              = string ("client_version");
+    //static const string         CONTRACT_VERSION            = string ("contract_version");
+    static const string         TELOS_DECIDE_CONTRACT       = string ("telos_decide_contract");
+    static const string         SEEDS_TOKEN_CONTRACT        = string ("seeds_token_contract");
+    static const string         SEEDS_ESCROW_CONTRACT       = string ("seeds_escrow_contract");
+    static const string         HUSD_TOKEN_CONTRACT         = string ("husd_token_contract");
+    static const string         TREASURY_CONTRACT           = string ("treasury_contract");
+    static const string         HYPHA_TOKEN_CONTRACT        = string ("hypha_token_contract");
+    static const string         UPDATED_DATE                = string ("updated_date");
+    //static const string         ROOT_NODE                   = string ("root_node");
+    static const string         SEEDS_DEFERRAL_FACTOR_X100  = string ("seeds_deferral_factor_x100");
+    static const string         HYPHA_DEFERRAL_FACTOR_X100  = string ("hypha_deferral_factor_x100");
+    static const string         LAST_BALLOT_ID              = string ("last_ballot_id");
+    static const string         LAST_SENDER_ID              = string ("last_sender_id");
+    static const string         VOTING_DURATION_SEC         = string ("voting_duration_sec");
+    static const string         PUBLISHER_CONTRACT          = string ("publisher_contract");
+    static const string         PAUSED                      = string ("paused");
     static const string         ROLE_STRING                 = string ("role");
 
     static const string         FULL_TIME_CAPACITY          = string ("fulltime_capacity_x100");
@@ -62,8 +81,10 @@ namespace common {
     static const string         HYPHA_SALARY_PER_PERIOD     = string ("hypha_salary_per_phase");
     static const string         HUSD_SALARY_PER_PERIOD      = string ("husd_salary_per_phase");
     static const string         HVOICE_SALARY_PER_PERIOD    = string ("hvoice_salary_per_phase");
+    static const string         SETTINGS                    = string ("settings");
 
     // graph edge names
+    static constexpr name       SETTINGS_EDGE               = name ("settings");
     static constexpr name       HOLDS_BADGE                 = name ("holdsbadge");
     static constexpr name       HELD_BY                     = name ("heldby");
     static constexpr name       OWNED_BY                    = name ("ownedby");

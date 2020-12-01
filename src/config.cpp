@@ -3,22 +3,29 @@
 #include <document_graph/content_group.hpp>
 #include <document_graph/document.hpp>
 
+#include <algorithm>
+
+//using namespace hyphaspace;
 using namespace hypha;
 
 void hyphadao::createroot (const string &notes)
 {
-	// require_auth (get_self());
+	require_auth (get_self());
 
-	// Content c (common::ROOT_NODE, get_self());
-	// ContentGroup cg {};
-	// cg.push_back(c);
-	// ContentGroups cgs {};
-	// cgs.push_back (cg);
+	Document rootDoc(get_self(), get_self(), Content(common::ROOT_NODE, get_self()));
+	rootDoc.emplace();
 
-	ContentGroups cgs = Document::rollup(Content(common::ROOT_NODE, get_self()));
-    eosio::checksum256 rootNode = Document::hashContents(cgs);
+	//Create the settings document as well and add an edge to it
+	ContentGroups settingCgs{{
+		Content(CONTENT_GROUP_LABEL, common::SETTINGS),
+		Content(common::ROOT_NODE, readableHash(rootDoc.getHash()))
+	}};
 
-	setconfigatt("root_node", readableHash(rootNode));
+	Document settingsDoc(get_self(), get_self(), std::move(settingCgs));
+	settingsDoc.emplace();
+
+	Edge rootToSettings(get_self(), get_self(), rootDoc.getHash(), settingsDoc.getHash(), common::SETTINGS_EDGE);
+	rootToSettings.emplace();
 }
 
 checksum256 hyphadao::get_root (const name &contract)
@@ -30,6 +37,17 @@ checksum256 hyphadao::get_root (const name &contract)
 checksum256 hyphadao::get_root ()
 {
 	return get_root(get_self());
+}
+
+Document hyphadao::getSettingsDocument()
+{
+	auto root = get_root();
+	
+	auto edges = m_documentGraph.getEdgesFromOrFail(root, common::SETTINGS_EDGE);
+	
+	check(edges.size() == 1, "There should only exists only 1 settings edge from root node");
+
+	return Document(get_self(), edges[0].to_node);
 }
 
 void hyphadao::setconfig(const map<string, name> names,
@@ -138,6 +156,65 @@ void hyphadao::remconfigatt(const string& key)
  	config_s.set(c, get_self());
 }
 
+void hyphadao::setsetting(const string &key, const flexvalue& value)
+{
+	require_auth(get_self());
+
+	auto document = getSettingsDocument();
+
+	auto oldHash = document.getHash();
+	
+	auto settingContent = Content(key, value);
+
+	auto updateDateContent = Content(common::UPDATED_DATE, current_time_point());
+
+	//Might want to return by & instead of const &
+	auto contentGroups = document.getContentGroups();
+
+	auto& settingsGroup = contentGroups[0];
+
+	ContentWrapper::insertOrReplace(settingsGroup, settingContent);
+	ContentWrapper::insertOrReplace(settingsGroup, updateDateContent);
+
+	//We could to change ContentWrapper to store a regulare reference instead of a constant
+	//Maybe also a ref to Document so we can rehashContents on data changes
+
+	m_documentGraph.updateDocument(get_self(), oldHash, std::move(contentGroups));
+}
+
+void hyphadao::remsetting(const string &key)
+{
+	require_auth(get_self());
+
+	auto document = getSettingsDocument();
+
+	auto oldHash = document.getHash();
+
+	auto contentGroups = document.getContentGroups();
+
+	auto& settingsGroup = contentGroups[0];
+
+	auto isKey = [&key](auto &c) 
+	{
+		return c.label == key;
+	};
+
+	//First let's check if key exists
+	auto contentItr = std::find_if(settingsGroup.begin(), settingsGroup.end(), isKey);
+
+	if (contentItr != settingsGroup.end())
+	{	
+		settingsGroup.erase(contentItr);
+		
+		auto updateDateContent = Content(common::UPDATED_DATE, current_time_point());
+
+		ContentWrapper::insertOrReplace(settingsGroup, updateDateContent);
+
+		m_documentGraph.updateDocument(get_self(), oldHash, std::move(contentGroups));
+	}
+	//Should we assert if setting doesn't exits ?
+	check(false, "The specified setting doesn't exits: " + key);
+}
 
 void hyphadao::setalert (const name &level, const string &content)
 {
@@ -182,33 +259,17 @@ void hyphadao::remalert (const string &notes)
 
 void hyphadao::updversion(const string &component, const string &version)
 {
-	config_table config_s(get_self(), get_self().value);
-	Config c = config_s.get_or_create(get_self(), Config());
-	c.strings[component] = version;
-	config_s.set(c, get_self());
+	setsetting(component, version);
 }
 
 void hyphadao::setlastballt(const name &last_ballot_id)
 {
-	require_auth(get_self());
-	config_table config_s(get_self(), get_self().value);
-	Config c = config_s.get_or_create(get_self(), Config());
-	c.names["last_ballot_id"] = last_ballot_id;
-	config_s.set(c, get_self());
+	setsetting(common::LAST_BALLOT_ID, last_ballot_id);
 }
 
 void hyphadao::togglepause()
 {
-	require_auth(get_self());
-	config_table config_s(get_self(), get_self().value);
-	Config c = config_s.get_or_create(get_self(), Config());
-	if (c.ints.find("paused") == c.ints.end() || c.ints.at("paused") == 0)
-	{
-		c.ints["paused"] = 1;
-	}
-	else
-	{
-		c.ints["paused"] = 0;
-	}
-	config_s.set(c, get_self());
+	int64_t new_state = !getSettingOrDefault<int64_t>(common::PAUSED);
+
+	setsetting(common::PAUSED, new_state);
 }

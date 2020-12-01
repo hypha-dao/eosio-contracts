@@ -16,14 +16,11 @@ void hyphadao::make_payment(const uint64_t &period_id,
 
     debug("Making payment to recipient: " + recipient.to_string() + ", quantity: " + quantity.to_string());
 
-    config_table config_s(get_self(), get_self().value);
-    Config c = config_s.get_or_create(get_self(), Config());
-
     if (quantity.symbol == common::S_HVOICE)
     {
         action(
             permission_level{get_self(), name("active")},
-            c.names.at("telos_decide_contract"), name("mint"),
+            getSettingOrFail<name>(common::TELOS_DECIDE_CONTRACT), name("mint"),
             std::make_tuple(recipient, quantity, memo))
             .send();
     }
@@ -33,13 +30,14 @@ void hyphadao::make_payment(const uint64_t &period_id,
         {
             action(
                 permission_level{get_self(), name("active")},
-                c.names.at("seeds_token_contract"), name("transfer"),
-                std::make_tuple(get_self(), c.names.at("seeds_escrow_contract"), quantity, memo))
+                getSettingOrFail<name>(common::SEEDS_TOKEN_CONTRACT), 
+                name("transfer"),
+                std::make_tuple(get_self(), getSettingOrFail<name>(common::SEEDS_ESCROW_CONTRACT), quantity, memo))
                 .send();
 
             action(
                 permission_level{get_self(), name("active")},
-                c.names.at("seeds_escrow_contract"), name("lock"),
+                getSettingOrFail<name>(common::SEEDS_ESCROW_CONTRACT), name("lock"),
                 std::make_tuple(name("event"),
                                 get_self(),
                                 recipient,
@@ -55,18 +53,19 @@ void hyphadao::make_payment(const uint64_t &period_id,
         {
             action(
                 permission_level{get_self(), name("active")},
-                c.names.at("seeds_token_contract"), name("transfer"),
+                getSettingOrFail<name>(common::SEEDS_TOKEN_CONTRACT), name("transfer"),
                 std::make_tuple(get_self(), recipient, quantity, memo))
                 .send();
         }
     }
     else if (quantity.symbol == common::S_HUSD)
     {
-        issuetoken(c.names.at("husd_token_contract"), c.names.at("treasury_contract"), recipient, quantity, memo);
+        issuetoken(getSettingOrFail<name>(common::HUSD_TOKEN_CONTRACT), 
+                   getSettingOrFail<name>(common::TREASURY_CONTRACT), recipient, quantity, memo);
     }
     else
     {
-        issuetoken(c.names.at("hypha_token_contract"), get_self(), recipient, quantity, memo);
+        issuetoken(getSettingOrFail<name>(common::HYPHA_TOKEN_CONTRACT), get_self(), recipient, quantity, memo);
     }
 
     payment_table payment_t(get_self(), get_self().value);
