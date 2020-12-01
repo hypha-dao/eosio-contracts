@@ -10,6 +10,8 @@ using namespace hypha;
 
 void hyphadao::createroot (const string &notes)
 {
+	require_auth (get_self());
+
 	Document rootDoc(get_self(), get_self(), Content(common::ROOT_NODE, get_self()));
 	rootDoc.emplace();
 
@@ -211,6 +213,7 @@ void hyphadao::remsetting(const string &key)
 		m_documentGraph.updateDocument(get_self(), oldHash, std::move(contentGroups));
 	}
 	//Should we assert if setting doesn't exits ?
+	check(false, "The specified setting doesn't exits: " + key);
 }
 
 void hyphadao::setalert (const name &level, const string &content)
