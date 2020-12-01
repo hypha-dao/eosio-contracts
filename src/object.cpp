@@ -34,81 +34,81 @@ void hyphadao::set(const name &scope, const uint64_t &id, const string &key, con
 	});
 }
 
-void hyphadao::resetscope(const name &scope)
-{
-	require_auth(get_self());
-	object_table o_t(get_self(), scope.value);
-	auto o_itr = o_t.begin();
-	while (o_itr != o_t.end())
-	{
-		o_itr = o_t.erase(o_itr);
-	}
-}
+// void hyphadao::resetscope(const name &scope)
+// {
+// 	require_auth(get_self());
+// 	object_table o_t(get_self(), scope.value);
+// 	auto o_itr = o_t.begin();
+// 	while (o_itr != o_t.end())
+// 	{
+// 		o_itr = o_t.erase(o_itr);
+// 	}
+// }
 
-void hyphadao::erasedoc(const name &scope,
-						const uint64_t &id)
-{
-	require_auth(get_self());
-	object_table o_t(get_self(), scope.value);
-	auto o_itr = o_t.find(id);
-	check(o_itr != o_t.end(), "Scope: " + scope.to_string() + "; Object ID: " + std::to_string(id) + " does not exist.");
-	o_t.erase(o_itr);
-}
+// void hyphadao::erasedoc(const name &scope,
+// 						const uint64_t &id)
+// {
+// 	require_auth(get_self());
+// 	object_table o_t(get_self(), scope.value);
+// 	auto o_itr = o_t.find(id);
+// 	check(o_itr != o_t.end(), "Scope: " + scope.to_string() + "; Object ID: " + std::to_string(id) + " does not exist.");
+// 	o_t.erase(o_itr);
+// }
 
-void hyphadao::changescope(const name &current_scope, const uint64_t &id, const vector<name> &new_scopes, const bool &remove_old)
-{
-	require_auth(get_self());
-	object_table o_t_current(get_self(), current_scope.value);
-	auto o_itr_current = o_t_current.find(id);
-	check(o_itr_current != o_t_current.end(), "Scope: " + current_scope.to_string() + "; Object ID: " + std::to_string(id) + " does not exist.");
+// void hyphadao::changescope(const name &current_scope, const uint64_t &id, const vector<name> &new_scopes, const bool &remove_old)
+// {
+// 	require_auth(get_self());
+// 	object_table o_t_current(get_self(), current_scope.value);
+// 	auto o_itr_current = o_t_current.find(id);
+// 	check(o_itr_current != o_t_current.end(), "Scope: " + current_scope.to_string() + "; Object ID: " + std::to_string(id) + " does not exist.");
 
-	for (name new_scope : new_scopes)
-	{
-		object_table o_t_new(get_self(), new_scope.value);
-		o_t_new.emplace(get_self(), [&](auto &o) {
-			o.id = o_t_new.available_primary_key();
-			o.names = o_itr_current->names;
-			o.names["prior_scope"] = current_scope;
-			o.assets = o_itr_current->assets;
-			o.strings = o_itr_current->strings;
-			o.floats = o_itr_current->floats;
-			o.time_points = o_itr_current->time_points;
-			o.ints = o_itr_current->ints;
-			o.ints["prior_id"] = o_itr_current->id;
-			o.trxs = o_itr_current->trxs;
+// 	for (name new_scope : new_scopes)
+// 	{
+// 		object_table o_t_new(get_self(), new_scope.value);
+// 		o_t_new.emplace(get_self(), [&](auto &o) {
+// 			o.id = o_t_new.available_primary_key();
+// 			o.names = o_itr_current->names;
+// 			o.names["prior_scope"] = current_scope;
+// 			o.assets = o_itr_current->assets;
+// 			o.strings = o_itr_current->strings;
+// 			o.floats = o_itr_current->floats;
+// 			o.time_points = o_itr_current->time_points;
+// 			o.ints = o_itr_current->ints;
+// 			o.ints["prior_id"] = o_itr_current->id;
+// 			o.trxs = o_itr_current->trxs;
 
-			new_document(get_self(), new_scope, o.names, o.strings, o.assets, o.time_points, o.ints);
-		});
+// 			new_document(get_self(), new_scope, o.names, o.strings, o.assets, o.time_points, o.ints);
+// 		});
 
-		debug("Added object ID: " + std::to_string(id) + " from scope: " + current_scope.to_string() + " to scope: " + new_scope.to_string());
-	}
+// 		debug("Added object ID: " + std::to_string(id) + " from scope: " + current_scope.to_string() + " to scope: " + new_scope.to_string());
+// 	}
 
-	if (remove_old)
-	{
-		debug("Erasing object ID: " + std::to_string(id) + " from : " + current_scope.to_string());
-		o_t_current.erase(o_itr_current);
-	}
-}
+// 	if (remove_old)
+// 	{
+// 		debug("Erasing object ID: " + std::to_string(id) + " from : " + current_scope.to_string());
+// 		o_t_current.erase(o_itr_current);
+// 	}
+// }
 
-void hyphadao::transscope (const name &creator, const name &scope, const uint64_t &starting_id, const uint64_t &batch_size) 
-{
-	require_auth (creator);
-	object_table o_t(get_self(), scope.value);
-	auto o_itr = o_t.find(starting_id);
+// void hyphadao::transscope (const name &creator, const name &scope, const uint64_t &starting_id, const uint64_t &batch_size) 
+// {
+// 	require_auth (creator);
+// 	object_table o_t(get_self(), scope.value);
+// 	auto o_itr = o_t.find(starting_id);
 
-	while (o_itr->id <= starting_id + batch_size) 
-	{
-		transform (creator, scope, o_itr->id);
-		o_itr++;
-	}
+// 	while (o_itr->id <= starting_id + batch_size) 
+// 	{
+// 		transform (creator, scope, o_itr->id);
+// 		o_itr++;
+// 	}
 
-	eosio::transaction out{};
-	out.actions.emplace_back(permission_level{get_self(), name("active")},
-							 get_self(), name("transscope"),
-							 make_tuple(creator, scope, o_itr->id, batch_size));
-	out.delay_sec = 1;
-	out.send(get_next_sender_id(), get_self());
-}
+// 	eosio::transaction out{};
+// 	out.actions.emplace_back(permission_level{get_self(), name("active")},
+// 							 get_self(), name("transscope"),
+// 							 make_tuple(creator, scope, o_itr->id, batch_size));
+// 	out.delay_sec = 1;
+// 	out.send(get_next_sender_id(), get_self());
+// }
 
 // void hyphadao::erasedocs (const name &scope) 
 // {
@@ -122,15 +122,15 @@ void hyphadao::transscope (const name &creator, const name &scope, const uint64_
 // 	}
 // }
 
-void hyphadao::transform(const name &creator, const name &scope, const uint64_t &id)
-{
-	require_auth (creator);
-	object_table o_t(get_self(), scope.value);
-	auto o_itr = o_t.find(id);
-	check(o_itr != o_t.end(), "Scope: " + scope.to_string() + "; Object ID: " + std::to_string(id) + " does not exist.");
+// void hyphadao::transform(const name &creator, const name &scope, const uint64_t &id)
+// {
+// 	require_auth (creator);
+// 	object_table o_t(get_self(), scope.value);
+// 	auto o_itr = o_t.find(id);
+// 	check(o_itr != o_t.end(), "Scope: " + scope.to_string() + "; Object ID: " + std::to_string(id) + " does not exist.");
 
-	new_document(creator, scope, o_itr->names, o_itr->strings, o_itr->assets, o_itr->time_points, o_itr->ints);
-}
+// 	new_document(creator, scope, o_itr->names, o_itr->strings, o_itr->assets, o_itr->time_points, o_itr->ints);
+// }
 
 void hyphadao::new_document(const name &creator,
 							const name &scope,

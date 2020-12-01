@@ -35,12 +35,6 @@ namespace hypha
 		out.send(get_next_sender_id(), get_self());
 	}
 
-	void hyphadao::debugmsg(const string &message)
-	{
-		require_auth(get_self());
-		debug(message);
-	}
-
 	void hyphadao::debug(const string &notes)
 	{
 		debug_table d_t(get_self(), get_self().value);
@@ -89,11 +83,6 @@ namespace hypha
 		return asset{static_cast<int64_t>(original_asset.amount * adjustment), original_asset.symbol};
 	}
 
-	float hyphadao::get_float(const map<string, uint64_t> ints, string key)
-	{
-		return (float)ints.at(key) / (float)100;
-	}
-
 	string hyphadao::get_string(const map<string, string> strings, string key)
 	{
 		if (strings.find(key) != strings.end())
@@ -104,43 +93,6 @@ namespace hypha
 		{
 			return string{""};
 		}
-	}
-
-	void hyphadao::debugx(const string &message)
-	{
-		transaction trx(time_point_sec(current_time_point()) + (60));
-		trx.actions.emplace_back(
-			permission_level{get_self(), name("active")},
-			get_self(), name("debugmsg"),
-			make_tuple(message));
-		trx.delay_sec = 0;
-		trx.send(get_next_sender_id(), get_self());
-	}
-
-	
-	void hyphadao::check_capacity(const uint64_t &role_id, const uint64_t &req_time_share_x100)
-	{
-		// Ensure that this proposal would not push the role over it's approved full time capacity
-		object_table o_t_role(get_self(), name("role").value);
-		auto o_itr_role = o_t_role.find(role_id);
-		check(o_itr_role != o_t_role.end(), "Role ID: " + to_string(role_id) + " does not exist.");
-		int role_capacity = o_itr_role->ints.at("fulltime_capacity_x100");
-
-		object_table o_t_assignment(get_self(), name("assignment").value);
-		auto sorted_by_role = o_t_assignment.get_index<name("byfk")>();
-		auto a_itr_by_role = sorted_by_role.find(role_id);
-		int consumed_capacity = 0;
-		debug("Role capacity: " + to_string(role_capacity) + ", fk: " +
-			  to_string(a_itr_by_role->ints.at("fk")) + "; Role ID: " + to_string(role_id));
-		while (a_itr_by_role != sorted_by_role.end() && a_itr_by_role->ints.at("fk") == role_id)
-		{
-			consumed_capacity += a_itr_by_role->ints.at("time_share_x100");
-			a_itr_by_role++;
-		}
-
-		check(consumed_capacity + req_time_share_x100 <= role_capacity, "Role ID: " +
-																			 to_string(role_id) + " cannot support assignment. Full time capacity (x100) is " + to_string(role_capacity) +
-																			 " and consumed capacity (x100) is " + to_string(consumed_capacity) + "; proposal requests time share (x100) of: " + to_string(req_time_share_x100));
 	}
 
 	// void hyphadao::erasedochash (const checksum256 &doc)

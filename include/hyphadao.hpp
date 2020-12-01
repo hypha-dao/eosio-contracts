@@ -225,15 +225,6 @@ namespace hypha
       ///  Generation 1 Actions
       /// **********************************
 
-      // ACTION create(const name &scope,
-      //               map<string, name> names,
-      //               map<string, string> strings,
-      //               map<string, asset> assets,
-      //               map<string, time_point> time_points,
-      //               map<string, uint64_t> ints,
-      //               const map<string, float> floats,
-      //               map<string, transaction> trxs);
-
       // ACTION edit(const name &scope,
       //             const uint64_t &id,
       //             const map<string, name> names,
@@ -244,13 +235,6 @@ namespace hypha
       //             const map<string, float> floats,
       //             map<string, transaction> trxs);
 
-      ACTION setconfig(const map<string, name> names,
-                       const map<string, string> strings,
-                       const map<string, asset> assets,
-                       const map<string, time_point> time_points,
-                       const map<string, uint64_t> ints,
-                       const map<string, float> floats,
-                       const map<string, transaction> trxs);
       ACTION setconfigatt(const string &key, const hyphadao::flexvalue1 &value);
       ACTION remconfigatt(const string &key);
       ACTION setlastballt(const name &last_ballot_id);
@@ -259,13 +243,8 @@ namespace hypha
       ACTION remsetting(const string& key);
       // These actions are executed only on approval of a proposal.
       // To introduce a new proposal type, we would add another action to the below.
-      ACTION newrole(const uint64_t &proposal_id);
-      ACTION assign(const uint64_t &proposal_id);
+      
       ACTION makepayout(const uint64_t &proposal_id);
-      ACTION suspend(const uint64_t &proposal_id);
-
-      // anyone can call closeprop, it executes the transaction if the voting passed
-      ACTION closeprop(const uint64_t &proposal_id);
 
       // ACTION copytodraft(const name &copier, const name &scope, const uint64_t &id);
       // ACTION propdraft(const uint64_t &id);
@@ -275,15 +254,12 @@ namespace hypha
       ACTION propsuspend (const name &proposer, const name &scope, const uint64_t &id, const string &notes);
       ACTION withdraw (const name &withdrawer, const uint64_t &assignment_id, const string& notes);
 
-      ACTION removemember(const name &member_to_remove);
-      ACTION addmember(const name &member);
-
       // data object handling
-      ACTION transform(const name &creator, const name &scope, const uint64_t &id);
-      ACTION transscope(const name &creator, const name &scope, const uint64_t &starting_id, const uint64_t &batch_size);
-      ACTION resetscope(const name &scope);
-      ACTION erasedoc(const name &scope, const uint64_t &id);
-      ACTION changescope(const name &scope, const uint64_t &id, const vector<name> &new_scopes, const bool &remove_old);
+      // ACTION transform(const name &creator, const name &scope, const uint64_t &id);
+      // ACTION transscope(const name &creator, const name &scope, const uint64_t &starting_id, const uint64_t &batch_size);
+      // ACTION resetscope(const name &scope);
+      // ACTION erasedoc(const name &scope, const uint64_t &id);
+      // ACTION changescope(const name &scope, const uint64_t &id, const vector<name> &new_scopes, const bool &remove_old);
 
       // migration related actions
       // ACTION backupobjs (const name& scope);
@@ -319,11 +295,9 @@ namespace hypha
       // membership actions
       ACTION apply(const name &applicant, const string &content);
       ACTION enroll(const name &enroller, const name &applicant, const string &content);
-      ACTION remapply(const name &applicant);
 
       // Admin
       // ACTION reset ();
-      ACTION debugmsg(const string &message);
       ACTION clrdebugs(const uint64_t &starting_id, const uint64_t &batch_size);
       ACTION updversion(const string &component, const string &version);
       // ACTION updassets(const uint64_t &proposal_id);
@@ -342,14 +316,12 @@ namespace hypha
       DocumentGraph m_documentGraph = DocumentGraph(get_self());
       
       static checksum256 get_root(const name &contract);
-      // static void verify_membership(const name &member);
 
       static asset adjust_asset(const asset &original_asset, const float &adjustment);
       static string get_string(const std::map<string, string> strings, string key);
 
    private:
       // bank-related functions
-      // void remove_periods(const uint64_t &begin_period_id, const uint64_t &end_period_id);
       void make_payment(const uint64_t &period_id, const name &recipient, const asset &quantity, const string &memo, const uint64_t &assignment_id, const uint64_t &bypass_escrow);
       void issuetoken(const name &token_contract, const name &issuer, const name &to, const asset &token_amount, const string &memo);
 
@@ -362,19 +334,14 @@ namespace hypha
       // Generation 2 - document graph related
             
       Document getSettingsDocument();
-      
+   
       Document create_votetally_doc(const name &proposer, ContentGroups &content_groups);
-      // bool did_pass(const name &ballot_id);
-
-      // void check_coefficient(ContentGroup & content_group, const string &coefficient_key);
       asset apply_coefficient(const Document &badge, const asset &base, const string &coefficient_key);
       asset_batch apply_badge_coefficients(const uint64_t period_id, const name &member, const asset_batch ab);
       vector<Document> get_current_badges(const uint64_t &period_id, const name &member);
 
       checksum256 get_root();
 
-      void qualify_owner(const name &proposer);
-      
       template<class T>
       T getSettingOrFail(const string& setting)
       {
@@ -419,25 +386,12 @@ namespace hypha
 
       float get_float(const string& setting);
       
-      float get_float(const std::map<string, uint64_t> ints, string key);
-
       bool is_paused();
       uint64_t get_next_sender_id();
       
       // Utilities
       uint64_t hash(std::string str);
       void debug(const string &notes);
-      void debugx(const string &message);
-      void check_capacity(const uint64_t &role_id, const uint64_t &req_time_share_x100);
-
-      // void new_object(const name &creator,
-      //                 const name &scope,
-      //                 const map<string, name> names,
-      //                 const map<string, string> strings,
-      //                 const map<string, asset> assets,
-      //                 const map<string, time_point> time_points,
-      //                 const map<string, uint64_t> ints,
-      //                 const map<string, transaction> trxs);
 
       void new_document(const name &creator,
                         const name &scope,

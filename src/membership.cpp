@@ -127,31 +127,31 @@ namespace hypha
 		}
 	};
 
-	void hyphadao::remapply(const name &applicant)
-	{
-		require_auth(get_self());
-		applicant_table a_t(get_self(), get_self().value);
-		auto a_itr = a_t.find(applicant.value);
-		a_t.erase(a_itr);
-	}
+	// void hyphadao::remapply(const name &applicant)
+	// {
+	// 	require_auth(get_self());
+	// 	applicant_table a_t(get_self(), get_self().value);
+	// 	auto a_itr = a_t.find(applicant.value);
+	// 	a_t.erase(a_itr);
+	// }
 
-	void hyphadao::addmember(const name &member)
-	{
-		require_auth(get_self());
-		member_table m_t(get_self(), get_self().value);
-		auto m_itr = m_t.find(member.value);
-		check(m_itr == m_t.end(), "Account is already a member: " + member.to_string());
-		m_t.emplace(get_self(), [&](auto &m) {
-			m.member = member;
-		});
-	}
+	// void hyphadao::addmember(const name &member)
+	// {
+	// 	require_auth(get_self());
+	// 	member_table m_t(get_self(), get_self().value);
+	// 	auto m_itr = m_t.find(member.value);
+	// 	check(m_itr == m_t.end(), "Account is already a member: " + member.to_string());
+	// 	m_t.emplace(get_self(), [&](auto &m) {
+	// 		m.member = member;
+	// 	});
+	// }
 
-	void hyphadao::removemember(const name &member)
-	{
-		require_auth(get_self());
-		member_table m_t(get_self(), get_self().value);
-		auto m_itr = m_t.find(member.value);
-		check(m_itr != m_t.end(), "Account is not a member: " + member.to_string());
-		m_t.erase(m_itr);
-	}
+	// void hyphadao::removemember(const name &member)
+	// {
+	// 	require_auth(get_self());
+	// 	member_table m_t(get_self(), get_self().value);
+	// 	auto m_itr = m_t.find(member.value);
+	// 	check(m_itr != m_t.end(), "Account is not a member: " + member.to_string());
+	// 	m_t.erase(m_itr);
+	// }
 } // namespace hypha
