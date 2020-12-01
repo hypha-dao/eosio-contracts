@@ -21,10 +21,17 @@ namespace common {
     static const float          PHASE_TO_YEAR_RATIO             = 0.02026009582;
 
     // content keys
+    // keys used with settings
+    static const string         ROOT_NODE                   = string ("root_node");
+    static const string         HYPHA_DEFERRAL_FACTOR       = string ("hypha_deferral_factor_x100");
+    static const string         CLIENT_VERSION              = string ("client_version");
+    static const string         CONTRACT_VERSION            = string ("contract_version");
+
     static const string         TITLE                       = string ("title");
     static const string         DESCRIPTION                 = string ("description");
     static const string         CONTENT                     = string ("content");
     static const string         ICON                        = string ("icon");
+    // static const string         PROPOSER                    = string ("proposer");
 
     static const string         START_PERIOD                = string ("start_period");
     static const string         END_PERIOD                  = string ("end_period");
@@ -44,8 +51,8 @@ namespace common {
     static const string         BALLOT_TYPE                 = string ("ballot_type");
     
     //setting document
-    static const string         CLIENT_VERSION              = string ("client_version");
-    static const string         CONTRACT_VERSION            = string ("contract_version");
+    //static const string         CLIENT_VERSION              = string ("client_version");
+    //static const string         CONTRACT_VERSION            = string ("contract_version");
     static const string         TELOS_DECIDE_CONTRACT       = string ("telos_decide_contract");
     static const string         SEEDS_TOKEN_CONTRACT        = string ("seeds_token_contract");
     static const string         SEEDS_ESCROW_CONTRACT       = string ("seeds_escrow_contract");
@@ -53,7 +60,7 @@ namespace common {
     static const string         TREASURY_CONTRACT           = string ("treasury_contract");
     static const string         HYPHA_TOKEN_CONTRACT        = string ("hypha_token_contract");
     static const string         UPDATED_DATE                = string ("updated_date");
-    static const string         ROOT_NODE                   = string ("root_node");
+    //static const string         ROOT_NODE                   = string ("root_node");
     static const string         SEEDS_DEFERRAL_FACTOR_X100  = string ("seeds_deferral_factor_x100");
     static const string         HYPHA_DEFERRAL_FACTOR_X100  = string ("hypha_deferral_factor_x100");
     static const string         LAST_BALLOT_ID              = string ("last_ballot_id");
@@ -61,6 +68,19 @@ namespace common {
     static const string         VOTING_DURATION_SEC         = string ("voting_duration_sec");
     static const string         PUBLISHER_CONTRACT          = string ("publisher_contract");
     static const string         PAUSED                      = string ("paused");
+    static const string         ROLE_STRING                 = string ("role");
+
+    static const string         FULL_TIME_CAPACITY          = string ("fulltime_capacity_x100");
+    static const string         ANNUAL_USD_SALARY           = string ("annual_usd_salary");
+    static const string         TIME_SHARE                  = string ("time_share_x100");
+    static const string         MIN_TIME_SHARE              = string ("min_time_share_x100");
+    static const string         MIN_DEFERRED                = string ("min_deferred_x100");
+    static const string         DEFERRED                    = string ("deferred_perc_x100");
+
+    static const string         USD_SALARY_PER_PERIOD       = string ("usd_salary_value_per_phase");
+    static const string         HYPHA_SALARY_PER_PERIOD     = string ("hypha_salary_per_phase");
+    static const string         HUSD_SALARY_PER_PERIOD      = string ("husd_salary_per_phase");
+    static const string         HVOICE_SALARY_PER_PERIOD    = string ("hvoice_salary_per_phase");
 
     // graph edge names
     static constexpr name       SETTINGS_EDGE               = name ("settings");
@@ -73,6 +93,11 @@ namespace common {
     static constexpr name       ASSIGN_BADGE                = name ("assignbadge");
     static constexpr name       VOTE_TALLY                  = name ("votetally");
     static constexpr name       ASSIGNMENT                  = name ("assignment");
+    static constexpr name       ROLE_NAME                   = name ("role");
+
+    static constexpr name       ASSIGNED                    = name ("assigned");
+    static constexpr name       ASSIGNEE_NAME               = name ("assignee");
+
     
     // graph edges hanging off of primary DHO node
     static constexpr name       BADGE_NAME                  = name ("badge");

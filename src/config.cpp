@@ -1,34 +1,35 @@
 #include <hyphadao.hpp>
+#include <document_graph/util.hpp>
+#include <document_graph/content_group.hpp>
+#include <document_graph/document.hpp>
 
 #include <algorithm>
 
-using namespace hyphaspace;
+//using namespace hyphaspace;
+using namespace hypha;
 
 void hyphadao::createroot (const string &notes)
 {
-	require_auth (get_self());
-
-	document_graph::document root = _document_graph.get_or_create (get_self(), 
-																   _document_graph.new_content(common::ROOT_NODE, get_self()));
+	Document rootDoc(get_self(), get_self(), Content(common::ROOT_NODE, get_self()));
+	rootDoc.emplace();
 
 	//Create the settings document as well and add an edge to it
-	document_graph::document settings = _document_graph.get_or_create(get_self(), 
-																	  _document_graph.new_content(common::ROOT_NODE, _document_graph.readable_hash(root.hash)));
+	Document settingsDoc(get_self(), get_self(), Content(common::ROOT_NODE, readableHash(rootDoc.getHash())))
+	settingsDoc.emplace();
 
-	_document_graph.create_edge(root.hash, settings.hash, common::SETTINGS_EDGE);
-	/* Legacy Config Table
-	* setconfigatt("root_node", _document_graph.readable_hash(root.hash));
-	*/
+	Edge rootToSettings(get_self(), get_self(), rootDoc.getHash(), settingsDoc.getHash(), common::SETTINGS_EDGE);
+	rootToSettings.emplace();
+}
+
+checksum256 hyphadao::get_root (const name &contract)
+{
+	ContentGroups cgs = Document::rollup(Content(common::ROOT_NODE, contract));
+    return Document::hashContents(cgs);
 }
 
 checksum256 hyphadao::get_root ()
 {
-	auto ctnt = _document_graph.new_content("root_node", get_self());
-	document_graph::content_group cg; 
-	cg.push_back(ctnt);
-	vector<document_graph::content_group> cgs;
-	cgs.push_back(cg);
-	return document_graph::hash_document(cgs);
+	return get_root(get_self());
 }
 
 document_graph::document hyphadao::getSettingsDocument()

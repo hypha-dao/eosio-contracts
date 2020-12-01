@@ -125,7 +125,7 @@ func ClaimNextPeriod(t *testing.T, env *Environment, claimer eos.AccountName, as
 
 	if time.Now().Before(periods[periodIndex].EndTime.Time) {
 		t.Log("Waiting for a period to lapse...")
-		pause(t, periodPause, "", "Waiting...")
+		pause(t, env.PeriodPause, "", "Waiting...")
 	}
 
 	return dao.ClaimPay(env.ctx, &env.api, env.DAO, claimer, assignment.ID, periodIndex)
@@ -184,7 +184,7 @@ func createVoteAndClose(t *testing.T, env *Environment,
 		ActionData: eos.NewActionData(createP)}}
 
 	t.Log("Member: " + string(proposer) + " is submitting a role proposal")
-	pause(t, chainResponsePause, "", "Submitting...")
+	pause(t, env.ChainResponsePause, "", "Submitting...")
 	_, err := eostest.ExecTrx(env.ctx, &env.api, actions)
 	assert.NilError(t, err)
 
@@ -214,7 +214,7 @@ func createAssignment(t *testing.T, env *Environment, role dao.V1Object, propose
 	return createVoteAndClose(t, env, proposer, closer, assignmentProposal)
 }
 
-func createRole(t *testing.T, env *Environment, proposer, closer eos.AccountName, content string) dao.V1Object {
+func createRoleOld(t *testing.T, env *Environment, proposer, closer eos.AccountName, content string) dao.V1Object {
 
 	var roleProposal dao.RawObject
 	err := json.Unmarshal([]byte(content), &roleProposal)
@@ -223,6 +223,45 @@ func createRole(t *testing.T, env *Environment, proposer, closer eos.AccountName
 	roleProposal.Names = append(roleProposal.Names, dao.NameKV{Key: "owner", Value: eos.Name(proposer)})
 
 	return createVoteAndClose(t, env, proposer, closer, roleProposal)
+}
+
+func CreateRole(t *testing.T, env *Environment, proposer, closer Member, title, content string) docgraph.Document {
+	_, err := dao.Propose(env.ctx, &env.api, env.DAO, proposer.Member, "role", content)
+	assert.NilError(t, err)
+
+	// retrieve the document we just created
+	role, err := docgraph.GetLastDocument(env.ctx, &env.api, env.DAO)
+	assert.NilError(t, err)
+	assert.Equal(t, role.Creator, proposer.Member)
+
+	fv, err := role.GetContent("title")
+	assert.NilError(t, err)
+	assert.Equal(t, fv.String(), title)
+
+	// verify that the edges are created correctly
+	// Graph structure post creating proposal:
+	// root 		---proposal---> 	propDocument
+	// member 		---owns-------> 	propDocument
+	// propDocument ---ownedby----> 	member
+	checkEdge(t, env, env.Root, role, eos.Name("proposal"))
+	checkEdge(t, env, proposer.Doc, role, eos.Name("owns"))
+	checkEdge(t, env, role, proposer.Doc, eos.Name("ownedby"))
+
+	ballot, err := role.GetContent("ballot_id")
+	assert.NilError(t, err)
+	voteToPassTD(t, env, ballot.Impl.(eos.Name))
+
+	t.Log("Member: ", closer.Member, " is closing role proposal	: ", role.Hash.String())
+	_, err = dao.CloseProposal(env.ctx, &env.api, env.DAO, closer.Member, role.Hash)
+	assert.NilError(t, err)
+
+	// verify that the edges are created correctly
+	// Graph structure post creating proposal:
+	// root 		---role---> 	role
+	// root     ---passedprops--->  propDocument
+	checkEdge(t, env, env.Root, role, eos.Name("role"))
+	checkEdge(t, env, env.Root, role, eos.Name("passedprops"))
+	return role
 }
 
 func loadSeedsTablesFromProd(t *testing.T, env *Environment, prodEndpoint string) {
@@ -300,5 +339,5 @@ func voteToPassTD(t *testing.T, env *Environment, ballot eos.Name) {
 		assert.NilError(t, err)
 	}
 	t.Log("Allowing the ballot voting period to lapse")
-	pause(t, votingPause, "", "Voting...")
+	pause(t, env.VotingPause, "", "Voting...")
 }
