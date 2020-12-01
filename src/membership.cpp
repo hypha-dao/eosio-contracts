@@ -34,10 +34,10 @@ namespace hypha
 			});
 		}
 
-		map<string, hyphadao::flexvalue1> event_data;
-		event_data["New Applicant"] = applicant;
-		event_data["Content"] = content;
-		event(name("medium"), event_data);
+		// map<string, hyphadao::flexvalue1> event_data;
+		// event_data["New Applicant"] = applicant;
+		// event_data["Content"] = content;
+		// event(name("medium"), event_data);
 	}
 
 	void hyphadao::enroll(const name &enroller,
@@ -53,11 +53,11 @@ namespace hypha
 
 		asset one_hvoice = asset{100, common::S_HVOICE};
 		string memo{"Welcome to Hypha DAO!"};
-		action(
-			permission_level{get_self(), name("active")},
-			getSettingOrFail<name>(common::TELOS_DECIDE_CONTRACT), name("mint"),
-			make_tuple(applicant, one_hvoice, memo))
-			.send();
+		// action(
+		// 	permission_level{get_self(), name("active")},
+		// 	getSettingOrFail<name>(common::TELOS_DECIDE_CONTRACT), name("mint"),
+		// 	make_tuple(applicant, one_hvoice, memo))
+		// 	.send();
 
 		action(
 			permission_level{get_self(), name("active")},
@@ -80,19 +80,19 @@ namespace hypha
 		checksum256 root_hash = get_root();
 		Document member_doc = Document::getOrNew(get_self(), enroller, common::MEMBER_STRING, applicant);
 		member_doc.emplace();
-		Edge rootMemberEdge(get_self(), get_self(), root_hash, member_doc.getHash(), common::MEMBER);
+		Edge rootMemberEdge(get_self(), get_self(), root_hash, member_doc.hash, common::MEMBER);
 		rootMemberEdge.emplace();
 
-		Edge memberRootEdge(get_self(), get_self(), member_doc.getHash(), root_hash, common::MEMBER_OF);
+		Edge memberRootEdge(get_self(), get_self(), member_doc.hash, root_hash, common::MEMBER_OF);
 		memberRootEdge.emplace();
 
 		// broadcast event
-		map<string, hyphadao::flexvalue1> event_data;
-		event_data["New Member"] = applicant;
-		event_data["Enroller"] = enroller;
-		event_data["Content"] = content;
-		event_data["Purchased RAM"] = common::RAM_ALLOWANCE;
-		event(name("high"), event_data);
+		// map<string, hyphadao::flexvalue1> event_data;
+		// event_data["New Member"] = applicant;
+		// event_data["Enroller"] = enroller;
+		// event_data["Content"] = content;
+		// event_data["Purchased RAM"] = common::RAM_ALLOWANCE;
+		// event(name("high"), event_data);
 
 		a_t.erase(a_itr);
 	}
@@ -107,25 +107,25 @@ namespace hypha
 	// 	return document_graph::hash_document(cgs);
 	// }
 
-	void hyphadao::makememdocs(const string &notes)
-	{
-		checksum256 root = get_root();
+	// void hyphadao::makememdocs(const string &notes)
+	// {
+	// 	checksum256 root = get_root();
 
-		member_table m_t(get_self(), get_self().value);
-		auto m_itr = m_t.begin();
-		while (m_itr != m_t.end())
-		{
-			Document member = Document::getOrNew(get_self(), get_self(), common::MEMBER_STRING, m_itr->member);
+	// 	member_table m_t(get_self(), get_self().value);
+	// 	auto m_itr = m_t.begin();
+	// 	while (m_itr != m_t.end())
+	// 	{
+	// 		Document member = Document::getOrNew(get_self(), get_self(), common::MEMBER_STRING, m_itr->member);
 
-			Edge rootMemberEdge(get_self(), get_self(), root, member.getHash(), common::MEMBER);
-			rootMemberEdge.emplace();
+	// 		Edge rootMemberEdge(get_self(), get_self(), root, member.hash, common::MEMBER);
+	// 		rootMemberEdge.emplace();
 
-			Edge memberRootEdge(get_self(), get_self(), member.getHash(), root, common::MEMBER_OF);
-			memberRootEdge.emplace();
+	// 		Edge memberRootEdge(get_self(), get_self(), member.hash, root, common::MEMBER_OF);
+	// 		memberRootEdge.emplace();
 
-			m_itr++;
-		}
-	};
+	// 		m_itr++;
+	// 	}
+	// };
 
 	// void hyphadao::remapply(const name &applicant)
 	// {

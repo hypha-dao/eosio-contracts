@@ -18,13 +18,13 @@ void hyphadao::createroot (const string &notes)
 	//Create the settings document as well and add an edge to it
 	ContentGroups settingCgs{{
 		Content(CONTENT_GROUP_LABEL, common::SETTINGS),
-		Content(common::ROOT_NODE, readableHash(rootDoc.getHash()))
+		Content(common::ROOT_NODE, readableHash(rootDoc.hash))
 	}};
 
 	Document settingsDoc(get_self(), get_self(), std::move(settingCgs));
 	settingsDoc.emplace();
 
-	Edge rootToSettings(get_self(), get_self(), rootDoc.getHash(), settingsDoc.getHash(), common::SETTINGS_EDGE);
+	Edge rootToSettings(get_self(), get_self(), rootDoc.hash, settingsDoc.hash, common::SETTINGS_EDGE);
 	rootToSettings.emplace();
 }
 
@@ -81,51 +81,20 @@ void hyphadao::setconfigatt(const string& key, const hyphadao::flexvalue1& value
  	config_s.set(c, get_self());
 }
 
-void hyphadao::remconfigatt(const string& key)
-{
-	require_auth(get_self());
-
-	config_table config_s(get_self(), get_self().value);
-	Config c = config_s.get_or_create(get_self(), Config());
-
-	if (c.names.find(key) != c.names.end())
-	{
-		c.names.erase (key);
-	}
-	else if (c.strings.find(key) != c.strings.end())
-	{
-		c.strings.erase (key);
-	}
-	else if (c.assets.find(key) != c.assets.end())
-	{
-		c.assets.erase (key);
-	}
-	else if (c.time_points.find(key) != c.time_points.end())
-	{
-		c.time_points.erase (key);
-	}
-	else if (c.ints.find(key) != c.ints.end())
-	{
-		c.ints.erase (key);
-	}
-	c.time_points["updated_date"] = current_time_point();
- 	config_s.set(c, get_self());
-}
-
 void hyphadao::setsetting(const string &key, const flexvalue& value)
 {
 	require_auth(get_self());
 
 	auto document = getSettingsDocument();
 
-	auto oldHash = document.getHash();
+	auto oldHash = document.hash;
 	
 	auto settingContent = Content(key, value);
 
 	auto updateDateContent = Content(common::UPDATED_DATE, current_time_point());
 
 	//Might want to return by & instead of const &
-	auto contentGroups = document.getContentGroups();
+	auto contentGroups = document.content_groups;
 
 	auto& settingsGroup = contentGroups[0];
 
@@ -144,9 +113,9 @@ void hyphadao::remsetting(const string &key)
 
 	auto document = getSettingsDocument();
 
-	auto oldHash = document.getHash();
+	auto oldHash = document.hash;
 
-	auto contentGroups = document.getContentGroups();
+	auto contentGroups = document.content_groups;
 
 	auto& settingsGroup = contentGroups[0];
 
@@ -172,45 +141,45 @@ void hyphadao::remsetting(const string &key)
 	check(false, "The specified setting doesn't exits: " + key);
 }
 
-void hyphadao::setalert (const name &level, const string &content)
-{
-	// inline actions seem happiest when affixing types
-	string alert_level = string {"alert_level"};
-	string alert_content = string {"alert_content"};
-	hyphadao::flexvalue1 fv_level = level;
-	hyphadao::flexvalue1 fv_content = content;
+// void hyphadao::setalert (const name &level, const string &content)
+// {
+// 	// inline actions seem happiest when affixing types
+// 	string alert_level = string {"alert_level"};
+// 	string alert_content = string {"alert_content"};
+// 	hyphadao::flexvalue1 fv_level = level;
+// 	hyphadao::flexvalue1 fv_content = content;
 
-	action(
-		permission_level{get_self(), name("active")},
-		get_self(), name("setconfigatt"),
-		std::make_tuple(alert_level, fv_level))
-	.send();
+// 	action(
+// 		permission_level{get_self(), name("active")},
+// 		get_self(), name("setconfigatt"),
+// 		std::make_tuple(alert_level, fv_level))
+// 	.send();
 	
-	action(
-		permission_level{get_self(), name("active")},
-		get_self(), name("setconfigatt"),
-		std::make_tuple(alert_content, fv_content))
-	.send();
-}
+// 	action(
+// 		permission_level{get_self(), name("active")},
+// 		get_self(), name("setconfigatt"),
+// 		std::make_tuple(alert_content, fv_content))
+// 	.send();
+// }
 
-void hyphadao::remalert (const string &notes)
-{
-	// inline actions seem happiest when affixing types
-	string alert_level = string {"alert_level"};
-	string alert_content = string {"alert_content"};
+// void hyphadao::remalert (const string &notes)
+// {
+// 	// inline actions seem happiest when affixing types
+// 	string alert_level = string {"alert_level"};
+// 	string alert_content = string {"alert_content"};
 	
-	action(
-		permission_level{get_self(), name("active")},
-		get_self(), name("remconfigatt"),
-		std::make_tuple(alert_level))
-	.send();
+// 	action(
+// 		permission_level{get_self(), name("active")},
+// 		get_self(), name("remconfigatt"),
+// 		std::make_tuple(alert_level))
+// 	.send();
 
-	action(
-		permission_level{get_self(), name("active")},
-		get_self(), name("remconfigatt"),
-		std::make_tuple(alert_content))
-	.send();
-}
+// 	action(
+// 		permission_level{get_self(), name("active")},
+// 		get_self(), name("remconfigatt"),
+// 		std::make_tuple(alert_content))
+// 	.send();
+// }
 
 
 void hyphadao::updversion(const string &component, const string &version)
@@ -225,7 +194,7 @@ void hyphadao::setlastballt(const name &last_ballot_id)
 
 void hyphadao::togglepause()
 {
-	int64_t new_state = !getSettingOrDefault<int64_t>(common::PAUSED);
+	// int64_t new_state = !getSettingOrDefault<int64_t>(common::PAUSED);
 
-	setsetting(common::PAUSED, new_state);
+	// setsetting(common::PAUSED, new_state);
 }

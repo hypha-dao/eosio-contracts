@@ -19,7 +19,7 @@ namespace hypha
 
         // assignment proposal must link to a valid role
         Document roleDocument(m_contract, assignment.getContent(common::DETAILS, common::ROLE_STRING).getAs<eosio::checksum256>());
-        ContentWrapper role(roleDocument.getContentGroups());
+        ContentWrapper role(roleDocument.content_groups);
 
         // role in the proposal must be of type: role
         eosio::check (role.getContent(common::SYSTEM, common::TYPE).getAs<eosio::name>() != common::ROLE_NAME, 
@@ -78,7 +78,7 @@ namespace hypha
 
     Document AssignmentProposal::pass_impl(Document proposal)
     {
-        ContentWrapper assignment(proposal.getContentGroups());
+        ContentWrapper assignment(proposal.content_groups);
         eosio::checksum256 assignee = Member::hash(assignment.getContent(common::DETAILS, common::ASSIGNEE).getAs<eosio::name>());
 
         Document role(m_contract, assignment.getContent(common::DETAILS, common::ROLE_STRING).getAs<eosio::checksum256>());
@@ -92,19 +92,19 @@ namespace hypha
         // what about periods?
 
         //  member          ---- assigned           ---->   role_assignment
-        Edge memberAssignedEdge(m_contract, m_contract, assignee, proposal.getHash(), common::ASSIGNED);
+        Edge memberAssignedEdge(m_contract, m_contract, assignee, proposal.hash, common::ASSIGNED);
         memberAssignedEdge.emplace();
 
         //  role_assignment ---- assignee           ---->   member
-        Edge assignmentAssigneeEdge(m_contract, m_contract, proposal.getHash(), assignee, common::ASSIGNED);
+        Edge assignmentAssigneeEdge(m_contract, m_contract, proposal.hash, assignee, common::ASSIGNED);
         assignmentAssigneeEdge.emplace();
 
         //  role_assignment ---- role               ----> role
-        Edge assignmentRoleEdge(m_contract, m_contract, proposal.getHash(), role.getHash(), common::ROLE_NAME);
+        Edge assignmentRoleEdge(m_contract, m_contract, proposal.hash, role.hash, common::ROLE_NAME);
         assignmentRoleEdge.emplace();
 
         //  role            ---- role_assignment    ----> role_assignment
-        Edge roleAssignmentEdge(m_contract, m_contract, role.getHash(), proposal.getHash(), common::ASSIGNMENT);
+        Edge roleAssignmentEdge(m_contract, m_contract, role.hash, proposal.hash, common::ASSIGNMENT);
         roleAssignmentEdge.emplace();
 
         // I don't think we need this one:

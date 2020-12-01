@@ -2,6 +2,8 @@
 #include <document_graph/util.hpp>
 #include <member.hpp>
 
+#include <cmath>
+
 namespace hypha
 {
     // retrieve the seeds price as of a specific point in time
@@ -140,18 +142,18 @@ namespace hypha
         vector<Document> current_badges;
         Document memberDocument = Document::getOrNew(get_self(), get_self(), common::MEMBER_STRING, member);
 
-        vector<Edge> badge_assignment_edges = m_documentGraph.getEdgesFrom(memberDocument.getHash(), common::ASSIGN_BADGE);
+        vector<Edge> badge_assignment_edges = m_documentGraph.getEdgesFrom(memberDocument.hash, common::ASSIGN_BADGE);
         for (const Edge e : badge_assignment_edges)
         {
             Document badge_assignment(get_self(), e.to_node);
-            ContentWrapper badgeAssignment(badge_assignment.getContentGroups());
+            ContentWrapper badgeAssignment(badge_assignment.content_groups);
             int64_t start_period = badgeAssignment.getContent(common::DETAILS, common::START_PERIOD).getAs<int64_t>();
             int64_t end_period = badgeAssignment.getContent(common::DETAILS, common::END_PERIOD).getAs<int64_t>();
 
             // check that period_id falls within start_period and end_period
             if (period_id >= start_period && period_id <= end_period)
             {
-                Edge badge_edge = Edge::get(get_self(), badge_assignment.getHash(), common::BADGE_NAME);
+                Edge badge_edge = Edge::get(get_self(), badge_assignment.hash, common::BADGE_NAME);
                 Document badge(get_self(), badge_edge.to_node);
                 current_badges.push_back(badge);
             }
@@ -161,7 +163,7 @@ namespace hypha
 
     asset hyphadao::apply_coefficient(const Document &badge, const asset &base, const string &coefficient_key)
     {
-        Content::FlexValue coefficient = ContentWrapper::getContent(badge.getContentGroups(), common::DETAILS, coefficient_key).value;
+        Content::FlexValue coefficient = ContentWrapper::getContent(badge.content_groups, common::DETAILS, coefficient_key).value;
 
         if (std::holds_alternative<std::monostate>(coefficient))
         {
@@ -169,7 +171,7 @@ namespace hypha
         }
 
         check(std::holds_alternative<int64_t>(coefficient), "fatal error: coefficient must be an int; badge: " +
-                                                                readableHash(badge.getHash()) + "; coefficient_key: " + coefficient_key);
+                                                                readableHash(badge.hash) + "; coefficient_key: " + coefficient_key);
 
         float coeff_float = (float)((float)std::get<int64_t>(coefficient) / (float)10000);
         float adjustment = (float)coeff_float - (float)1;
@@ -194,77 +196,4 @@ namespace hypha
 
         return applied_assets;
     }
-
-    // void hyphadao::fixseedsprec(const uint64_t &proposal_id)
-    // {
-    //     require_auth(get_self());
-
-    //     object_table o_t(get_self(), name("proposal").value);
-    //     auto p_itr = o_t.find(proposal_id);
-    //     check(p_itr != o_t.end(), "Proposal ID does not exist: " + std::to_string(proposal_id));
-
-    //     std::map<string, asset>::const_iterator asset_itr;
-    //     for (asset_itr = p_itr->assets.begin(); asset_itr != p_itr->assets.end(); ++asset_itr)
-    //     {
-    //         if (asset_itr->first == "seeds_escrow_amount" &&
-    //             asset_itr->second.symbol.code().to_string() == "SEEDS" &&
-    //             asset_itr->second.symbol.precision() == 2)
-    //         {
-    //             o_t.modify(p_itr, get_self(), [&](auto &o) {
-    //                 o.assets["seeds_escrow_amount"] = asset{asset_itr->second.amount * 100, common::S_SEEDS};
-    //             });
-    //         }
-    //     }
-    // }
-
-    // void hyphadao::updassets(const uint64_t &proposal_id)
-    // {
-    //     require_auth(get_self());
-
-    //     object_table o_t(get_self(), name("proposal").value);
-    //     auto p_itr = o_t.find(proposal_id);
-    //     check(p_itr != o_t.end(), "Proposal ID does not exist: " + std::to_string(proposal_id));
-
-    //     o_t.modify(p_itr, get_self(), [&](auto &p) {
-    //         // merge calculated assets into map
-    //         map<string, asset> calculated_assets = get_assets(p_itr->ints.at("role_id"), get_float(p_itr->ints, "deferred_perc_x100"), get_float(p_itr->ints, "time_share_x100"));
-    //         std::map<string, asset>::const_iterator asset_itr;
-    //         for (asset_itr = calculated_assets.begin(); asset_itr != calculated_assets.end(); ++asset_itr)
-    //         {
-    //             p.assets[asset_itr->first] = asset_itr->second;
-    //         }
-    //     });
-    // }
-
-    // void hyphadao::updassassets(const uint64_t &assignment_id)
-    // {
-    //     require_auth(get_self());
-
-    //     object_table o_t(get_self(), name("assignment").value);
-    //     auto a_itr = o_t.find(assignment_id);
-    //     check(a_itr != o_t.end(), "Assignment ID does not exist: " + std::to_string(assignment_id));
-
-    //     o_t.modify(a_itr, get_self(), [&](auto &a) {
-    //         auto instant_seeds_itr = a.assets.find("seeds_instant_salary_per_phase");
-    //         if (instant_seeds_itr != a.assets.end())
-    //         {
-    //             a.assets.erase(instant_seeds_itr);
-    //         }
-
-    //         auto escrow_seeds_itr = a.assets.find("seeds_escrow_salary_per_phase");
-    //         if (escrow_seeds_itr != a.assets.end())
-    //         {
-    //             a.assets.erase(escrow_seeds_itr);
-    //         }
-
-    //         // merge calculated assets into map
-    //         map<string, asset> calculated_assets = get_assets(a_itr->ints.at("role_id"), get_float(a_itr->ints, "deferred_perc_x100"), get_float(a_itr->ints, "time_share_x100"));
-    //         std::map<string, asset>::const_iterator asset_itr;
-    //         for (asset_itr = calculated_assets.begin(); asset_itr != calculated_assets.end(); ++asset_itr)
-    //         {
-    //             a.assets[asset_itr->first] = asset_itr->second;
-    //         }
-    //         a.updated_date = current_time_point();
-    //     });
-    // }
 } // namespace hypha

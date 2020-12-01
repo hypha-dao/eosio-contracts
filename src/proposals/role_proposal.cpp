@@ -26,7 +26,7 @@ namespace hypha
         eosio::checksum256 rootNode = Document::hashContents(cgs);
         
         // TODO: check to see if get_first_signer() is accurate here
-        Edge rootRoleEdge (m_contract, m_contract, rootNode, proposal.getHash(), common::ROLE_NAME);
+        Edge rootRoleEdge (m_contract, m_contract, rootNode, proposal.hash, common::ROLE_NAME);
         rootRoleEdge.emplace();
 
         return proposal;

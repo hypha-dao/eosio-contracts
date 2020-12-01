@@ -29,90 +29,15 @@ namespace hypha
 		check(!is_paused(), "Contract is paused for maintenance. Please try again later.");
 
 		Document docprop(get_self(), proposal_hash);
-		name proposal_type = ContentWrapper::getContent(docprop.getContentGroups(), common::SYSTEM, common::TYPE).getAs<eosio::name>();
+		name proposal_type = ContentWrapper::getContent(docprop.content_groups, common::SYSTEM, common::TYPE).getAs<eosio::name>();
 
 		Proposal *proposal = ProposalFactory::Factory(get_self(), proposal_type);
 		proposal->close(docprop);
 		// delete proposal;
 	}
 
-	void hyphadao::withdraw(const name &withdrawer, const uint64_t &assignment_id, const string &notes)
-	{
-		// check paused state
-		check(!is_paused(), "Contract is paused for maintenance. Please try again later.");
-		require_auth(withdrawer);
-
-		// confirm that the object to be suspended exists
-		object_table original_t(get_self(), name("assignment").value);
-		auto original_itr = original_t.find(assignment_id);
-		check(original_itr != original_t.end(), "Cannot withdraw, original does not exist. Assignment: " +
-													std::to_string(assignment_id) + " does not exist.");
-
-		check(original_itr->names.at("assigned_account") == withdrawer, "Only the assigned account can withdraw from an assignment. You are: " +
-																			withdrawer.to_string() + " but the assigned account is " + original_itr->names.at("assigned_account").to_string());
-
-		original_t.modify(original_itr, get_self(), [&](auto &o) {
-			o.ints["end_period"] = get_last_period_id();
-			o.time_points["withdrawal_date"] = current_time_point();
-			o.strings["withdrawal_notes"] = notes;
-			o.updated_date = current_time_point();
-		});
-	}
-
-	void hyphadao::propsuspend(const name &proposer, const name &scope, const uint64_t &id, const string &notes)
-	{
-		// check paused state
-		check(!is_paused(), "Contract is paused for maintenance. Please try again later.");
-		require_auth(proposer);
-
-		// confirm that the object to be suspended exists
-		object_table original_t(get_self(), scope.value);
-		auto original_itr = original_t.find(id);
-		check(original_itr != original_t.end(), "Cannot suspend, original does not exist. Scope: " + scope.to_string() +
-													"; Original Object ID: " + std::to_string(id) + " does not exist.");
-
-		map<string, name> temp_names{};
-		map<string, uint64_t> temp_ints{};
-		map<string, string> temp_strings{};
-
-		temp_names["original_scope"] = scope;
-		temp_ints["original_object_id"] = id;
-		temp_names["owner"] = proposer;
-		temp_names["type"] = name("suspend");
-		temp_names["trx_action_name"] = name("suspend");
-
-		temp_strings["notes"] = notes;	
-
-		// not used, just required for passing to new_proposal (non-const must be lvalues)
-		map<string, asset> not_used_assets{};
-		map<string, time_point> not_used_timepoints{};
-		map<string, transaction> not_used_transactions{};
-
-		// new_proposal(proposer, temp_names, temp_strings, not_used_assets,
-		// 			not_used_timepoints, temp_ints, not_used_transactions);
-	}
-
-	void hyphadao::makepayout(const uint64_t &proposal_id)
-	{
-		require_auth(get_self());
-
-		object_table o_t(get_self(), name("proposal").value);
-		auto o_itr = o_t.find(proposal_id);
-		check(o_itr != o_t.end(), "Scope: " + name("proposal").to_string() + "; Object ID: " + std::to_string(proposal_id) + " does not exist.");
-
-		string memo{"One time payout for Hypha Contribution. Proposal ID: " + std::to_string(proposal_id)};
-		make_payment(-1, o_itr->names.at("recipient"), o_itr->assets.at("hypha_amount"), memo, common::NO_ASSIGNMENT, 1);
-		make_payment(-1, o_itr->names.at("recipient"), o_itr->assets.at("husd_amount"), memo, common::NO_ASSIGNMENT, 1);
-		make_payment(-1, o_itr->names.at("recipient"), o_itr->assets.at("hvoice_amount"), memo, common::NO_ASSIGNMENT, 1);
-		make_payment(-1, o_itr->names.at("recipient"), o_itr->assets.at("seeds_instant_amount"), memo, common::NO_ASSIGNMENT, 1);
-		make_payment(-1, o_itr->names.at("recipient"), o_itr->assets.at("seeds_escrow_amount"), memo, common::NO_ASSIGNMENT, 0);
-
-		// vector<name> new_scopes = {name("payout"), name("proparchive")};
-		// changescope(name("proposal"), proposal_id, new_scopes, true);
-	}
-
-	void hyphadao::payassign(const checksum256 &assignment_hash, const uint64_t &period_id)
-	{
+	// void hyphadao::payassign(const checksum256 &assignment_hash, const uint64_t &period_id)
+	// {
 		// check(!is_paused(), "Contract is paused for maintenance. Please try again later.");
 
 		// Document assignment = _document_graph.get_document(assignment_hash);
@@ -245,5 +170,5 @@ namespace hypha
 		// make_payment(period_id, a_itr->names.at("assigned_account"), ab.seeds, memo, assignment_id, 1);
 		// make_payment(period_id, a_itr->names.at("assigned_account"), ab.voice, memo, assignment_id, 1);
 		// make_payment(period_id, a_itr->names.at("assigned_account"), ab.husd, memo, assignment_id, 1);
-	}
+	// }
 } // namespace hypha

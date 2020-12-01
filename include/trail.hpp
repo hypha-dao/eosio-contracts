@@ -13,9 +13,9 @@
 #include <eosio/asset.hpp>
 #include <eosio/singleton.hpp>
 
-#include "eosiotoken.hpp"
+// #include "eosiotoken.hpp"
 
-#include <cmath>
+// #include <cmath>
 
 using namespace eosio;
 using namespace std;
@@ -27,9 +27,9 @@ namespace trailservice {
 
         //TODO: add payment decay to claimpayment
 
-        trail(name self, name code, datastream<const char*> ds);
+        // trail(name self, name code, datastream<const char*> ds);
 
-        ~trail();
+        // ~trail();
 
         // //reserved symbols
         // static constexpr symbol TLOS_SYM = symbol("TLOS", 4);

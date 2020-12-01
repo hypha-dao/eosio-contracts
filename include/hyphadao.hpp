@@ -107,42 +107,6 @@ namespace hypha
                                      const_mem_fun<AssignmentPayout, uint64_t, &AssignmentPayout::by_recipient>>>
           asspay_table;
 
-      // scope: proposal, proparchive, role, assignment
-      struct [[eosio::table, eosio::contract("hyphadao")]] Object
-      {
-         uint64_t id;
-
-         // core maps
-         map<string, name> names;
-         map<string, string> strings;
-         map<string, asset> assets;
-         map<string, time_point> time_points;
-         map<string, uint64_t> ints;
-         map<string, transaction> trxs;
-         map<string, float> floats;
-         uint64_t primary_key() const { return id; }
-
-         // indexes
-         uint64_t by_owner() const { return names.at("owner").value; }
-         uint64_t by_type() const { return names.at("type").value; }
-         uint64_t by_fk() const { return ints.at("fk"); }
-
-         // timestamps
-         time_point created_date = current_time_point();
-         time_point updated_date = current_time_point();
-         uint64_t by_created() const { return created_date.sec_since_epoch(); }
-         uint64_t by_updated() const { return updated_date.sec_since_epoch(); }
-      };
-
-      typedef multi_index<name("objects"), Object,                                                             // index 1
-                          indexed_by<name("bycreated"), const_mem_fun<Object, uint64_t, &Object::by_created>>, // index 2
-                          indexed_by<name("byupdated"), const_mem_fun<Object, uint64_t, &Object::by_updated>>, // 3
-                          indexed_by<name("byowner"), const_mem_fun<Object, uint64_t, &Object::by_owner>>,     // 4
-                          indexed_by<name("bytype"), const_mem_fun<Object, uint64_t, &Object::by_type>>,       // 5
-                          indexed_by<name("byfk"), const_mem_fun<Object, uint64_t, &Object::by_fk>>            // 6
-                          >
-          object_table;
-
       struct [[eosio::table, eosio::contract("hyphadao")]] Debug
       {
          uint64_t debug_id;
@@ -221,97 +185,35 @@ namespace hypha
       const uint64_t MICROSECONDS_PER_HOUR = (uint64_t)60 * (uint64_t)60 * (uint64_t)1000000;
       const uint64_t MICROSECONDS_PER_YEAR = MICROSECONDS_PER_HOUR * (uint64_t)24 * (uint64_t)365;
 
-      /// **********************************
-      ///  Generation 1 Actions
-      /// **********************************
-
-      // ACTION edit(const name &scope,
-      //             const uint64_t &id,
-      //             const map<string, name> names,
-      //             map<string, string> strings,
-      //             map<string, asset> assets,
-      //             map<string, time_point> time_points,
-      //             const map<string, uint64_t> ints,
-      //             const map<string, float> floats,
-      //             map<string, transaction> trxs);
-
       ACTION setconfigatt(const string &key, const hyphadao::flexvalue1 &value);
-      ACTION remconfigatt(const string &key);
       ACTION setlastballt(const name &last_ballot_id);
       ACTION togglepause();
       ACTION setsetting(const string &key, const flexvalue& value);
       ACTION remsetting(const string& key);
-      // These actions are executed only on approval of a proposal.
-      // To introduce a new proposal type, we would add another action to the below.
-      
-      ACTION makepayout(const uint64_t &proposal_id);
-
-      // ACTION copytodraft(const name &copier, const name &scope, const uint64_t &id);
-      // ACTION propdraft(const uint64_t &id);
-      // ACTION erasedraft(const uint64_t &id);
-      // ACTION recreate(const name &scope, const uint64_t &id);
-
-      ACTION propsuspend (const name &proposer, const name &scope, const uint64_t &id, const string &notes);
-      ACTION withdraw (const name &withdrawer, const uint64_t &assignment_id, const string& notes);
-
-      // data object handling
-      // ACTION transform(const name &creator, const name &scope, const uint64_t &id);
-      // ACTION transscope(const name &creator, const name &scope, const uint64_t &starting_id, const uint64_t &batch_size);
-      // ACTION resetscope(const name &scope);
-      // ACTION erasedoc(const name &scope, const uint64_t &id);
-      // ACTION changescope(const name &scope, const uint64_t &id, const vector<name> &new_scopes, const bool &remove_old);
-
-      // migration related actions
-      // ACTION backupobjs (const name& scope);
-      // ACTION erasebackups (const name& scope);
-      // ACTION restoreobjs (const name& scope);
-      /// **********************************
-      ///  END - Generation 1 Actions
-      /// **********************************
-
-      /// **********************************
-      ///  BEGIN - Generation 2 Actions
-      /// **********************************
 
       ACTION propose(const name &proposer, const name &proposal_type, ContentGroups &content_groups);
       ACTION closedocprop(const checksum256 &proposal_hash);
 
-      // ADMIN
-      // ACTION erasedochash(const checksum256 &doc);
-      // ACTION erasedocs(const uint64_t &begin_id, const uint64_t &batch_size);
-      // ACTION erasealldocs(const string &notes);
-      // ACTION eraseedges(const string &notes);
-      // ACTION erasedocbyid(const uint64_t &id);
       // create the initial rootnode document
       ACTION createroot(const string &notes);
-      // make member documents from the members table
-      ACTION makememdocs(const string &notes);
-      // ACTION createdoc(const name &creator, const vector<ContentGroup> &content_groups);
-
-      /// **********************************
-      ///  END - Generation 2 Actions
-      /// **********************************
 
       // membership actions
       ACTION apply(const name &applicant, const string &content);
       ACTION enroll(const name &enroller, const name &applicant, const string &content);
 
       // Admin
-      // ACTION reset ();
-      ACTION clrdebugs(const uint64_t &starting_id, const uint64_t &batch_size);
+      // ACTION clrdebugs(const uint64_t &starting_id, const uint64_t &batch_size);
       ACTION updversion(const string &component, const string &version);
-      // ACTION updassets(const uint64_t &proposal_id);
-      ACTION set(const name &scope, const uint64_t &id, const string &key, const flexvalue1 &flexvalue);
 
       // alerts Group
-      ACTION setalert(const name &level, const string &content);
-      ACTION remalert(const string &notes);
+      // ACTION setalert(const name &level, const string &content);
+      // ACTION remalert(const string &notes);
 
       // Calendar actions
       ACTION addperiod(const time_point &start_time, const time_point &end_time, const string &phase);
 
       // users can claim their salary pay
-      ACTION payassign(const checksum256 &assignment_hash, const uint64_t &period_id);
+      // ACTION payassign(const checksum256 &assignment_hash, const uint64_t &period_id);
 
       DocumentGraph m_documentGraph = DocumentGraph(get_self());
       
@@ -333,8 +235,7 @@ namespace hypha
 
       // Generation 2 - document graph related
             
-      Document getSettingsDocument();
-   
+      Document getSettingsDocument();   
       Document create_votetally_doc(const name &proposer, ContentGroups &content_groups);
       asset apply_coefficient(const Document &badge, const asset &base, const string &coefficient_key);
       asset_batch apply_badge_coefficients(const uint64_t period_id, const name &member, const asset_batch ab);
@@ -342,47 +243,47 @@ namespace hypha
 
       checksum256 get_root();
 
-      template<class T>
-      T getSettingOrFail(const string& setting)
-      {
-         auto settings = getSettingsDocument();
+      // template<class T>
+      // T getSettingOrFail(const string& setting)
+      // {
+      //    auto settings = getSettingsDocument();
          
-         auto wrapper = ContentWrapper(settings.getContentGroups());
+      //    auto wrapper = ContentWrapper(settings.content_groups);
 
-         //TODO: Add getContent function which only receives the content label
-         auto content = wrapper.getContent(common::SETTINGS, setting);
+      //    //TODO: Add getContent function which only receives the content label
+      //    auto content = wrapper.getContent(common::SETTINGS, setting);
 
-         return std::get<T>(content.value);
-      }
+      //    return std::get<T>(content.value);
+      // }
 
-      template<class T>
-      std::optional<T> getSettingOpt(const string &setting)
-      {
-         auto settings = getSettingsDocument();
+      // template<class T>
+      // std::optional<T> getSettingOpt(const string &setting)
+      // {
+      //    auto settings = getSettingsDocument();
          
-         auto wrapper = ContentWrapper(settings.getContentGroups());
+      //    auto wrapper = ContentWrapper(settings.content_groups);
 
-         //TODO: Add getGroupOpt or not cheking version
-         auto content = wrapper.getContent(common::SETTINGS, setting);
+      //    //TODO: Add getGroupOpt or not cheking version
+      //    auto content = wrapper.getContent(common::SETTINGS, setting);
 
-         if (auto p = std::get_if<T>(&content.value)) 
-         {
-            return *p;
-         }
+      //    if (auto p = std::get_if<T>(&content.value)) 
+      //    {
+      //       return *p;
+      //    }
 
-         return {};
-      }
+      //    return {};
+      // }
 
-      template<class T>
-      T getSettingOrDefault(const string &setting, const T &def = T{})
-      {
-         if (auto content = getSettingOpt<T>(setting))
-         {
-            return *content;
-         }
+      // template<class T>
+      // T getSettingOrDefault(const string &setting, const T &def = T{})
+      // {
+      //    if (auto content = getSettingOpt<T>(setting))
+      //    {
+      //       return *content;
+      //    }
 
-         return def;
-      }
+      //    return def;
+      // }
 
       float get_float(const string& setting);
       
@@ -401,24 +302,7 @@ namespace hypha
                         const map<string, time_point> time_points,
                         const map<string, uint64_t> ints);
 
-      // void new_proposal(const name &owner,
-      //                   map<string, name> &names,
-      //                   map<string, string> &strings,
-      //                   map<string, asset> &assets,
-      //                   map<string, time_point> &time_points,
-      //                   map<string, uint64_t> &ints,
-      //                   map<string, transaction> &trxs);
-
-      // void merge(const name &scope,
-      //            const uint64_t &id,
-      //            const map<string, name> names,
-      //            const map<string, string> strings,
-      //            const map<string, asset> assets,
-      //            const map<string, time_point> time_points,
-      //            const map<string, uint64_t> ints,
-      //            const map<string, transaction> trxs);
-
-      void event(const name &level, const map<string, flexvalue1> &values);
+      // void event(const name &level, const map<string, flexvalue1> &values);
 
         };
 } // namespace hypha

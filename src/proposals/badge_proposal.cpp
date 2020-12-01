@@ -21,7 +21,7 @@ namespace hypha
         ContentGroups cgs = Document::rollup(Content(common::ROOT_NODE, m_contract));
         eosio::checksum256 rootNode = Document::hashContents(cgs);
 
-        Edge rootBadgeEdge(m_contract, m_contract, rootNode, proposal.getHash(), common::BADGE_NAME);
+        Edge rootBadgeEdge(m_contract, m_contract, rootNode, proposal.hash, common::BADGE_NAME);
         rootBadgeEdge.emplace();
 
         return proposal;

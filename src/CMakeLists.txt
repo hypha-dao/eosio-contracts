@@ -6,11 +6,9 @@ find_package(eosio.cdt)
 
 add_contract( hyphadao hyphadao 
                 hyphadao.cpp 
-                legacy_proposal.cpp 
                 config.cpp 
                 membership.cpp 
                 bank.cpp
-                object.cpp 
                 utility.cpp 
                 calculation.cpp 
                 member.cpp

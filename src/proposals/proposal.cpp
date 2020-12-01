@@ -32,15 +32,15 @@ namespace hypha
         // proposalNode.emplace();
 
         // the proposer OWNS the proposal; this creates the graph EDGE
-        Edge memberProposalEdge(m_contract, proposer, memberHash, proposalNode.getHash(), common::OWNS);
+        Edge memberProposalEdge(m_contract, proposer, memberHash, proposalNode.hash, common::OWNS);
         memberProposalEdge.emplace();
 
         // the proposal was PROPOSED_BY proposer; this creates the graph EDGE
-        Edge proposalMemberEdge(m_contract, proposer, proposalNode.getHash(), memberHash, common::OWNED_BY);
+        Edge proposalMemberEdge(m_contract, proposer, proposalNode.hash, memberHash, common::OWNED_BY);
         proposalMemberEdge.emplace();
 
         // the DHO also links to the document as a proposal, another graph EDGE
-        Edge rootProposalEdge(m_contract, proposer, rootNode, proposalNode.getHash(), common::PROPOSAL);
+        Edge rootProposalEdge(m_contract, proposer, rootNode, proposalNode.hash, common::PROPOSAL);
         rootProposalEdge.emplace();
 
         return proposalNode;
@@ -50,23 +50,23 @@ namespace hypha
     {
         ContentGroups rootCgs = Document::rollup(Content(common::ROOT_NODE, m_contract));
         auto rootNode = Document::hashContents(rootCgs);
-        Edge edge (m_contract, m_contract, rootNode, proposal.getHash(), common::PROPOSAL);
+        Edge edge (m_contract, m_contract, rootNode, proposal.hash, common::PROPOSAL);
         edge.erase();
 
-        name ballot_id = ContentWrapper::getContent(proposal.getContentGroups(), common::SYSTEM, common::BALLOT_ID).getAs<eosio::name>();
+        name ballot_id = ContentWrapper::getContent(proposal.content_groups, common::SYSTEM, common::BALLOT_ID).getAs<eosio::name>();
         if (did_pass(ballot_id))
         {
             // INVOKE child class close logic
             pass_impl(proposal);
 
             // if proposal passes, create an edge for PASSED_PROPS
-            Edge rootPassedProposal(m_contract, m_contract, rootNode, proposal.getHash(), common::PASSED_PROPS);
+            Edge rootPassedProposal(m_contract, m_contract, rootNode, proposal.hash, common::PASSED_PROPS);
             rootPassedProposal.emplace();
         }
         else
         {
             // create edge for FAILED_PROPS
-            Edge rootFailedProposal(m_contract, m_contract, rootNode, proposal.getHash(), common::FAILED_PROPS);
+            Edge rootFailedProposal(m_contract, m_contract, rootNode, proposal.hash, common::FAILED_PROPS);
             rootFailedProposal.emplace();
         }
 

@@ -9,75 +9,75 @@ void hyphadao::make_payment(const uint64_t &period_id,
                             const uint64_t &assignment_id,
                             const uint64_t &bypass_escrow)
 {
-    if (quantity.amount == 0)
-    {
-        return;
-    }
+    // if (quantity.amount == 0)
+    // {
+    //     return;
+    // }
 
-    debug("Making payment to recipient: " + recipient.to_string() + ", quantity: " + quantity.to_string());
+    // debug("Making payment to recipient: " + recipient.to_string() + ", quantity: " + quantity.to_string());
 
-    if (quantity.symbol == common::S_HVOICE)
-    {
-        action(
-            permission_level{get_self(), name("active")},
-            getSettingOrFail<name>(common::TELOS_DECIDE_CONTRACT), name("mint"),
-            std::make_tuple(recipient, quantity, memo))
-            .send();
-    }
-    else if (quantity.symbol == common::S_SEEDS)
-    {      
-        if (bypass_escrow == 0)
-        {
-            action(
-                permission_level{get_self(), name("active")},
-                getSettingOrFail<name>(common::SEEDS_TOKEN_CONTRACT), 
-                name("transfer"),
-                std::make_tuple(get_self(), getSettingOrFail<name>(common::SEEDS_ESCROW_CONTRACT), quantity, memo))
-                .send();
+    // if (quantity.symbol == common::S_HVOICE)
+    // {
+    //     action(
+    //         permission_level{get_self(), name("active")},
+    //         getSettingOrFail<name>(common::TELOS_DECIDE_CONTRACT), name("mint"),
+    //         std::make_tuple(recipient, quantity, memo))
+    //         .send();
+    // }
+    // else if (quantity.symbol == common::S_SEEDS)
+    // {      
+    //     if (bypass_escrow == 0)
+    //     {
+    //         action(
+    //             permission_level{get_self(), name("active")},
+    //             getSettingOrFail<name>(common::SEEDS_TOKEN_CONTRACT), 
+    //             name("transfer"),
+    //             std::make_tuple(get_self(), getSettingOrFail<name>(common::SEEDS_ESCROW_CONTRACT), quantity, memo))
+    //             .send();
 
-            action(
-                permission_level{get_self(), name("active")},
-                getSettingOrFail<name>(common::SEEDS_ESCROW_CONTRACT), name("lock"),
-                std::make_tuple(name("event"),
-                                get_self(),
-                                recipient,
-                                quantity,
-                                name("golive"),
-                                get_self(),
-                                time_point(current_time_point().time_since_epoch() +
-                                           current_time_point().time_since_epoch()), // long time from now
-                                memo))
-                .send();
-        }
-        else
-        {
-            action(
-                permission_level{get_self(), name("active")},
-                getSettingOrFail<name>(common::SEEDS_TOKEN_CONTRACT), name("transfer"),
-                std::make_tuple(get_self(), recipient, quantity, memo))
-                .send();
-        }
-    }
-    else if (quantity.symbol == common::S_HUSD)
-    {
-        issuetoken(getSettingOrFail<name>(common::HUSD_TOKEN_CONTRACT), 
-                   getSettingOrFail<name>(common::TREASURY_CONTRACT), recipient, quantity, memo);
-    }
-    else
-    {
-        issuetoken(getSettingOrFail<name>(common::HYPHA_TOKEN_CONTRACT), get_self(), recipient, quantity, memo);
-    }
+    //         action(
+    //             permission_level{get_self(), name("active")},
+    //             getSettingOrFail<name>(common::SEEDS_ESCROW_CONTRACT), name("lock"),
+    //             std::make_tuple(name("event"),
+    //                             get_self(),
+    //                             recipient,
+    //                             quantity,
+    //                             name("golive"),
+    //                             get_self(),
+    //                             time_point(current_time_point().time_since_epoch() +
+    //                                        current_time_point().time_since_epoch()), // long time from now
+    //                             memo))
+    //             .send();
+    //     }
+    //     else
+    //     {
+    //         action(
+    //             permission_level{get_self(), name("active")},
+    //             getSettingOrFail<name>(common::SEEDS_TOKEN_CONTRACT), name("transfer"),
+    //             std::make_tuple(get_self(), recipient, quantity, memo))
+    //             .send();
+    //     }
+    // }
+    // else if (quantity.symbol == common::S_HUSD)
+    // {
+    //     issuetoken(getSettingOrFail<name>(common::HUSD_TOKEN_CONTRACT), 
+    //                getSettingOrFail<name>(common::TREASURY_CONTRACT), recipient, quantity, memo);
+    // }
+    // else
+    // {
+    //     issuetoken(getSettingOrFail<name>(common::HYPHA_TOKEN_CONTRACT), get_self(), recipient, quantity, memo);
+    // }
 
-    payment_table payment_t(get_self(), get_self().value);
-    payment_t.emplace(get_self(), [&](auto &p) {
-        p.payment_id = payment_t.available_primary_key();
-        p.payment_date = current_block_time().to_time_point();
-        p.period_id = period_id;
-        p.assignment_id = assignment_id;
-        p.recipient = recipient;
-        p.amount = quantity;
-        p.memo = memo;
-    });
+    // payment_table payment_t(get_self(), get_self().value);
+    // payment_t.emplace(get_self(), [&](auto &p) {
+    //     p.payment_id = payment_t.available_primary_key();
+    //     p.payment_date = current_block_time().to_time_point();
+    //     p.period_id = period_id;
+    //     p.assignment_id = assignment_id;
+    //     p.recipient = recipient;
+    //     p.amount = quantity;
+    //     p.memo = memo;
+    // });
 }
 
 void hyphadao::issuetoken(const name &token_contract,
