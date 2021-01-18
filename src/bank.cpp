@@ -29,36 +29,7 @@ void hyphadao::make_payment(const uint64_t &period_id,
     }
     else if (quantity.symbol == common::S_SEEDS)
     {      
-        if (bypass_escrow == 0)
-        {
-            action(
-                permission_level{get_self(), name("active")},
-                c.names.at("seeds_token_contract"), name("transfer"),
-                std::make_tuple(get_self(), c.names.at("seeds_escrow_contract"), quantity, memo))
-                .send();
-
-            action(
-                permission_level{get_self(), name("active")},
-                c.names.at("seeds_escrow_contract"), name("lock"),
-                std::make_tuple(name("event"),
-                                get_self(),
-                                recipient,
-                                quantity,
-                                name("golive"),
-                                get_self(),
-                                time_point(current_time_point().time_since_epoch() +
-                                           current_time_point().time_since_epoch()), // long time from now
-                                memo))
-                .send();
-        }
-        else
-        {
-            action(
-                permission_level{get_self(), name("active")},
-                c.names.at("seeds_token_contract"), name("transfer"),
-                std::make_tuple(get_self(), recipient, quantity, memo))
-                .send();
-        }
+        return;
     }
     else if (quantity.symbol == common::S_HUSD)
     {
